@@ -1,0 +1,11 @@
+digraph "Call graph: double.ll" {
+	label="Call graph: double.ll";
+
+	Node0x62e6107de290 [shape=record,label="{init}"];
+	Node0x62e6107de340 [shape=record,label="{double_1}"];
+	Node0x62e6107de3c0 [shape=record,label="{main}"];
+	Node0x62e6107de3c0 -> Node0x62e6107de440;
+	Node0x62e6107de3c0 -> Node0x62e6107de290;
+	Node0x62e6107de3c0 -> Node0x62e6107de340;
+	Node0x62e6107de440 [shape=record,label="{malloc}"];
+}

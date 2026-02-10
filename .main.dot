@@ -1,0 +1,12 @@
+digraph "CFG for 'main' function" {
+	label="CFG for 'main' function";
+
+	Node0x5a8d660694f0 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#d6524470" fontname="Courier",label="{entry:\l|  %retval = alloca i32, align 4\l  %r = alloca i32, align 4\l  %p = alloca ptr, align 8\l  store i32 0, ptr %retval, align 4\l  store i32 0, ptr %r, align 4\l  %call = call noalias ptr @malloc(i64 noundef 4) #2\l  store ptr %call, ptr %p, align 8\l  %0 = load ptr, ptr %p, align 8\l  call void @init(ptr noundef %0)\l  br label %while.cond\l}"];
+	Node0x5a8d660694f0 -> Node0x5a8d6606a1d0[tooltip="entry -> while.cond\nProbability 100.00%" ];
+	Node0x5a8d6606a1d0 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870" fontname="Courier",label="{while.cond:\l|  %1 = load ptr, ptr %p, align 8\l  %2 = load i32, ptr %1, align 4\l  %cmp = icmp slt i32 %2, 100\l  br i1 %cmp, label %while.body, label %while.end\l|{<s0>T|<s1>F}}"];
+	Node0x5a8d6606a1d0:s0 -> Node0x5a8d6606a3f0[tooltip="while.cond -> while.body\nProbability 96.88%" ];
+	Node0x5a8d6606a1d0:s1 -> Node0x5a8d6606a470[tooltip="while.cond -> while.end\nProbability 3.12%" ];
+	Node0x5a8d6606a3f0 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870" fontname="Courier",label="{while.body:\l|  %3 = load ptr, ptr %p, align 8\l  %call1 = call i32 @double_1(ptr noundef %3)\l  store i32 %call1, ptr %r, align 4\l  br label %while.cond, !llvm.loop !6\l}"];
+	Node0x5a8d6606a3f0 -> Node0x5a8d6606a1d0[tooltip="while.body -> while.cond\nProbability 100.00%" ];
+	Node0x5a8d6606a470 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#d6524470" fontname="Courier",label="{while.end:\l|  %4 = load i32, ptr %r, align 4\l  ret i32 %4\l}"];
+}

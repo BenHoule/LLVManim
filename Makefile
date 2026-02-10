@@ -6,6 +6,7 @@ OBJS = $(SRCS:.c=.ll)
 all: $(OBJS)
 
 %.ll: %.c
+# clang -O0 -fno-strict-aliasing -fno-inline -fno-discard-value-names -S -emit-llvm double.c -o double.ll
 	$(CC) $(CFLAGS) -S -emit-llvm $< -o $@
 
 call-graph: $(OBJS)

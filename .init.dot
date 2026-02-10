@@ -1,5 +1,0 @@
-digraph "CFG for 'init' function" {
-	label="CFG for 'init' function";
-
-	Node0x5a8d660666f0 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870" fontname="Courier",label="{entry:\l|  %p.addr = alloca ptr, align 8\l  store ptr %p, ptr %p.addr, align 8\l  %0 = load ptr, ptr %p.addr, align 8\l  store i32 1, ptr %0, align 4\l  ret void\l}"];
-}

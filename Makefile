@@ -14,8 +14,8 @@ call-graph: $(OBJS)
 	dot -Tsvg double.ll.callgraph.dot -o callgraph.svg
 
 cfg-main: $(OBJS)
-	opt -passes=dot-cfg -disable-output double.ll
+	opt -passes=dot-cfg -disable-output double.ll -cfg-func-name=main
 	dot -Tsvg .main.dot -o main.svg
 
 clean:
-	rm -f $(OBJS) double.ll.callgraph.dot callgraph.svg double.ll.cfg.dot cfg.svg
+	rm -f $(OBJS) double.ll.callgraph.dot callgraph.svg .main.dot main.svg

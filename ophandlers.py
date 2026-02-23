@@ -205,7 +205,11 @@ def handle_fptosi(instr):
     irh.print_instruction(instr)
 
 
-def handle_inttoptr(instr):
+def handle_uitofp(instr):
+    irh.print_instruction(instr)
+
+
+def handle_sitofp(instr):
     irh.print_instruction(instr)
 
 
@@ -265,4 +269,3 @@ def handle_catchpad(instr):
 
 def handle_cleanuppad(instr):
     irh.print_instruction(instr)
-

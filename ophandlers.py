@@ -1,6 +1,10 @@
 import ir_helpers as irh
 
 
+# Included handlers for all instructions, we will only need to implement a
+# subset of these, but it's easier to have them all
+# defined now and fill in the ones we need later.
+
 # Terminator Instructions
 def handle_ret(instr):
     irh.print_instruction(instr)

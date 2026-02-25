@@ -61,140 +61,223 @@ class InteractiveDevelopment(ml.Scene):
 
 
 class StackVisualization(ml.Scene):
-    """
-    Visualizes a program's call stack with function calls and local variables.
-    Shows a simple program:
-
-    def factorial(n):
-        if n <= 1:
-            return 1
-        return n * factorial(n-1)
-
-    result = factorial(3)
-    """
+    """Visualize load -> use -> store with stack state present at start."""
 
     def construct(self):
-        # Title
-        title = ml.Text("Call Stack Visualization", font_size=48)
-        title.to_edge(ml.UP)
-        self.play(ml.Write(title))
-        self.wait()
-
-        # Create code display on the left
-        code_lines = [
-            "def factorial(n):",
-            "    if n <= 1:",
-            "        return 1",
-            "    return n * factorial(n-1)",
-            "",
-            "result = factorial(3)"
+        ir_lines = [
+            "define i32 @dummy(i32 %x) {",
+            "entry:",
+            "  %x.addr = alloca i32, align 4",
+            "  %y.addr = alloca i32, align 4",
+            "  store i32 %x, ptr %x.addr, align 4",
+            "  store i32 0, ptr %y.addr, align 4",
+            "  %v = load i32, ptr %x.addr, align 4",
+            "  %sum = add i32 %v, 1",
+            "  store i32 %sum, ptr %y.addr, align 4",
+            "  ret i32 %sum",
+            "}",
         ]
 
-        code = ml.VGroup()
-        for i, line in enumerate(code_lines):
-            text_line = ml.Text(line, font="Monospace", font_size=24)
-            text_line.align_to(ml.LEFT * 5, ml.LEFT)
-            text_line.shift(ml.DOWN * 0.4 * i)
-            code.add(text_line)
+        ir_group = ml.VGroup()
+        for i, line in enumerate(ir_lines):
+            txt = ml.Text(line, font="Monospace", font_size=22)
+            txt.align_to(ml.LEFT * 6.3, ml.LEFT)
+            txt.shift(ml.DOWN * 0.40 * i)
+            ir_group.add(txt)
 
-        code.to_edge(ml.LEFT, buff=0.5)
-        code.shift(ml.UP * 0.5)
+        ir_group.to_edge(ml.LEFT, buff=0.45)
+        ir_group.shift(ml.UP * 1.2)
 
-        self.play(ml.FadeIn(code))
-        self.wait()
+        slot_width = 4.1
+        slot_height = 0.72
+        stack_top = ml.RIGHT * 3.7 + ml.UP * 1.85
 
-        # Stack pointer label
-        stack_label = ml.Text("Stack →", font_size=36)
-        stack_label.move_to(ml.RIGHT * 3 + ml.UP * 2.5)
-        self.play(ml.Write(stack_label))
+        def make_slot(label, fill_color, y_shift):
+            rect = ml.Rectangle(
+                width=slot_width,
+                height=slot_height,
+                fill_color=fill_color,
+                fill_opacity=0.25,
+                stroke_color=fill_color,
+                stroke_width=2,
+            )
+            rect.move_to(stack_top + ml.DOWN * y_shift)
+            text = ml.Text(label, font="Monospace", font_size=22)
+            text.move_to(rect.get_center())
+            return ml.VGroup(rect, text)
 
-        # Base position for stack frames
-        stack_base = ml.RIGHT * 3.5 + ml.DOWN * 2
+        return_addr = make_slot("[rbp+8]  return address", ml.BLUE_D, 0.00)
+        saved_rbp = make_slot("[rbp+0]  saved rbp", ml.TEAL_D, 0.84)
+        local_x = make_slot("[rbp-4]  x.addr = 42", ml.GREEN_D, 1.68)
+        local_y = make_slot("[rbp-8]  y.addr = 0", ml.MAROON_D, 2.52)
+        padding = make_slot("[rbp-16..rbp-9]  padding", ml.GREY_BROWN, 3.36)
 
-        # Simulate the execution: factorial(3)
-        self.wait(0.5)
-
-        # Call factorial(3)
-        frame1 = self.create_stack_frame("factorial(3)", ["n = 3"], stack_base)
-        self.play(ml.FadeIn(frame1))
-        self.wait(0.8)
-
-        # Call factorial(2)
-        frame2 = self.create_stack_frame("factorial(2)", ["n = 2"],
-                                         stack_base + ml.UP * 1.5)
-        self.play(ml.FadeIn(frame2))
-        self.wait(0.8)
-
-        # Call factorial(1)
-        frame3 = self.create_stack_frame("factorial(1)", ["n = 1"],
-                                         stack_base + ml.UP * 3.0)
-        self.play(ml.FadeIn(frame3))
-        self.wait(0.8)
-
-        # Highlight the base case
-        highlight = ml.SurroundingRectangle(frame3, color=ml.GREEN, buff=0.1)
-        self.play(ml.ShowCreation(highlight))
-        self.wait(0.5)
-
-        # Return from factorial(1) - returns 1
-        return_text1 = ml.Text("return 1", font_size=24, color=ml.GREEN)
-        return_text1.next_to(frame3, ml.RIGHT)
-        self.play(ml.Write(return_text1))
-        self.wait(0.5)
-
-        self.play(ml.FadeOut(highlight), ml.FadeOut(return_text1),
-                  ml.FadeOut(frame3))
-        self.wait(0.5)
-
-        # Return from factorial(2) - returns 2 * 1 = 2
-        return_text2 = ml.Text("return 2", font_size=24, color=ml.GREEN)
-        return_text2.next_to(frame2, ml.RIGHT)
-        self.play(ml.Write(return_text2))
-        self.wait(0.5)
-        self.play(ml.FadeOut(return_text2), ml.FadeOut(frame2))
-        self.wait(0.5)
-
-        # Return from factorial(3) - returns 3 * 2 = 6
-        return_text3 = ml.Text("return 6", font_size=24, color=ml.GREEN)
-        return_text3.next_to(frame1, ml.RIGHT)
-        self.play(ml.Write(return_text3))
-        self.wait(0.5)
-        self.play(ml.FadeOut(return_text3), ml.FadeOut(frame1))
-        self.wait(0.5)
-
-        # Show final result
-        result = ml.Text("result = 6", font_size=42, color=ml.YELLOW)
-        result.move_to(ml.RIGHT * 3.5)
-        self.play(ml.Write(result))
-        self.wait(2)
-
-    def create_stack_frame(self, function_name, variables, position):
-        """Create a visual representation of a stack frame."""
-        # Frame box
-        frame = ml.VGroup()
-
-        # Rectangle for the frame
-        rect = ml.Rectangle(
-            width=3,
-            height=1.2,
-            fill_color=ml.BLUE,
-            fill_opacity=0.3,
-            stroke_color=ml.BLUE_E,
-            stroke_width=3
+        stack_slots = ml.VGroup(
+            return_addr,
+            saved_rbp,
+            local_x,
+            local_y,
+            padding,
+        )
+        stack_outline = ml.SurroundingRectangle(
+            stack_slots,
+            color=ml.WHITE,
+            buff=0.08,
         )
 
-        # Function name
-        func_text = ml.Text(function_name, font_size=28)
-        func_text.move_to(rect.get_top() + ml.DOWN * 0.3)
+        rbp_label = ml.Text("RBP", font_size=21, color=ml.TEAL_A)
+        rbp_label.next_to(saved_rbp[0], ml.LEFT, buff=0.25)
+        rbp_arrow = ml.Arrow(
+            rbp_label.get_right(),
+            saved_rbp[0].get_left() + ml.RIGHT * 0.05,
+            buff=0.05,
+            color=ml.TEAL_A,
+            stroke_width=4,
+        )
 
-        # Variables
-        var_texts = ml.VGroup()
-        for i, var in enumerate(variables):
-            var_text = ml.Text(var, font_size=22, color=ml.YELLOW)
-            var_text.move_to(rect.get_center() + ml.DOWN * (0.15 + i * 0.3))
-            var_texts.add(var_text)
+        rsp_label = ml.Text("RSP", font_size=21, color=ml.PURPLE_A)
+        rsp_label.next_to(padding[0], ml.LEFT, buff=0.25)
+        rsp_arrow = ml.Arrow(
+            rsp_label.get_right(),
+            padding[0].get_left() + ml.RIGHT * 0.05,
+            buff=0.05,
+            color=ml.PURPLE_A,
+            stroke_width=4,
+        )
 
-        frame.add(rect, func_text, var_texts)
-        frame.move_to(position)
+        stack_group = ml.VGroup(
+            stack_slots,
+            stack_outline,
+            rbp_label,
+            rbp_arrow,
+            rsp_label,
+            rsp_arrow,
+        )
 
-        return frame
+        self.add(ir_group, stack_group)
+        self.wait(0.5)
+
+        load_line = ir_group[6]
+        add_line = ir_group[7]
+        store_line = ir_group[8]
+
+        line_box = ml.SurroundingRectangle(
+            load_line,
+            color=ml.YELLOW,
+            buff=0.07,
+        )
+        self.play(ml.ShowCreation(line_box))
+
+        load_mem_box = ml.SurroundingRectangle(
+            local_x,
+            color=ml.YELLOW,
+            buff=0.06,
+        )
+        self.play(ml.ShowCreation(load_mem_box))
+
+        v_box = ml.RoundedRectangle(
+            width=2.1,
+            height=0.9,
+            corner_radius=0.15,
+            fill_color=ml.YELLOW,
+            fill_opacity=0.2,
+            stroke_color=ml.YELLOW,
+            stroke_width=3,
+        )
+        v_box.move_to(ml.RIGHT * 0.2 + ml.DOWN * 2.0)
+        v_text = ml.Text(
+            "%v = 42",
+            font="Monospace",
+            font_size=28,
+            color=ml.YELLOW,
+        )
+        v_text.move_to(v_box.get_center())
+        v_group = ml.VGroup(v_box, v_text)
+
+        load_arrow = ml.Arrow(
+            local_x[0].get_left() + ml.LEFT * 0.15,
+            v_box.get_right() + ml.RIGHT * 0.05,
+            buff=0.1,
+            color=ml.YELLOW,
+            stroke_width=5,
+        )
+        self.play(
+            ml.ShowCreation(load_arrow),
+            ml.FadeIn(v_group, shift=ml.UP * 0.15),
+        )
+
+        self.play(
+            ml.Transform(
+                line_box,
+                ml.SurroundingRectangle(add_line, color=ml.ORANGE, buff=0.07),
+            ),
+            ml.FadeOut(load_mem_box),
+        )
+
+        sum_box = ml.RoundedRectangle(
+            width=2.6,
+            height=0.9,
+            corner_radius=0.15,
+            fill_color=ml.ORANGE,
+            fill_opacity=0.2,
+            stroke_color=ml.ORANGE,
+            stroke_width=3,
+        )
+        sum_box.next_to(v_box, ml.DOWN, buff=0.35)
+        sum_text = ml.Text(
+            "%sum = 43",
+            font="Monospace",
+            font_size=28,
+            color=ml.ORANGE,
+        )
+        sum_text.move_to(sum_box.get_center())
+        sum_group = ml.VGroup(sum_box, sum_text)
+
+        add_arrow = ml.Arrow(
+            v_box.get_bottom() + ml.DOWN * 0.05,
+            sum_box.get_top() + ml.UP * 0.05,
+            buff=0.1,
+            color=ml.ORANGE,
+            stroke_width=5,
+        )
+        self.play(
+            ml.ShowCreation(add_arrow),
+            ml.FadeIn(sum_group, shift=ml.UP * 0.1),
+        )
+
+        self.play(
+            ml.Transform(
+                line_box,
+                ml.SurroundingRectangle(
+                    store_line,
+                    color=ml.MAROON_B,
+                    buff=0.07,
+                ),
+            )
+        )
+
+        store_mem_box = ml.SurroundingRectangle(
+            local_y,
+            color=ml.MAROON_B,
+            buff=0.06,
+        )
+        store_arrow = ml.Arrow(
+            sum_box.get_right() + ml.RIGHT * 0.05,
+            local_y[0].get_left() + ml.LEFT * 0.1,
+            buff=0.1,
+            color=ml.MAROON_B,
+            stroke_width=5,
+        )
+
+        new_y_text = ml.Text(
+            "[rbp-8]  y.addr = 43",
+            font="Monospace",
+            font_size=22,
+        )
+        new_y_text.move_to(local_y[1].get_center())
+
+        self.play(ml.ShowCreation(store_mem_box), ml.ShowCreation(store_arrow))
+        self.play(ml.Transform(local_y[1], new_y_text))
+        self.wait(1.8)
+
+

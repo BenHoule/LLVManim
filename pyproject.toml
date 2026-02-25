@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "llvmlite>=0.46.0",
     "manim>=0.19.2",
     "manimgl>=1.7.2",
 ]

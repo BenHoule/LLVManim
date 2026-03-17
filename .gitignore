@@ -1,3 +1,4 @@
+# Python bytecode and cache files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -7,30 +8,6 @@ __pycache__/
 venv/
 env/
 
-# Manim / ManimGL outputs
-media/
-videos/
-images/
-partial_movie_files/
-tex/
-logs/
-
-# Build artifacts
-build/
-dist/
-*.egg-info/
-
-# C/C++ outputs (from LLVM demos)
-*.o
-*.obj
-*.so
-*.dylib
-*.dll
-
-# Logs and temp files
-*.log
-*.tmp
-
 # Tooling caches
 .pytest_cache/
 .mypy_cache/
@@ -39,6 +16,49 @@ dist/
 .coverage.*
 htmlcov/
 
+# Build packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Local environment files
+.env
+.env.*
+*.orig
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Jupyter (Not that I use it)
+.ipynb_checkpoints/
+
+# Manim / ManimGL outputs
+media/
+videos/
+images/
+partial_movie_files/
+tex/
+logs/
+
+# C/C++ build artifacts
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+
+# snapshot of proposal (maintained in separate repo)
+proposal_3-15-26/

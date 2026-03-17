@@ -1,0 +1,20 @@
+[importlinter]
+root_package = llvmanim
+include_external_packages = True
+
+[importlinter:contract:ir_does_not_depend_on_animation]
+name = IR layer must not depend on animation layer
+type = forbidden
+source_modules =
+    llvmanim.ir
+forbidden_modules =
+    llvmanim.animation
+
+[importlinter:contract:core_does_not_depend_on_cli]
+name = Core packages must not import CLI
+type = forbidden
+source_modules =
+    llvmanim.ir
+    llvmanim.animation
+forbidden_modules =
+    llvmanim.cli

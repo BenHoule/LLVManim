@@ -2,6 +2,26 @@
 _We should try to keep this updated as we go along._
 ---
 Currently just a very basic example file - double.c
+
+## QuickStart Guide:
+Install dependencies:
+```bash
+uv sync --dev
+```
+Run quality checks:
+```bash
+./scripts/qualtiy-check.sh
+```
+Run tests:
+```bash
+uv run pytest -q
+```
+Run CLI:
+```bash
+uv run llvmanim
+```
+
+
 ### Makefile info:
 `make` -> double.ll IR file
 ```bash
@@ -32,11 +52,11 @@ opt -passes=dot-cfg -disable-output double.ll -cfg-func-name=main && dot -Tsvg .
 ### Using Manim CE
 View scenes in example_scenes.py with
 ```bash
-manim -pql example_scenes.py SquareToCircle`
+uv run manim -pql sandbox/manim_CE/example_scenes.py SquareToCircle`
 ```
 or
 ```bash
-manim --renderer=opengl -p example_scenes.py InteractiveDevelopment
+uv run manim --renderer=opengl -p sandbox/manim_CE/example_scenes.py InteractiveDevelopment
 ```
 
 InteractiveDevelopment lets you watch animations as you build them using the shell that comes up when you run it, but is vaguely broken on the community edition.
@@ -44,10 +64,10 @@ InteractiveDevelopment lets you watch animations as you build them using the she
 ### Using ManimGL
 For manimgl, use
 ```bash
-manimgl manimgl_scenes.py SquareToCircle
+uv run manimgl sandbox/manim/manimgl_scenes.py SquareToCircle
 ```
 or
 ```bash
-manimgl manimgl_scenes.py InteractiveDevelopment
+uv run manimgl sandbox/manim/manimgl_scenes.py InteractiveDevelopment
 ```
 This version lets you zoom in and interact with the scene in different ways. Honestly it just kind of seems significantly better overall, really thinking about using it over the CE.

@@ -1,8 +1,9 @@
-from llvmanim.ir import ir_helpers as irh
+from llvmanim.ingest import LEGACY_ir_helpers as irh
 
 # Included handlers for all instructions, we will only need to implement a
 # subset of these, but it's easier to have them all
 # defined now and fill in the ones we need later.
+
 
 # Terminator Instructions
 def handle_ret(instr):

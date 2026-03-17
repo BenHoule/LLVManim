@@ -1,7 +1,7 @@
 import llvmlite.binding as llvm
 
-from llvmanim.ir import ir_helpers as irout
-from llvmanim.ir import ophandlers as oph
+from llvmanim.ingest import LEGACY_ir_helpers as irout
+from llvmanim.ingest import LEGACY_ophandlers as oph
 
 with open("double.ll") as f:
     llvm_ir = f.read()

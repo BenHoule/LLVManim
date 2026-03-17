@@ -50,3 +50,58 @@ or
 uv run manimgl sandbox/manim/manimgl_scenes.py InteractiveDevelopment
 ```
 This version lets you zoom in and interact with the scene in different ways. Honestly it just kind of seems significantly better overall, really thinking about using it over the CE.
+
+## Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         CLI (cli/)                          │
+│  llvmanim demo.c --mode=trace --output=demo.mp4             │
+│                                                             │
+│  • Parse flags (mode, speed, palette, output, interactive)  │
+│  • Optionally invoke clang to produce .ll from .c/.cpp      │
+└────────────────────────────┬────────────────────────────────┘
+                             │ source_path (.ll or .c)
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      Ingest (ingest/)                       │
+│                                                             │
+│  parse_ir_to_events(ir_text) → ProgramEventStream           │
+│                                                             │
+│  • llvmlite: parse module, walk functions/blocks/instrs     │
+│  • Classify each instruction into EventKind                 │
+│  • (optional) XRay: attach timing data to events            │
+└────────────────────────────┬────────────────────────────────┘
+                             │ ProgramEventStream
+                             │ (list[IREvent], each with
+                             │  function, block, opcode, kind,
+                             │  operands, debug_line, index)
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Transform (transform/)                    │
+│                                                             │
+│  build_scene_graph(stream, mode) → SceneGraph               │
+│                                                             │
+│  • One SceneNode per meaningful event                       │
+│  • alloca  → StackFrameNode (create variable slot)          │
+│  • load    → MemReadNode  (arrow from memory → register)    │
+│  • store   → MemWriteNode (arrow from register → memory)    │
+│  • call    → CallNode     (push new stack frame)            │
+│  • ret     → ReturnNode   (pop stack frame)                 │
+│  • br      → BranchNode   (highlight CFG edge)              │
+│  • other   → skipped / warning                              │
+│                                                             │
+│  • Assigns layout positions, colors from palette config     │
+│  • Assigns timing offsets (uniform or XRay-driven)          │
+└────────────────────────────┬────────────────────────────────┘
+                             │ SceneGraph
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Present (present/)                       │
+│                                                             │
+│  render(scene_graph, config) → output file / preview        │
+│                                                             │
+│  • Translate SceneGraph → Manim Scene subclass              │
+│  • Each SceneNode → Mobject + animation command             │
+│  • Invoke Manim renderer → MP4 / GIF / interactive GL       │
+└─────────────────────────────────────────────────────────────┘
+```

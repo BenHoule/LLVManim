@@ -25,7 +25,7 @@ uv run llvmanim
 	- `sudo apt install pkg-config libcairo2-dev libpango1.0-dev`
 - [Manim (Community Edition)](https://docs.manim.community/en/stable/installation/uv.html)
   - Follow the install guide with uv
-	- Not sure if we want to stick with CE or use the [3b1b version](https://3b1b.github.io/manim/getting_started/installation.html). The 3b1b version is pretty nice and I like the interactivity features, but community edition is _supposed_ to be more stable (doesn't feel like it tbh).
+  - Not sure if we want to stick with CE or use the [3b1b version](https://3b1b.github.io/manim/getting_started/installation.html). The 3b1b version is pretty nice and I like the interactivity features, but community edition is _supposed_ to be more stable (doesn't feel like it tbh).
 - LLVM bindings - (Exact library tbd)
 ---
 ## Using Manim CE

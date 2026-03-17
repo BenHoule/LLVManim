@@ -28,3 +28,6 @@ def test_build_scene_graph_minimal_ir() -> None:
 
     node = graph.nodes[0]
     assert node.event.kind == "alloca"
+
+
+# TODO: Test that events with kind "other" are excluded from the scene graph

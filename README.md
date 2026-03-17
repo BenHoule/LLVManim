@@ -21,6 +21,8 @@ uv run llvmanim
 ---
 ## Dependencies
 - [LLVM](https://llvm.org/) - `sudo apt install llvm-18 clang-18`
+- Linux system packages required by Manim/ManimGL Python deps:
+	- `sudo apt install pkg-config libcairo2-dev libpango1.0-dev`
 - [Manim (Community Edition)](https://docs.manim.community/en/stable/installation/uv.html)
   - Follow the install guide with uv
 	- Not sure if we want to stick with CE or use the [3b1b version](https://3b1b.github.io/manim/getting_started/installation.html). The 3b1b version is pretty nice and I like the interactivity features, but community edition is _supposed_ to be more stable (doesn't feel like it tbh).
@@ -29,7 +31,7 @@ uv run llvmanim
 ## Using Manim CE
 View example [Community Edition scenes](sandbox/manim_CE/example_scenes.py) with
 ```bash
-uv run manim -pql sandbox/manim_CE/example_scenes.py SquareToCircle`
+uv run manim -pql sandbox/manim_CE/example_scenes.py SquareToCircle
 ```
 or
 ```bash
@@ -39,7 +41,7 @@ uv run manim --renderer=opengl -p sandbox/manim_CE/example_scenes.py Interactive
 InteractiveDevelopment lets you watch animations as you build them using the shell that comes up when you run it, but is vaguely broken on the community edition.
 
 ## Using ManimGL
-View example [Standard Edition scenes](sandbox/manim_CE/example_scenes.py) with
+View example [Standard Edition scenes](sandbox/manim/manimgl_scenes.py) with
 ```bash
 uv run manimgl sandbox/manim/manimgl_scenes.py SquareToCircle
 ```

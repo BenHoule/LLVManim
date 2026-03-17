@@ -1,8 +1,9 @@
 import llvmlite.binding as llvm
-import ir_helpers as irout
-import ophandlers as oph
 
-with open("double.ll", "r") as f:
+from llvmanim.ir import ir_helpers as irout
+from llvmanim.ir import ophandlers as oph
+
+with open("double.ll") as f:
     llvm_ir = f.read()
 
 prog = llvm.parse_assembly(llvm_ir)

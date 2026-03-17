@@ -1,5 +1,4 @@
-import ir_helpers as irh
-
+from llvmanim.ir import ir_helpers as irh
 
 # Included handlers for all instructions, we will only need to implement a
 # subset of these, but it's easier to have them all

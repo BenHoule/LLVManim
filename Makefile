@@ -1,3 +1,8 @@
+# LLVM demo build targets: Compile C source → LLVM IR, render call graphs and control flow.
+# Not part of Python package infrastructure; maintained for example/education purposes.
+# Use this for LLVM IR visualization demos, not for testing the llvmanim package itself.
+# For that, use: uv run pytest -q
+
 CC = clang
 CFLAGS = -O0 -fno-strict-aliasing -fno-inline -fno-discard-value-names
 SRCS = double.c

@@ -1,0 +1,13 @@
+digraph {
+    rankdir=TB
+    "init::entry" [label="init::entry\nrole: entry\nterm: ret\nmem: alloca, store, load, store"]
+    "double_1::entry" [label="double_1::entry\nrole: entry\nterm: ret\nmem: alloca, alloca, store, load, load, store, load, load, store, load, load"]
+    "main::entry" [label="main::entry\nrole: entry\nterm: br\nmem: alloca, alloca, alloca, store, store, store, load"]
+    "main::while.cond" [label="main::while.cond\nrole: branch\nterm: br\nmem: load, load"]
+    "main::while.body" [label="main::while.body\nrole: linear\nterm: br\nmem: load, store"]
+    "main::while.end" [label="main::while.end\nrole: exit\nterm: ret\nmem: load"]
+    "main::entry" -> "main::while.cond"
+    "main::while.cond" -> "main::while.body"
+    "main::while.cond" -> "main::while.end"
+    "main::while.body" -> "main::while.cond"
+}

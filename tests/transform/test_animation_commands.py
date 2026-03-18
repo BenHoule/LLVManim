@@ -2,7 +2,6 @@
 
 from llvmanim.transform.commands import build_animation_commands
 from llvmanim.transform.models import EventKind, IREvent, ProgramEventStream
-from llvmanim.transform.scene import build_scene_graph
 
 
 def _make_event(
@@ -39,8 +38,7 @@ def test_build_animation_commands_translates_events() -> None:
             _make_event(kind="other"),  # This should be ignored by the scene graph
         ],
     )
-    graph = build_scene_graph(stream)
-    commands = build_animation_commands(graph)
+    commands = build_animation_commands(stream)
 
     assert len(commands) == 6, (
         "Should create one command for each supported event kind, excluding 'other'"
@@ -58,4 +56,4 @@ def test_build_animation_commands_translates_events() -> None:
         strict=True,
     ):
         assert cmd.action == expected_kind, f"Expected action {expected_kind}, got {cmd.action}"
-        assert cmd.node.event.kind != "other", "Commands should not be created for 'other' events"
+        assert cmd.event.kind != "other", "Commands should not be created for 'other' events"

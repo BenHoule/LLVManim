@@ -36,15 +36,17 @@ def parse_ir_to_events(llvm_ir: str, source_path: str = "<in-memory>") -> Progra
     for func in module.functions:
         func_name = func.name or "<anon_fn>"
         per_func_index.setdefault(func_name, 0)
+
         for block in func.blocks:
             block_name = block.name
+
             for instr in block.instructions:
                 opcode = instr.opcode
 
                 event = IREvent(
                     function_name=func_name,
                     block_name=block_name,
-                    opcode=opcode or "<unknown_opcode>",
+                    opcode=opcode or "unknown",
                     text=str(instr).strip(),
                     kind=_kind_from_opcode(opcode),
                     index_in_function=per_func_index[func_name],
@@ -66,4 +68,4 @@ def parse_module_to_events(source_path: str) -> ProgramEventStream:
 
     This is a wrapper around parse_ir_to_events that reads the IR from a file path."""
     path = Path(source_path)
-    return parse_ir_to_events(path.read_text(encoding="utf-8"), str(path))
+    return parse_ir_to_events(path.read_text(encoding="utf-8"), path.as_posix())

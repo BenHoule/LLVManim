@@ -1,229 +1,134 @@
-"""Tests for LLVM IR ingestion event extraction."""
+"""Tests for CFG scene graph construction from IR event streams."""
 
-from enum import StrEnum
-
-from llvmanim.transform.models import EventKind, IREvent, ProgramEventStream
-from llvmanim.transform.scene import SceneGraph, build_scene_graph
-
-
-class _FAIL_MSG(StrEnum):
-    """Centralized failure messages for test assertions in this module."""
-
-    INSTANCE = "build_scene_graph should return a SceneGraph instance"
-    ORDER = "Scene graph should preserve the order of events from the event stream"
-    NODES = "Scene graph should include all non-'other' events from the event stream"
-    EVENT = "Scene node should not modify IREvent data from the event stream"
-
-
-def _make_event(
-    function_name: str = "<test_fn>",
-    block_name: str = "<test_block>",
-    kind: EventKind = "other",
-    opcode: str | None = None,
-    index: int = 0,
-) -> IREvent:
-    """Helper to create a simple IREvent with specified kind and optional opcode."""
-    return IREvent(
-        function_name=function_name,
-        block_name=block_name,
-        opcode=opcode or kind,
-        text=f"<test {kind}>",
-        kind=kind,  # type: ignore[arg-type]
-        index_in_function=index,
-        debug_line=None,
-    )
+from llvmanim.ingest.llvm_events import parse_ir_to_events
+from llvmanim.transform.models import ProgramEventStream, SceneGraph
+from llvmanim.transform.scene import build_scene_graph
 
 
 def test_build_scene_graph_empty_stream() -> None:
     """Scene graph builds without error on an empty event stream."""
-    stream = ProgramEventStream(source_path="<test>", events=[])
+    stream = ProgramEventStream(source_path="<test>")
     graph = build_scene_graph(stream)
-    assert isinstance(graph, SceneGraph), _FAIL_MSG.INSTANCE
-    assert len(graph.nodes) == 0, "Scene graph should have no nodes when event stream is empty"
+    assert isinstance(graph, SceneGraph)
+    assert len(graph.nodes) == 0
+    assert len(graph.edges) == 0
 
 
-def test_build_scene_graph_minimal_ir() -> None:
-    """Scene graph builds without error on minimal IR."""
-    event = _make_event(kind="alloca")
-    stream = ProgramEventStream(source_path="<test>", events=[event])
-
+def test_build_scene_graph_single_block() -> None:
+    """A function with one block produces one node and no edges."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %x = alloca i32
+          ret void
+        }
+    """)
     graph = build_scene_graph(stream)
-    assert isinstance(graph, SceneGraph), _FAIL_MSG.INSTANCE
-    assert len(graph.nodes) == 1, _FAIL_MSG.NODES
-
-    node = graph.nodes[0]
-    assert node.event is event, "Scene node should carry the IREvent from the event stream"
-    assert node.event.kind == "alloca", _FAIL_MSG.EVENT
+    assert len(graph.nodes) == 1
+    assert len(graph.edges) == 0
+    assert graph.nodes[0].block.function_name == "f"
+    assert graph.nodes[0].block.name == "entry"
 
 
-def test_build_scene_graph_excludes_other() -> None:
-    """Scene graph excludes events with kind 'other'."""
-    stream = ProgramEventStream(
-        source_path="<test>",
-        events=[
-            _make_event(kind="alloca"),
-            _make_event(kind="other"),
-        ],
-    )
+def test_build_scene_graph_groups_events_by_block() -> None:
+    """Events in different blocks produce one node per block."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %yes, label %no
+        yes:
+          ret void
+        no:
+          ret void
+        }
+    """)
     graph = build_scene_graph(stream)
-    assert isinstance(graph, SceneGraph), _FAIL_MSG.INSTANCE
-    assert len(graph.nodes) == 1, _FAIL_MSG.NODES
-
-    node = graph.nodes[0]
-    assert node.event.kind == "alloca", _FAIL_MSG.EVENT
+    block_names = {node.block.name for node in graph.nodes}
+    assert block_names == {"entry", "yes", "no"}
 
 
-# NEEDS TO BE UPDATED AS WE ADD MORE KINDS TO THE PARSER
-def test_build_scene_graph_all_kinds() -> None:
-    """Scene graph includes all events of supported kinds and excludes 'other'."""
-    kinds: list[EventKind] = ["alloca", "load", "store", "call", "ret", "br", "other"]
-    events = [_make_event(kind=kind) for kind in kinds]
-    stream = ProgramEventStream(source_path="<test>", events=events)
-
+def test_build_scene_graph_extracts_cfg_edges() -> None:
+    """A conditional branch produces two outgoing edges."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %yes, label %no
+        yes:
+          ret void
+        no:
+          ret void
+        }
+    """)
     graph = build_scene_graph(stream)
-    assert isinstance(graph, SceneGraph), _FAIL_MSG.INSTANCE
-    assert len(graph.nodes) == 6, _FAIL_MSG.NODES
-
-    for node in graph.nodes:
-        assert node.event.kind in kinds and node.event.kind != "other", (
-            "Scene graph should include all supported kinds and exclude 'other'"
-        )
+    assert len(graph.edges) == 2
+    sources = {e.source for e in graph.edges}
+    targets = {e.target for e in graph.edges}
+    assert sources == {"f::entry"}
+    assert targets == {"f::yes", "f::no"}
 
 
-def test_build_scene_graph_keeps_event_order() -> None:
-    """Scene graph preserves the order of events."""
-    stream = ProgramEventStream(
-        source_path="<test>",
-        events=[
-            _make_event(kind="alloca"),
-            _make_event(kind="store"),
-            _make_event(kind="load"),
-        ],
-    )
-
+def test_build_scene_graph_assigns_entry_role() -> None:
+    """The first block (indegree=0) gets the 'entry' role."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          ret void
+        }
+    """)
     graph = build_scene_graph(stream)
-    assert isinstance(graph, SceneGraph), _FAIL_MSG.INSTANCE
-    assert len(graph.nodes) == 3, _FAIL_MSG.NODES
-
-    first_node = graph.nodes[0]
-    second_node = graph.nodes[1]
-    third_node = graph.nodes[2]
-    assert first_node.event.kind == "alloca", "First node should have index 0"
-    assert second_node.event.kind == "store", "Second node should have index 1"
-    assert third_node.event.kind == "load", "Third node should have index 2"
+    assert graph.nodes[0].role == "entry"
 
 
-def test_function_names_property() -> None:
-    """function_names property returns the set of function names in the scene graph."""
-    stream = ProgramEventStream(
-        source_path="<test>",
-        events=[
-            _make_event(function_name="<f1>", kind="call"),
-            _make_event(function_name="<f2>", kind="alloca"),
-            _make_event(function_name="<f1>", kind="load"),
-        ],
-    )
-
+def test_build_scene_graph_assigns_exit_role() -> None:
+    """A block ending in ret gets the 'exit' role."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %done, label %done
+        done:
+          ret void
+        }
+    """)
     graph = build_scene_graph(stream)
-    assert isinstance(graph, SceneGraph), _FAIL_MSG.INSTANCE
-
-    function_names = graph.function_names
-    assert function_names == {"<f1>", "<f2>"}, (
-        "function_names should return the unique set of function names in the scene graph"
-    )
+    node_map = {n.block.name: n for n in graph.nodes}
+    assert node_map["done"].role == "exit"
 
 
-def test_get_function_nodes() -> None:
-    """get_function_nodes retrieves all nodes for a given function name."""
-    stream = ProgramEventStream(
-        source_path="<test>",
-        events=[
-            _make_event(function_name="<f1>", kind="alloca", index=0),
-            _make_event(function_name="<f1>", kind="alloca", index=1),
-            _make_event(function_name="<f1>", kind="alloca", index=2),
-            _make_event(function_name="<f2>", kind="alloca", index=0),
-            _make_event(function_name="<f2>", kind="alloca", index=1),
-            _make_event(function_name="<f2>", kind="alloca", index=2),
-        ],
-    )
-
+def test_build_scene_graph_assigns_branch_role() -> None:
+    """A block with two outgoing edges gets the 'branch' role."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %yes, label %no
+        yes:
+          ret void
+        no:
+          ret void
+        }
+    """)
     graph = build_scene_graph(stream)
-    assert isinstance(graph, SceneGraph), _FAIL_MSG.INSTANCE
-
-    for function_name in ["<f1>", "<f2>"]:
-        function_nodes = graph.get_function_nodes(function_name)
-        assert len(function_nodes) == 3, (
-            f"get_function_nodes should return all nodes for {function_name}"
-        )
-        for i, node in enumerate(function_nodes):
-            assert node.event.function_name == function_name, (
-                f"Node should belong to {function_name}"
-            )
-            assert node.event.index_in_function == i, _FAIL_MSG.ORDER
-
-    empty_nodes = graph.get_function_nodes("<nonexistent>")
-    assert len(empty_nodes) == 0, (
-        "get_function_nodes should return an empty list for a function name with no nodes"
-    )
+    node_map = {n.block.name: n for n in graph.nodes}
+    assert node_map["entry"].role == "branch"
 
 
-def test_block_names_property() -> None:
-    """block_names property returns the set of block names in the scene graph."""
-    stream = ProgramEventStream(
-        source_path="<test>",
-        events=[
-            _make_event(block_name="<b1>", kind="alloca"),
-            _make_event(block_name="<b2>", kind="alloca"),
-            _make_event(block_name="<b1>", kind="alloca"),
-        ],
-    )
-
+def test_build_scene_graph_block_carries_memory_ops() -> None:
+    """Alloca/load/store events are captured in block.memory_ops."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %x = alloca i32
+          store i32 42, ptr %x
+          %v = load i32, ptr %x
+          ret void
+        }
+    """)
     graph = build_scene_graph(stream)
-    assert isinstance(graph, SceneGraph), _FAIL_MSG.INSTANCE
-
-    block_names = graph.block_names
-    assert block_names == {"<b1>", "<b2>"}, (
-        "block_names should return the unique set of block names in the scene graph"
-    )
-
-
-def test_get_block_nodes() -> None:
-    """get_block_nodes retrieves all nodes for a given function and block name."""
-    stream = ProgramEventStream(
-        source_path="<test>",
-        events=[
-            _make_event(function_name="<f1>", block_name="<b1>", kind="alloca", index=0),
-            _make_event(function_name="<f1>", block_name="<b1>", kind="alloca", index=1),
-            _make_event(function_name="<f1>", block_name="<b2>", kind="alloca", index=2),
-            _make_event(function_name="<f2>", block_name="<b1>", kind="alloca", index=0),
-            _make_event(function_name="<f2>", block_name="<b2>", kind="alloca", index=1),
-            _make_event(function_name="<f2>", block_name="<b2>", kind="alloca", index=2),
-        ],
-    )
-
-    graph = build_scene_graph(stream)
-    assert isinstance(graph, SceneGraph), _FAIL_MSG.INSTANCE
-
-    assert len(graph.get_block_nodes("<f1>", "<b1>")) == 2, (
-        "get_block_nodes should return all nodes for function <f1> and block <b1>"
-    )
-    assert len(graph.get_block_nodes("<f1>", "<b2>")) == 1, (
-        "get_block_nodes should return all nodes for function <f1> and block <b2>"
-    )
-    assert len(graph.get_block_nodes("<f2>", "<b1>")) == 1, (
-        "get_block_nodes should return all nodes for function <f2> and block <b1>"
-    )
-    assert len(graph.get_block_nodes("<f2>", "<b2>")) == 2, (
-        "get_block_nodes should return all nodes for function <f2> and block <b2>"
-    )
-
-    for function_name in ["<f1>", "<f2>"]:
-        for block_name in ["<b1>", "<b2>"]:
-            block_nodes = graph.get_block_nodes(function_name, block_name)
-            for node in block_nodes:
-                assert node.event.block_name == block_name, f"Node should belong to {block_name}"
-
-    empty_nodes = graph.get_block_nodes("<nonexistent>", "<nonexistent>")
-    assert len(empty_nodes) == 0, (
-        "get_block_nodes should return an empty list for a function and block name with no nodes"
-    )
+    assert len(graph.nodes) == 1
+    mem_opcodes = [e.opcode for e in graph.nodes[0].block.memory_ops]
+    assert "alloca" in mem_opcodes
+    assert "store" in mem_opcodes
+    assert "load" in mem_opcodes

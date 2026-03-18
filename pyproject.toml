@@ -5,6 +5,7 @@ description = "LLVM IR parsing and animation tooling"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "graphviz>=0.21",
     "llvmlite>=0.46.0",
     "manim>=0.20.1",
     "manimgl>=1.7.2",

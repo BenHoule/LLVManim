@@ -33,7 +33,17 @@ def test_events_have_function_block_opcode_and_kind() -> None:
         assert event.function_name == "compute"
         assert event.block_name == "entry"
         assert event.opcode != ""
-        assert event.kind in ["alloca", "load", "store", "call", "ret", "br", "other"]
+        assert event.kind in [
+            "alloca",
+            "load",
+            "store",
+            "binop",
+            "compare",
+            "call",
+            "ret",
+            "br",
+            "other",
+        ]
 
 
 def test_parse_ir_captures_all_supported_kinds(all_kinds_ir: str) -> None:
@@ -44,10 +54,22 @@ def test_parse_ir_captures_all_supported_kinds(all_kinds_ir: str) -> None:
     assert "alloca" in kinds
     assert "load" in kinds
     assert "store" in kinds
+    assert "binop" in kinds
+    assert "compare" in kinds
     assert "call" in kinds
     assert "ret" in kinds
     assert "br" in kinds
-    assert "other" in kinds  # icmp is not a supported kind and must fall through
+    assert "other" in kinds  # zext is not a supported kind and must fall through
+
+
+def test_kind_from_opcode_add_returns_binop() -> None:
+    """Classifier should map arithmetic opcodes like add to binop."""
+    assert _kind_from_opcode("add") == "binop"
+
+
+def test_kind_from_opcode_icmp_returns_compare() -> None:
+    """Classifier should map compare opcodes like icmp to compare."""
+    assert _kind_from_opcode("icmp") == "compare"
 
 
 def test_events_have_sequential_indices() -> None:

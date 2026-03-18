@@ -33,6 +33,8 @@ def test_build_animation_commands_translates_events() -> None:
             _event(kind="alloca"),
             _event(kind="load"),
             _event(kind="store"),
+            _event(kind="binop"),
+            _event(kind="compare"),
             _event(kind="call"),
             _event(kind="ret"),
             _event(kind="br"),
@@ -41,7 +43,7 @@ def test_build_animation_commands_translates_events() -> None:
     )
     commands = build_animation_commands(stream)
 
-    assert len(commands) == 6, (
+    assert len(commands) == 8, (
         "Should create one command for each supported event kind, excluding 'other'"
     )
     for cmd, expected_kind in zip(
@@ -50,6 +52,8 @@ def test_build_animation_commands_translates_events() -> None:
             "create_stack_slot",
             "animate_memory_read",
             "animate_memory_write",
+            "animate_binop",
+            "animate_compare",
             "push_stack_frame",
             "pop_stack_frame",
             "highlight_branch",

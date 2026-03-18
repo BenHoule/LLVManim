@@ -12,7 +12,9 @@ entry:
   %x = alloca i32
   store i32 99, ptr %x
   %v = load i32, ptr %x
+  %sum = add i32 %v, 1
   %cond = icmp eq i32 %v, 0
+  %tmp = zext i1 %cond to i32
   br i1 %cond, label %yes, label %no
 yes:
   call void @g()

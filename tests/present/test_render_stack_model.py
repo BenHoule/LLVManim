@@ -149,6 +149,26 @@ def test_build_render_steps_non_stack_actions_still_produce_steps() -> None:
     assert steps[0].action == "highlight_branch"
 
 
+def test_build_render_steps_binop_action_emits_noop_snapshot() -> None:
+    """binop actions should generate steps while leaving stack state unchanged."""
+    event = _event("f", "add", "%sum = add i32 %v, 1")
+    steps = build_render_steps([_cmd("animate_binop", event)])
+
+    assert len(steps) == 1
+    assert steps[0].action == "animate_binop"
+    assert steps[0].state.frames == []
+
+
+def test_build_render_steps_compare_action_emits_noop_snapshot() -> None:
+    """compare actions should generate steps while leaving stack state unchanged."""
+    event = _event("f", "icmp", "%cond = icmp eq i32 %v, 0")
+    steps = build_render_steps([_cmd("animate_compare", event)])
+
+    assert len(steps) == 1
+    assert steps[0].action == "animate_compare"
+    assert steps[0].state.frames == []
+
+
 def test_slot_name_from_alloca_strips_whitespace() -> None:
     assert _slot_name_from_alloca("   %tmp42   = alloca i64, align 8") == "%tmp42"
 

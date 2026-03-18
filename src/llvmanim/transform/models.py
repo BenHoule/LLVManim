@@ -3,7 +3,17 @@
 from dataclasses import dataclass, field
 from typing import Literal
 
-EventKind = Literal["alloca", "load", "store", "call", "ret", "br", "other"]
+EventKind = Literal[
+    "alloca",
+    "load",
+    "store",
+    "binop",
+    "compare",
+    "call",
+    "ret",
+    "br",
+    "other",
+]
 BlockRole = Literal["entry", "linear", "branch", "merge", "exit"]
 
 

@@ -15,11 +15,40 @@ _OPCODE_KINDS: dict[str, EventKind] = {
     "br": "br",
 }
 
+_BINARY_OPCODES: frozenset[str] = frozenset(
+    {
+        "add",
+        "sub",
+        "mul",
+        "udiv",
+        "sdiv",
+        "urem",
+        "srem",
+        "shl",
+        "lshr",
+        "ashr",
+        "and",
+        "or",
+        "xor",
+        "fadd",
+        "fsub",
+        "fmul",
+        "fdiv",
+        "frem",
+    }
+)
+
+_COMPARE_OPCODES: frozenset[str] = frozenset({"icmp", "fcmp"})
+
 
 def _kind_from_opcode(opcode: str | None) -> EventKind:
     """Classify an LLVM opcode into an event kind."""
     if opcode is None:
         return "other"
+    if opcode in _BINARY_OPCODES:
+        return "binop"
+    if opcode in _COMPARE_OPCODES:
+        return "compare"
     return _OPCODE_KINDS.get(opcode, "other")
 
 

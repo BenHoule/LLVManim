@@ -36,7 +36,9 @@ def test_stack_animation_pipeline_from_ir_to_commands(all_kinds_ir: str) -> None
             "create_stack_slot",  # alloca
             "animate_memory_write",  # store
             "animate_memory_read",  # load
-            "highlight_branch",  # br (icmp skipped since it's "other")
+            "animate_binop",  # add
+            "animate_compare",  # icmp
+            "highlight_branch",  # br
             "push_stack_frame",  # call
             "pop_stack_frame",  # ret (yes block)
         ],

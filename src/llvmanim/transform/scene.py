@@ -69,6 +69,7 @@ def _extract_branch_targets_from_text(instr_text: str) -> list[str]:
 def _extract_edges(blocks: dict[tuple[str, str], CFGBlock]) -> list[CFGEdge]:
     """Derive control-flow edges from branch terminators within each function."""
     edges: list[CFGEdge] = []
+    seen: set[tuple[str, str]] = set()
 
     per_function: dict[str, list[CFGBlock]] = defaultdict(list)
     for block in blocks.values():
@@ -88,12 +89,11 @@ def _extract_edges(blocks: dict[tuple[str, str], CFGBlock]) -> list[CFGEdge]:
             targets = _extract_branch_targets_from_text(terminator.text)
             for target_name in targets:
                 if target_name in name_to_id:
-                    edges.append(
-                        CFGEdge(
-                            source=block.id,
-                            target=name_to_id[target_name],
-                        )
-                    )
+                    edge_key = (block.id, name_to_id[target_name])
+                    if edge_key in seen:
+                        continue
+                    seen.add(edge_key)
+                    edges.append(CFGEdge(source=edge_key[0], target=edge_key[1]))
 
     return edges
 

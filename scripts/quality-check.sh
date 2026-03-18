@@ -21,7 +21,7 @@ echo "OK Import Linter passed"
 echo ""
 
 echo "[4/4] Running pytest..."
-uv run pytest -q
+uv run pytest -q --cov=llvmanim --cov-report=term-missing
 echo "OK Tests passed"
 echo ""
 

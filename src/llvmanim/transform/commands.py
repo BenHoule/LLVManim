@@ -38,11 +38,30 @@ def build_animation_commands(stream: ProgramEventStream) -> list[AnimationComman
     Events with kind 'other' are skipped. Each remaining event maps to an
     ActionKind that drives the stack-frame visualization.
 
-    Note: conditional branches produce one 'highlight_branch' per br instruction
-    and one 'pop_stack_frame' per ret — one per basic block that ends in ret.
-    Full deduplication requires control-flow analysis (future work)."""
-    return [
-        AnimationCommand(action=_EVENT_TO_ACTION[event.kind], event=event)
-        for event in stream.events
-        if event.kind != "other"
-    ]
+    Pop commands are emitted only when a matching prior push exists. This
+    avoids unmatched extra pops when a flat IR event stream includes multiple
+    return terminators from mutually exclusive control-flow branches."""
+    commands: list[AnimationCommand] = []
+    pushed_frames = 0
+
+    for event in stream.events:
+        if event.kind == "other":
+            continue
+
+        action = _EVENT_TO_ACTION[event.kind]
+
+        if action == "push_stack_frame":
+            pushed_frames += 1
+            commands.append(AnimationCommand(action=action, event=event))
+            continue
+
+        if action == "pop_stack_frame":
+            if pushed_frames == 0:
+                continue
+            pushed_frames -= 1
+            commands.append(AnimationCommand(action=action, event=event))
+            continue
+
+        commands.append(AnimationCommand(action=action, event=event))
+
+    return commands

@@ -8,29 +8,10 @@ from llvmanim.transform.scene import build_scene_graph
 # CFG pipeline (block-level graph, edges, roles)
 # ---------------------------------------------------------------------------
 
-# Minimal IR exercising every supported EventKind plus one "other" (icmp).
-_ALL_KINDS_IR = """
-define void @f(ptr %p) {
-entry:
-  %x = alloca i32
-  store i32 99, ptr %x
-  %v = load i32, ptr %x
-  %cond = icmp eq i32 %v, 0
-  br i1 %cond, label %yes, label %no
-yes:
-  call void @g()
-  ret void
-no:
-  ret void
-}
 
-declare void @g()
-"""
-
-
-def test_cfg_pipeline_produces_blocks_and_edges() -> None:
+def test_cfg_pipeline_produces_blocks_and_edges(all_kinds_ir: str) -> None:
     """CFG pipeline: IR → SceneGraph has correct block count and edges."""
-    stream = parse_ir_to_events(_ALL_KINDS_IR, source_path="<test_ir>")
+    stream = parse_ir_to_events(all_kinds_ir, source_path="<test_ir>")
     graph = build_scene_graph(stream)
     # IR has 3 basic blocks: entry, yes, no
     assert len(graph.nodes) == 3, "Expected 3 CFG blocks (entry, yes, no)"
@@ -43,9 +24,9 @@ def test_cfg_pipeline_produces_blocks_and_edges() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_stack_animation_pipeline_from_ir_to_commands() -> None:
+def test_stack_animation_pipeline_from_ir_to_commands(all_kinds_ir: str) -> None:
     """Stack animation pipeline: IR → AnimationCommands has correct actions."""
-    stream = parse_ir_to_events(_ALL_KINDS_IR, source_path="<test_ir>")
+    stream = parse_ir_to_events(all_kinds_ir, source_path="<test_ir>")
     commands = build_animation_commands(stream)
     assert len(commands) > 0, "Commands should be generated from the IR events"
 
@@ -58,7 +39,6 @@ def test_stack_animation_pipeline_from_ir_to_commands() -> None:
             "highlight_branch",  # br (icmp skipped since it's "other")
             "push_stack_frame",  # call
             "pop_stack_frame",  # ret (yes block)
-            "pop_stack_frame",  # ret (no block) — known gap: two pops for one logical call
         ],
         strict=True,
     ):

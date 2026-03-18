@@ -36,6 +36,13 @@ build-backend = "uv_build"
 # PYTEST
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "unit: fast deterministic tests with no external dependencies",
+    "integration: tests that span multiple LLVManim layers",
+    "contract: tests asserting behavior at external dependency boundaries",
+    "e2e: end-to-end CLI or rendering workflows",
+]
 
 # RUFF
 [tool.ruff]
@@ -51,3 +58,6 @@ ignore = [
 max-complexity = 60
 [tool.ruff.lint.isort]
 known-first-party = ["llvmanim"]
+
+[tool.coverage.run]
+source = ["llvmanim"]

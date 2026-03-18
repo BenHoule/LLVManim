@@ -49,6 +49,42 @@ Run tests directly:
 uv run pytest -q
 ```
 
+Run tests with coverage visibility:
+
+```bash
+uv run pytest -q --cov=llvmanim --cov-report=term-missing
+```
+
+## Test-Driven Development Workflow
+
+Use a small-loop TDD cycle for new behavior and bug fixes:
+
+1. Write a failing test first.
+2. Implement the minimal change to make it pass.
+3. Refactor while keeping tests green.
+4. Run quality gates before opening/merging a PR.
+
+```bash
+./scripts/quality-check.sh
+```
+
+### Test Taxonomy
+
+Pytest markers used by the suite:
+
+- `unit`: deterministic tests without external dependencies
+- `integration`: tests crossing multiple LLVManim layers
+- `contract`: tests around external dependency boundaries
+- `e2e`: end-to-end entrypoint/workflow tests
+
+Example marker runs:
+
+```bash
+uv run pytest -q -m unit
+uv run pytest -q -m integration
+uv run pytest -q -m "contract or e2e"
+```
+
 ## CLI Usage
 
 Entry point:

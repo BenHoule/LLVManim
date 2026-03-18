@@ -1,29 +1,12 @@
 """Tests for LLVM IR ingestion event extraction."""
 
+import pytest
+
 from llvmanim.ingest.llvm_events import (
     _kind_from_opcode,
     parse_ir_to_events,
     parse_module_to_events,
 )
-
-# Minimal IR exercising every supported EventKind plus one "other" (icmp).
-_ALL_KINDS_IR = """
-define void @f(ptr %p) {
-entry:
-  %x = alloca i32
-  store i32 99, ptr %x
-  %v = load i32, ptr %x
-  %cond = icmp eq i32 %v, 0
-  br i1 %cond, label %yes, label %no
-yes:
-  call void @g()
-  ret void
-no:
-  ret void
-}
-
-declare void @g()
-"""
 
 
 def test_parse_module_extracts_events_and_path() -> None:
@@ -53,9 +36,9 @@ def test_events_have_function_block_opcode_and_kind() -> None:
         assert event.kind in ["alloca", "load", "store", "call", "ret", "br", "other"]
 
 
-def test_parse_ir_captures_all_supported_kinds() -> None:
+def test_parse_ir_captures_all_supported_kinds(all_kinds_ir: str) -> None:
     """Parser produces at least one event of every EventKind, including 'other'."""
-    stream = parse_ir_to_events(_ALL_KINDS_IR)
+    stream = parse_ir_to_events(all_kinds_ir)
 
     kinds = {event.kind for event in stream.events}
     assert "alloca" in kinds
@@ -86,3 +69,15 @@ def test_events_have_sequential_indices() -> None:
 def test_kind_from_opcode_none_returns_other() -> None:
     """Classifier should map None opcode to the fallback 'other' kind."""
     assert _kind_from_opcode(None) == "other"
+
+
+def test_parse_module_missing_file_raises_file_not_found() -> None:
+    """parse_module_to_events should raise FileNotFoundError for missing source files."""
+    with pytest.raises(FileNotFoundError):
+        parse_module_to_events("tests/ingest/testdata/does_not_exist.ll")
+
+
+def test_parse_ir_invalid_input_raises() -> None:
+    """parse_ir_to_events should surface llvmlite parse failures on invalid IR text."""
+    with pytest.raises(RuntimeError):
+        parse_ir_to_events("this is not valid llvm ir")

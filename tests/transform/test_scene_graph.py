@@ -213,6 +213,26 @@ def test_extract_edges_skips_empty_blocks() -> None:
     assert edges == []
 
 
+def test_extract_edges_deduplicates_duplicate_branch_targets() -> None:
+    """A branch that names the same target twice should produce one unique edge."""
+    stream = parse_ir_to_events(
+        """
+        define void @f() {
+        entry:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %done, label %done
+        done:
+          ret void
+        }
+        """
+    )
+
+    graph = build_scene_graph(stream)
+    edges = [(edge.source, edge.target) for edge in graph.edges]
+
+    assert edges == [("f::entry", "f::done")]
+
+
 def test_animation_hint_for_linear_memory_block() -> None:
   """Linear blocks with memory ops should use the memory-activity hint."""
   block = CFGBlock(id="f::entry", name="entry", function_name="f")

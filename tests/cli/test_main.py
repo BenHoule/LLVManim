@@ -1,5 +1,7 @@
 """CLI smoke tests."""
 
+from pathlib import Path
+
 from llvmanim.cli.main import main
 
 
@@ -240,3 +242,50 @@ def test_main_speed_default_is_1(tmp_path) -> None:
         main(argv=[str(ll_file), "--animate"])
     _, kwargs = MockScene.call_args
     assert kwargs.get("speed") == 1.0
+
+
+def test_main_gif_renders_manim_as_mp4(tmp_path) -> None:
+    """--format gif renders through Manim as mp4 first to avoid high memory GIF combine."""
+    from unittest.mock import patch
+
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text("""
+        define i32 @f() {
+        entry:
+            ret i32 0
+        }
+    """)
+    with patch("llvmanim.cli.main.RichStackSceneBadge"), \
+         patch("llvmanim.cli.main.manim_config") as mock_cfg, \
+         patch("llvmanim.cli.main._find_latest_file", return_value=None):
+        code = main(argv=[str(ll_file), "--animate", "--format", "gif"])
+
+    assert code == 0
+    assert mock_cfg.format == "mp4"
+
+
+def test_main_gif_calls_conversion_when_mp4_found(tmp_path) -> None:
+    """--format gif runs conversion step when a rendered mp4 is present."""
+    from unittest.mock import patch
+
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text("""
+        define i32 @f() {
+        entry:
+            ret i32 0
+        }
+    """)
+    fake_mp4 = tmp_path / "media" / "videos" / "scene.mp4"
+
+    with patch("llvmanim.cli.main.RichStackSceneBadge"), \
+         patch("llvmanim.cli.main._find_latest_file", return_value=fake_mp4), \
+         patch("llvmanim.cli.main._convert_mp4_to_gif", return_value=True) as mock_convert:
+        code = main(argv=[str(ll_file), "--animate", "--format", "gif", "--gif-fps", "10", "--gif-width", "720"])
+
+    assert code == 0
+    mock_convert.assert_called_once_with(
+        fake_mp4,
+        Path(str(fake_mp4.with_suffix(".gif"))),
+        fps=10,
+        width=720,
+    )

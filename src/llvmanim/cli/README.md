@@ -28,12 +28,21 @@ Default input when none is supplied: `tests/ingest/testdata/double.ll`.
 | `--preview` | off | Render and open video in viewer (implies `--animate`) |
 | `--ir-mode {basic,rich}` | `basic` | Animation display mode |
 | `--speed FLOAT` | `1.0` | Animation speed multiplier |
+| `--format {mp4,gif}` | `mp4` | Animation output format |
+| `--gif-fps FPS` | `12` | GIF conversion frame rate when `--format gif` |
+| `--gif-width PX` | `960` | GIF conversion width when `--format gif` |
 | `--outdir PATH` | `.` | Output directory (created if absent) |
 
 ## Animation Modes
 
 - `basic` — stack-only layout; arriving cells flash yellow then settle to white (`RichStackSceneBadge`)
 - `rich` — two-column layout with full IR source on the left and a moving yellow cursor; stack on the right (`RichStackSceneSpotlight`)
+
+## GIF Output Notes
+
+- `--format gif` renders MP4 first, then converts to GIF with `ffmpeg`.
+- This avoids Manim's high-memory GIF combine path and is safer under WSL memory pressure.
+- If `ffmpeg` is unavailable, the CLI prints a warning and leaves the MP4 output intact.
 
 ## Exit Codes
 

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import shutil
+import subprocess
 from pathlib import Path
 
 from llvmanim.ingest import parse_module_to_events
@@ -14,6 +16,65 @@ try:
     from manim import config as manim_config
 except ImportError:
     manim_config = None  # type: ignore[assignment]
+
+
+def _find_latest_file(root: Path, pattern: str) -> Path | None:
+    """Return the most recently modified file matching pattern below root."""
+    candidates = [path for path in root.rglob(pattern) if path.is_file()]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda path: path.stat().st_mtime)
+
+
+def _convert_mp4_to_gif(mp4_path: Path, gif_path: Path, fps: int, width: int) -> bool:
+    """Convert mp4_path to gif_path with ffmpeg using a low-memory palette workflow.
+
+    This is here because trying to use the Manim GIF renderer directly can lead to very
+    high memory usage when combining frames into a GIF, (enough to crash my WSL process).
+    By rendering to MP4 first and then converting to GIF with ffmpeg using a palette, we
+    keep memory usage much lower."""
+    ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg is None:
+        print("Warning: ffmpeg not found; skipping GIF conversion.")
+        return False
+
+    palette_path = gif_path.with_suffix(".palette.png")
+    scale_filter = f"fps={fps},scale={width}:-1:flags=lanczos"
+    try:
+        subprocess.run(
+            [
+                ffmpeg,
+                "-y",
+                "-i",
+                str(mp4_path),
+                "-vf",
+                f"{scale_filter},palettegen=stats_mode=diff",
+                str(palette_path),
+            ],
+            check=True,
+        )
+
+        subprocess.run(
+            [
+                ffmpeg,
+                "-y",
+                "-i",
+                str(mp4_path),
+                "-i",
+                str(palette_path),
+                "-lavfi",
+                f"{scale_filter}[x];[x][1:v]paletteuse=dither=sierra2_4a",
+                str(gif_path),
+            ],
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        print(f"Warning: ffmpeg GIF conversion failed (exit {exc.returncode}).")
+        return False
+    finally:
+        palette_path.unlink(missing_ok=True)
+
+    return True
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -73,6 +134,29 @@ def main(argv: list[str] | None = None) -> int:
         help="Output directory",
     )
 
+    parser.add_argument(
+        "--format",
+        choices=["mp4", "gif"],
+        default="mp4",
+        help="Animation output format (default: mp4)",
+    )
+
+    parser.add_argument(
+        "--gif-fps",
+        type=int,
+        default=12,
+        metavar="FPS",
+        help="GIF conversion frame rate when --format gif (default: 12)",
+    )
+
+    parser.add_argument(
+        "--gif-width",
+        type=int,
+        default=960,
+        metavar="PX",
+        help="GIF conversion width in pixels when --format gif (default: 960)",
+    )
+
     args = parser.parse_args(argv)
 
     input_path = Path(args.input)
@@ -111,12 +195,29 @@ def main(argv: list[str] | None = None) -> int:
             print("Graphviz Python package not installed; skipped PNG export.")
 
     if args.animate or args.preview:
+        render_format = "mp4" if args.format == "gif" else args.format
         if manim_config is not None:
             manim_config.media_dir = str(outdir)
+            manim_config.format = render_format
         if args.ir_mode == "rich":
             animation_scene = RichStackSceneSpotlight(stream, speed=args.speed)
         else:
             animation_scene = RichStackSceneBadge(stream, speed=args.speed)
         animation_scene.render(preview=args.preview)
+
+        if args.format == "gif":
+            mp4_path = _find_latest_file(outdir, "*.mp4")
+            if mp4_path is None:
+                print("Warning: could not find rendered mp4 to convert into GIF.")
+            else:
+                gif_path = mp4_path.with_suffix(".gif")
+                converted = _convert_mp4_to_gif(
+                    mp4_path,
+                    gif_path,
+                    fps=max(args.gif_fps, 1),
+                    width=max(args.gif_width, 64),
+                )
+                if converted:
+                    print(f"Wrote GIF: {gif_path}")
 
     return 0

@@ -67,6 +67,9 @@ Default input is `tests/ingest/testdata/double.ll` when no positional argument i
 - `--preview`: open rendered animation in viewer (implies animation render)
 - `--ir-mode {basic,rich}`: choose animation style (default: `basic`)
 - `--speed <float>`: animation speed multiplier (default: `1.0`)
+- `--format {mp4,gif}`: animation output format (default: `mp4`)
+- `--gif-fps <int>`: GIF conversion FPS when `--format gif` (default: `12`)
+- `--gif-width <int>`: GIF conversion width in px when `--format gif` (default: `960`)
 - `--outdir <path>`: output directory (default: current directory)
 
 ### Common Examples
@@ -87,6 +90,18 @@ Render stack animation (basic mode):
 
 ```bash
 uv run llvmanim tests/ingest/testdata/double.ll --animate --ir-mode basic --outdir llvmanim_out
+```
+
+Render as GIF:
+
+```bash
+uv run llvmanim tests/ingest/testdata/double.ll --animate --format gif --outdir llvmanim_out
+```
+
+Low-memory GIF render (recommended for WSL):
+
+```bash
+uv run llvmanim tests/ingest/testdata/double.ll --animate --format gif --gif-fps 10 --gif-width 720 --outdir llvmanim_out
 ```
 
 Render rich IR+stack animation and preview:
@@ -159,5 +174,6 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 ## Notes
 
 - DOT export does not require system Graphviz binaries; PNG export does.
+- GIF output renders MP4 first and then converts via `ffmpeg` palette workflow to reduce peak memory usage.
 - `pyproject.toml` includes both `manim` and `manimgl` dependencies, but the current CLI animation path uses Manim Community Edition scenes in `src/llvmanim/present/rich_stack_scene.py`.
 - Sandbox directories contain experimental scripts and examples and are not used by the package entrypoint.

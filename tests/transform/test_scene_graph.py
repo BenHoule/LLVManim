@@ -132,3 +132,49 @@ def test_build_scene_graph_block_carries_memory_ops() -> None:
     assert "alloca" in mem_opcodes
     assert "store" in mem_opcodes
     assert "load" in mem_opcodes
+
+
+def test_build_scene_graph_assigns_merge_role() -> None:
+    """A block targeted by two different branches gets role='merge' and animation_hint='converge'."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %left, label %right
+        left:
+          br label %merge
+        right:
+          br label %merge
+        merge:
+          br label %end
+        end:
+          ret void
+        }
+    """)
+    graph = build_scene_graph(stream)
+    node_map = {n.block.name: n for n in graph.nodes}
+    assert node_map["merge"].role == "merge"
+    assert node_map["merge"].animation_hint == "converge"
+
+
+def test_build_scene_graph_linear_block_gets_highlight_hint() -> None:
+    """A linear block with no memory ops gets animation_hint='highlight_block'."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %left, label %right
+        left:
+          br label %merge
+        right:
+          br label %merge
+        merge:
+          br label %end
+        end:
+          ret void
+        }
+    """)
+    graph = build_scene_graph(stream)
+    node_map = {n.block.name: n for n in graph.nodes}
+    assert node_map["left"].role == "linear"
+    assert node_map["left"].animation_hint == "highlight_block"

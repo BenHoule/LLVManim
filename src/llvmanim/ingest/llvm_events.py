@@ -36,17 +36,15 @@ def parse_ir_to_events(llvm_ir: str, source_path: str = "<in-memory>") -> Progra
     for func in module.functions:
         func_name = func.name or "<anon_fn>"
         per_func_index.setdefault(func_name, 0)
-
         for block in func.blocks:
             block_name = block.name
-
             for instr in block.instructions:
                 opcode = instr.opcode
 
                 event = IREvent(
                     function_name=func_name,
                     block_name=block_name,
-                    opcode=opcode or "unknown",
+                    opcode=opcode or "<unknown_opcode>",
                     text=str(instr).strip(),
                     kind=_kind_from_opcode(opcode),
                     index_in_function=per_func_index[func_name],

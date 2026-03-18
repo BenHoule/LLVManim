@@ -2,7 +2,7 @@
 
 from llvmanim.ingest.llvm_events import parse_ir_to_events
 from llvmanim.transform.commands import build_animation_commands
-from llvmanim.transform.scene import SceneGraph, build_scene_graph
+from llvmanim.transform.scene import build_scene_graph
 
 # Minimal IR exercising every supported EventKind plus one "other" (icmp).
 _ALL_KINDS_IR = """

@@ -1,7 +1,7 @@
 """Scene graph construction from IR event streams."""
 
-from collections import defaultdict
 import re
+from collections import defaultdict
 
 from llvmanim.transform.models import (
     CFGBlock,
@@ -113,8 +113,6 @@ def _assign_roles(blocks: dict[tuple[str, str], CFGBlock], edges: list[CFGEdge])
             block.role = "entry"
         elif block.terminator_opcode == "ret":
             block.role = "exit"
-        elif block.indegree > 1:
-            block.role = "merge"
         elif block.indegree > 1:
             block.role = "merge"
         else:

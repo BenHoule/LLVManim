@@ -1,3 +1,5 @@
+"""Translation from IR event streams to typed animation commands."""
+
 from dataclasses import dataclass
 from typing import Literal
 

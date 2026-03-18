@@ -1,6 +1,7 @@
 """tests/present/test_scene_builder.py"""
 
 from llvmanim.ingest.llvm_events import parse_ir_to_events
+from llvmanim.present.render_stack_model import RenderStep
 from llvmanim.present.scene_builder import LLVManimScene, build_scene
 from llvmanim.transform.commands import build_animation_commands
 
@@ -25,20 +26,16 @@ declare void @g()
 
 
 def test_build_scene_empty_commands_returns_empty():
-    """Test that build_scene returns an empty list when given no commands."""
+    """build_scene with no commands produces a scene with no steps."""
     scene = build_scene([])
-    assert len(scene.animations) == 0, (
-        "build_scene should return an empty list when given no commands"
-    )
+    assert len(scene.steps) == 0
 
 
-def test_build_scene_returns_one_per_command():
-    """Test that build_scene produces one scene per command."""
-
+def test_build_scene_returns_one_step_per_command():
+    """build_scene produces one RenderStep per animation command."""
     stream = parse_ir_to_events(_ALL_KINDS_IR, source_path="<test_ir>")
     commands = build_animation_commands(stream)
     scene = build_scene(commands)
-    assert isinstance(scene, LLVManimScene), "build_scene should return a single scene instance"
-    assert len(scene.animations) == len(commands), (
-        "build_scene should produce one animation per command"
-    )
+    assert isinstance(scene, LLVManimScene)
+    assert len(scene.steps) == len(commands)
+    assert all(isinstance(s, RenderStep) for s in scene.steps)

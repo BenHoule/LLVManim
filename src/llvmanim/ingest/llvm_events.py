@@ -1,3 +1,5 @@
+"""Ingestion of LLVM IR text into a structured ProgramEventStream via llvmlite."""
+
 from pathlib import Path
 
 import llvmlite.binding as llvm

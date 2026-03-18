@@ -51,6 +51,7 @@ videos/
 images/
 partial_movie_files/
 tex/
+texts/
 logs/
 
 # C/C++ build artifacts

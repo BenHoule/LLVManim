@@ -18,6 +18,7 @@ def _make_block_id(function_name: str, block_name: str) -> str:
 
 
 def _animation_hint_for_block(block: CFGBlock) -> str:
+    """Return a string animation hint for the given block based on its role."""
     if block.role == "entry":
         return "fade_in_and_focus"
     if block.role == "branch":
@@ -32,6 +33,7 @@ def _animation_hint_for_block(block: CFGBlock) -> str:
 
 
 def _group_blocks(event_stream: ProgramEventStream) -> dict[tuple[str, str], CFGBlock]:
+    """Group events by (function_name, block_name) into CFGBlock objects."""
     grouped: dict[tuple[str, str], CFGBlock] = {}
 
     for event in event_stream.events:
@@ -65,6 +67,7 @@ def _extract_branch_targets_from_text(instr_text: str) -> list[str]:
 
 
 def _extract_edges(blocks: dict[tuple[str, str], CFGBlock]) -> list[CFGEdge]:
+    """Derive control-flow edges from branch terminators within each function."""
     edges: list[CFGEdge] = []
 
     per_function: dict[str, list[CFGBlock]] = defaultdict(list)
@@ -96,6 +99,7 @@ def _extract_edges(blocks: dict[tuple[str, str], CFGBlock]) -> list[CFGEdge]:
 
 
 def _assign_roles(blocks: dict[tuple[str, str], CFGBlock], edges: list[CFGEdge]) -> None:
+    """Set each block's role (entry/branch/merge/exit/linear) from edge topology."""
     indegree: dict[str, int] = defaultdict(int)
     outdegree: dict[str, int] = defaultdict(int)
 

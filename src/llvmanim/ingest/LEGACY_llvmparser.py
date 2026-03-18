@@ -1,3 +1,9 @@
+"""Legacy LLVM IR parser preserved for reference.
+
+Not used by the current pipeline.  This file pre-dates the structured
+llvm_events.py ingestion layer and is kept in-tree for historical context.
+"""
+
 import llvmlite.binding as llvm
 
 from llvmanim.ingest import LEGACY_ir_helpers as irout

@@ -19,6 +19,11 @@ def _gv_id(node_id: str) -> str:
 
 
 def export_cfg_dot(graph: SceneGraph, output_path: str | Path) -> None:
+    """Write a Graphviz DOT file representing the CFG of *graph*.
+
+    Each node shows its block ID, role, terminator opcode, and any memory ops.
+    Edges represent control-flow branches extracted by the transform layer.
+    """
     path = Path(output_path)
 
     lines: list[str] = []
@@ -48,6 +53,12 @@ def export_cfg_dot(graph: SceneGraph, output_path: str | Path) -> None:
 
 
 def export_cfg_png(graph: SceneGraph, output_prefix: str | Path) -> bool:
+    """Render the CFG as a PNG via the *graphviz* Python package.
+
+    Returns True on success and False if the graphviz package is not installed
+    or the Graphviz binaries are unavailable.  The caller should print a
+    diagnostic in the False case.
+    """
     try:
         from graphviz import Digraph
         from graphviz.backend import CalledProcessError, ExecutableNotFound

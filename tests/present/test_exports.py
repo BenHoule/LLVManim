@@ -1,3 +1,5 @@
+"""Tests for Graphviz and JSON export helpers."""
+
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -5,10 +7,12 @@ from unittest.mock import MagicMock, patch
 from llvmanim.ingest import parse_ir_to_events
 from llvmanim.present import export_cfg_dot, export_scene_graph_json
 from llvmanim.present.graphviz_export import _gv_id, export_cfg_png
+from llvmanim.transform.models import SceneGraph
 from llvmanim.transform.scene import build_scene_graph
 
 
-def _build_graph():
+def _build_graph() -> SceneGraph:
+    """Return a small two-branch SceneGraph for use across export tests."""
     stream = parse_ir_to_events("""
         define void @f(ptr %p) {
         entry:

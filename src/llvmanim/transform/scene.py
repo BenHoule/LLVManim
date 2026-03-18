@@ -71,7 +71,7 @@ def _extract_edges(blocks: dict[tuple[str, str], CFGBlock]) -> list[CFGEdge]:
     for block in blocks.values():
         per_function[block.function_name].append(block)
 
-    for function_name, function_blocks in per_function.items():
+    for _function_name, function_blocks in per_function.items():
         name_to_id = {b.name: b.id for b in function_blocks}
 
         for block in function_blocks:

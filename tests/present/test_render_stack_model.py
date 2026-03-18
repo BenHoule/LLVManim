@@ -209,3 +209,20 @@ def test_build_render_steps_create_slot_without_frame_emits_noop_snapshot() -> N
     assert len(steps) == 1
     assert steps[0].action == "create_stack_slot"
     assert steps[0].state.frames == []
+
+
+def test_build_render_steps_underflow_signal_emits_step_and_terminates() -> None:
+    """signal_stack_underflow should emit one terminal step and stop further playback steps."""
+    signal_event = _event("f", "ret")
+    trailing_event = _event("f", "load", "%v = load i32, ptr %x")
+
+    steps = build_render_steps(
+        [
+            _cmd("signal_stack_underflow", signal_event),
+            _cmd("animate_memory_read", trailing_event),
+        ]
+    )
+
+    assert len(steps) == 1
+    assert steps[0].action == "signal_stack_underflow"
+    assert steps[0].state.frames == []

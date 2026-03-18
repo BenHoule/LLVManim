@@ -58,13 +58,6 @@ def build_render_steps(commands: list[AnimationCommand]) -> list[RenderStep]:
 
         elif cmd.action == "pop_stack_frame":
             if stack:
-                # TODO: Remove this guard once commands.py uses proper
-                # control-flow analysis (see GitHub issue: multiple
-                # pop_stack_frame on conditional branches). The guard
-                # silently swallows spurious pops and prevents crashes,
-                # but it also hides the bug from the renderer. Eventually
-                # the fix should live upstream so that the renderer can
-                # surface incorrect control flow visually if it recurs.
                 stack.pop()
 
         elif cmd.action == "create_stack_slot" and stack:
@@ -81,5 +74,8 @@ def build_render_steps(commands: list[AnimationCommand]) -> list[RenderStep]:
             ]
         )
         steps.append(RenderStep(action=cmd.action, event=cmd.event, state=snapshot))
+
+        if cmd.action == "signal_stack_underflow":
+            break
 
     return steps

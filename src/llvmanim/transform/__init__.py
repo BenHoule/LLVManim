@@ -1,1 +1,6 @@
 """Transformation layer from IR events to scene plans."""
+
+from llvmanim.transform.trace import (  # noqa: F401
+    TraceStep,
+    build_execution_trace,
+)

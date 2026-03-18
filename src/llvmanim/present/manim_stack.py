@@ -73,6 +73,8 @@ class StackMobjectManager:
             return self._pop()
         if step.action == "create_stack_slot":
             return self._create_slot(step)
+        if step.action == "signal_stack_underflow":
+            return self._signal_stack_underflow(step)
         return []
 
     def _push(self, step: RenderStep) -> list[Animation]:
@@ -97,6 +99,15 @@ class StackMobjectManager:
         new_mob.move_to(old_mob)
         self.current_mobjects[-1] = new_mob
         return [Transform(old_mob, new_mob)]
+
+    def _signal_stack_underflow(self, step: RenderStep) -> list[Animation]:
+        """Stub for visualizing stack underflow (e.g., ghost frame + red flash).
+
+        Currently returns no animations; render termination is handled upstream
+        by `build_render_steps` truncating the step stream after this signal.
+        """
+        _ = step
+        return []
 
 
 class StackAnimationScene(Scene):

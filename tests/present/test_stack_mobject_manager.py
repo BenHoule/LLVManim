@@ -163,3 +163,10 @@ def test_animate_memory_read_returns_no_animations() -> None:
     step = _step("animate_memory_read", "f", "load", frames=[])
     animations = mgr.apply(step)
     assert animations == []
+
+
+def test_signal_stack_underflow_returns_no_animations_stub() -> None:
+    mgr = StackMobjectManager()
+    step = _step("signal_stack_underflow", "f", "ret", frames=[])
+    animations = mgr.apply(step)
+    assert animations == []

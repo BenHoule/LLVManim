@@ -14,6 +14,7 @@ ActionKind = Literal[
     "push_stack_frame",
     "pop_stack_frame",
     "highlight_branch",
+    "signal_stack_underflow",
 ]
 
 _EVENT_TO_ACTION: dict[EventKind, ActionKind] = {
@@ -42,9 +43,13 @@ def build_animation_commands(stream: ProgramEventStream) -> list[AnimationComman
     Events with kind 'other' are skipped. Each remaining event maps to an
     ActionKind that drives the stack-frame visualization.
 
-    Pop commands are emitted only when a matching prior push exists. This
-    avoids unmatched extra pops when a flat IR event stream includes multiple
-    return terminators from mutually exclusive control-flow branches."""
+    Returns are translated into pop commands only when a matching prior push
+    exists in the flattened stream. This avoids false-positive underflow
+    signals on control-flow-alternative return blocks until trace generation
+    becomes control-flow aware.
+
+    Note: `signal_stack_underflow` remains available as an explicit action for
+    future trace-driven pipelines that can prove underflow behavior."""
     commands: list[AnimationCommand] = []
     pushed_frames = 0
 

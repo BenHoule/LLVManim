@@ -103,6 +103,7 @@ def test_construct_skips_play_for_non_stack_actions() -> None:
     steps = [
         _step("highlight_branch", "f", "br", frames=[]),
         _step("animate_memory_read", "f", "load", frames=[]),
+        _step("signal_stack_underflow", "f", "ret", frames=[]),
     ]
     scene = StackAnimationScene(LLVManimScene(steps=steps))
     with patch.object(scene, "play") as mock_play:

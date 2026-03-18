@@ -65,7 +65,7 @@ def test_build_animation_commands_translates_events() -> None:
 
 
 def test_build_animation_commands_ignores_extra_returns_without_matching_call() -> None:
-    """A single call should produce at most one matching pop across multi-ret branch IR."""
+    """Branch-alternative extra returns should not emit underflow without CFG trace resolution."""
     stream = parse_ir_to_events(
         """
                 define void @f(ptr %p) {
@@ -89,6 +89,10 @@ def test_build_animation_commands_ignores_extra_returns_without_matching_call() 
     commands = build_animation_commands(stream)
     pushes = len([command for command in commands if command.action == "push_stack_frame"])
     pops = len([command for command in commands if command.action == "pop_stack_frame"])
+    underflow_signals = len(
+        [command for command in commands if command.action == "signal_stack_underflow"]
+    )
 
     assert pushes == 1
     assert pops == 1
+    assert underflow_signals == 0

@@ -1,6 +1,10 @@
 """Tests for LLVM IR ingestion event extraction."""
 
-from llvmanim.ingest.llvm_events import parse_ir_to_events, parse_module_to_events
+from llvmanim.ingest.llvm_events import (
+    _kind_from_opcode,
+    parse_ir_to_events,
+    parse_module_to_events,
+)
 
 # Minimal IR exercising every supported EventKind plus one "other" (icmp).
 _ALL_KINDS_IR = """
@@ -77,3 +81,8 @@ def test_events_have_sequential_indices() -> None:
 
     indices = [e.index_in_function for e in stream.events if e.function_name == "f"]
     assert indices == list(range(len(indices)))
+
+
+def test_kind_from_opcode_none_returns_other() -> None:
+    """Classifier should map None opcode to the fallback 'other' kind."""
+    assert _kind_from_opcode(None) == "other"

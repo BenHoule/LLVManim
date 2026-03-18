@@ -140,6 +140,12 @@ def test_create_slot_does_not_change_mobject_count() -> None:
     assert len(mgr.current_mobjects) == before
 
 
+def test_create_slot_on_empty_stack_returns_no_animations() -> None:
+    mgr = StackMobjectManager()
+    animations = mgr.apply(_step("create_stack_slot", "f", "alloca", "%x = alloca i32", frames=[]))
+    assert animations == []
+
+
 # ---------------------------------------------------------------------------
 # Non-stack actions produce no animations
 # ---------------------------------------------------------------------------

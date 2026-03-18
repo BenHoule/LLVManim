@@ -1,5 +1,6 @@
 """CLI smoke tests."""
 
+import subprocess
 from pathlib import Path
 
 from llvmanim.cli.main import main
@@ -289,3 +290,81 @@ def test_main_gif_calls_conversion_when_mp4_found(tmp_path) -> None:
         fps=10,
         width=720,
     )
+
+
+def test_find_latest_file_returns_none_when_no_matches(tmp_path) -> None:
+    """_find_latest_file returns None when no files match the pattern."""
+    from llvmanim.cli.main import _find_latest_file
+
+    assert _find_latest_file(tmp_path, "*.mp4") is None
+
+
+def test_find_latest_file_returns_most_recent_match(tmp_path) -> None:
+    """_find_latest_file returns the most recently modified matching file."""
+    from llvmanim.cli.main import _find_latest_file
+
+    older = tmp_path / "a.mp4"
+    newer = tmp_path / "b.mp4"
+    older.write_text("old")
+    newer.write_text("new")
+
+    older.touch()
+    newer.touch()
+
+    assert _find_latest_file(tmp_path, "*.mp4") == newer
+
+
+def test_convert_mp4_to_gif_returns_false_without_ffmpeg(tmp_path, capsys) -> None:
+    """_convert_mp4_to_gif returns False and warns when ffmpeg is unavailable."""
+    from unittest.mock import patch
+
+    from llvmanim.cli.main import _convert_mp4_to_gif
+
+    with patch("llvmanim.cli.main.shutil.which", return_value=None):
+        ok = _convert_mp4_to_gif(
+            tmp_path / "in.mp4",
+            tmp_path / "out.gif",
+            fps=12,
+            width=960,
+        )
+
+    assert ok is False
+    assert "ffmpeg not found" in capsys.readouterr().out
+
+
+def test_convert_mp4_to_gif_returns_false_on_ffmpeg_error(tmp_path, capsys) -> None:
+    """_convert_mp4_to_gif returns False when ffmpeg command fails."""
+    from unittest.mock import patch
+
+    from llvmanim.cli.main import _convert_mp4_to_gif
+
+    with patch("llvmanim.cli.main.shutil.which", return_value="/usr/bin/ffmpeg"), \
+         patch("llvmanim.cli.main.subprocess.run", side_effect=subprocess.CalledProcessError(2, ["ffmpeg"])):
+        ok = _convert_mp4_to_gif(
+            tmp_path / "in.mp4",
+            tmp_path / "out.gif",
+            fps=12,
+            width=960,
+        )
+
+    assert ok is False
+    assert "ffmpeg GIF conversion failed" in capsys.readouterr().out
+
+
+def test_convert_mp4_to_gif_returns_true_when_commands_succeed(tmp_path) -> None:
+    """_convert_mp4_to_gif returns True when both ffmpeg commands succeed."""
+    from unittest.mock import patch
+
+    from llvmanim.cli.main import _convert_mp4_to_gif
+
+    with patch("llvmanim.cli.main.shutil.which", return_value="/usr/bin/ffmpeg"), \
+         patch("llvmanim.cli.main.subprocess.run") as mock_run:
+        ok = _convert_mp4_to_gif(
+            tmp_path / "in.mp4",
+            tmp_path / "out.gif",
+            fps=10,
+            width=720,
+        )
+
+    assert ok is True
+    assert mock_run.call_count == 2

@@ -6,6 +6,7 @@ from llvmanim.present.render_stack_model import (
     RenderStep,
     StackFrameView,
     StackSlotView,
+    _slot_name_from_alloca,
     build_render_steps,
 )
 from llvmanim.transform.commands import AnimationCommand
@@ -146,3 +147,45 @@ def test_build_render_steps_non_stack_actions_still_produce_steps() -> None:
 
     assert len(steps) == 1
     assert steps[0].action == "highlight_branch"
+
+
+def test_slot_name_from_alloca_strips_whitespace() -> None:
+    assert _slot_name_from_alloca("   %tmp42   = alloca i64, align 8") == "%tmp42"
+
+
+def test_slot_name_from_alloca_without_equals_returns_trimmed_text() -> None:
+    assert _slot_name_from_alloca("%mystery_alloca") == "%mystery_alloca"
+
+
+def test_build_render_steps_spurious_pop_on_empty_stack_keeps_empty_state() -> None:
+    """Underflow pop should be swallowed but still emit a RenderStep snapshot."""
+    pop_event = _event("f", "ret")
+    steps = build_render_steps([_cmd("pop_stack_frame", pop_event)])
+
+    assert len(steps) == 1
+    assert steps[0].action == "pop_stack_frame"
+    assert steps[0].state.frames == []
+
+
+def test_build_render_steps_repeated_spurious_pops_emit_steps() -> None:
+    """Multiple underflow pops should not crash and should emit one step each."""
+    pop_event = _event("f", "ret")
+    steps = build_render_steps(
+        [
+            _cmd("pop_stack_frame", pop_event),
+            _cmd("pop_stack_frame", pop_event),
+        ]
+    )
+
+    assert len(steps) == 2
+    assert all(step.state.frames == [] for step in steps)
+
+
+def test_build_render_steps_create_slot_without_frame_emits_noop_snapshot() -> None:
+    """create_stack_slot with no active frame should emit a step with unchanged empty stack."""
+    alloca_event = _event("f", "alloca", "%x = alloca i32")
+    steps = build_render_steps([_cmd("create_stack_slot", alloca_event)])
+
+    assert len(steps) == 1
+    assert steps[0].action == "create_stack_slot"
+    assert steps[0].state.frames == []

@@ -1,8 +1,12 @@
 """Tests for CFG scene graph construction from IR event streams."""
 
 from llvmanim.ingest.llvm_events import parse_ir_to_events
-from llvmanim.transform.models import ProgramEventStream, SceneGraph
-from llvmanim.transform.scene import build_scene_graph
+from llvmanim.transform.models import CFGBlock, ProgramEventStream, SceneGraph
+from llvmanim.transform.scene import (
+  _animation_hint_for_block,
+  _extract_edges,
+  build_scene_graph,
+)
 
 
 def test_build_scene_graph_empty_stream() -> None:
@@ -178,3 +182,51 @@ def test_build_scene_graph_linear_block_gets_highlight_hint() -> None:
     node_map = {n.block.name: n for n in graph.nodes}
     assert node_map["left"].role == "linear"
     assert node_map["left"].animation_hint == "highlight_block"
+
+
+def test_extract_edges_skips_empty_blocks() -> None:
+    """Edge extraction should ignore blocks with no events instead of failing."""
+    empty_block = CFGBlock(id="f::empty", name="empty", function_name="f", events=[])
+    ret_block = CFGBlock(
+        id="f::retblock",
+        name="retblock",
+        function_name="f",
+        events=[
+            parse_ir_to_events(
+                """
+                define void @f() {
+                retblock:
+                  ret void
+                }
+                """
+            ).events[0]
+        ],
+    )
+
+    edges = _extract_edges(
+        {
+            ("f", "empty"): empty_block,
+            ("f", "retblock"): ret_block,
+        }
+    )
+
+    assert edges == []
+
+
+def test_animation_hint_for_linear_memory_block() -> None:
+  """Linear blocks with memory ops should use the memory-activity hint."""
+  block = CFGBlock(id="f::entry", name="entry", function_name="f")
+  block.role = "linear"
+  block.memory_ops = [
+    parse_ir_to_events(
+      """
+      define void @f() {
+      entry:
+        %x = alloca i32
+        ret void
+      }
+      """
+    ).events[0]
+  ]
+
+  assert _animation_hint_for_block(block) == "show_memory_activity"

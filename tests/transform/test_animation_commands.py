@@ -2,10 +2,9 @@
 
 from llvmanim.transform.commands import build_animation_commands
 from llvmanim.transform.models import EventKind, IREvent, ProgramEventStream
-from llvmanim.transform.scene import build_scene_graph
 
 
-def _make_event(
+def _event(
     function_name: str = "<test_fn>",
     block_name: str = "<test_block>",
     kind: EventKind = "other",
@@ -18,7 +17,7 @@ def _make_event(
         block_name=block_name,
         opcode=opcode or kind,
         text=f"<test {kind}>",
-        kind=kind,  # type: ignore[arg-type]
+        kind=kind,
         index_in_function=index,
         debug_line=None,
     )
@@ -30,17 +29,16 @@ def test_build_animation_commands_translates_events() -> None:
     stream = ProgramEventStream(
         source_path="<test>",
         events=[
-            _make_event(kind="alloca"),
-            _make_event(kind="load"),
-            _make_event(kind="store"),
-            _make_event(kind="call"),
-            _make_event(kind="ret"),
-            _make_event(kind="br"),
-            _make_event(kind="other"),  # This should be ignored by the scene graph
+            _event(kind="alloca"),
+            _event(kind="load"),
+            _event(kind="store"),
+            _event(kind="call"),
+            _event(kind="ret"),
+            _event(kind="br"),
+            _event(kind="other"),  # This should be ignored by the scene graph
         ],
     )
-    graph = build_scene_graph(stream)
-    commands = build_animation_commands(graph)
+    commands = build_animation_commands(stream)
 
     assert len(commands) == 6, (
         "Should create one command for each supported event kind, excluding 'other'"
@@ -58,4 +56,4 @@ def test_build_animation_commands_translates_events() -> None:
         strict=True,
     ):
         assert cmd.action == expected_kind, f"Expected action {expected_kind}, got {cmd.action}"
-        assert cmd.node.event.kind != "other", "Commands should not be created for 'other' events"
+        assert cmd.event.kind != "other", "Commands should not be created for 'other' events"

@@ -1,8 +1,9 @@
-from dataclasses import dataclass, field
+"""Translation from IR event streams to typed animation commands."""
+
+from dataclasses import dataclass
 from typing import Literal
 
-from llvmanim.transform.models import EventKind
-from llvmanim.transform.scene import SceneGraph, SceneNode
+from llvmanim.transform.models import EventKind, IREvent, ProgramEventStream
 
 ActionKind = Literal[
     "create_stack_slot",
@@ -28,22 +29,20 @@ class AnimationCommand:
     """Represents a single animation command derived from an IREvent."""
 
     action: ActionKind
-    node: SceneNode  # Forward reference to avoid circular import issues
+    event: IREvent
 
 
-def build_animation_commands(scene_graph: SceneGraph) -> list[AnimationCommand]:
-    """Translate a scene graph into a list of animation commands.
+def build_animation_commands(stream: ProgramEventStream) -> list[AnimationCommand]:
+    """Translate an event stream into a list of stack animation commands.
 
-    Each command corresponds to an IREvent in the scene graph, with the action
-    determined by the event's kind. The node reference allows commands to be
-    associated back to the original event for context during animation."""
-    commands = []
-    for node in scene_graph.nodes:
-        # unsupported kinds are filtered out in scene graph construction,
-        # so we can assume all nodes are mappable
-        event_kind = node.event.kind
-        action = _EVENT_TO_ACTION[event_kind]
-        cmd = AnimationCommand(action=action, node=node)
-        commands.append(cmd)
+    Events with kind 'other' are skipped. Each remaining event maps to an
+    ActionKind that drives the stack-frame visualization.
 
-    return commands
+    Note: conditional branches produce one 'highlight_branch' per br instruction
+    and one 'pop_stack_frame' per ret — one per basic block that ends in ret.
+    Full deduplication requires control-flow analysis (future work)."""
+    return [
+        AnimationCommand(action=_EVENT_TO_ACTION[event.kind], event=event)
+        for event in stream.events
+        if event.kind != "other"
+    ]

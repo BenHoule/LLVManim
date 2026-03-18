@@ -1,3 +1,8 @@
+"""Legacy IR text-formatting helpers preserved for reference.
+
+Not used by the current pipeline.  These utilities pre-date the llvmlite-based
+ingestion layer (llvm_events.py) and are kept in-tree for context.
+"""
 
 import re
 

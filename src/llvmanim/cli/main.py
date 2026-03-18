@@ -7,7 +7,13 @@ from pathlib import Path
 
 from llvmanim.ingest import parse_module_to_events
 from llvmanim.present import export_cfg_dot, export_cfg_png, export_scene_graph_json
+from llvmanim.present.rich_stack_scene import RichStackSceneBadge, RichStackSceneSpotlight
 from llvmanim.transform.scene import build_scene_graph
+
+try:
+    from manim import config as manim_config
+except ImportError:
+    manim_config = None  # type: ignore[assignment]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -31,6 +37,34 @@ def main(argv: list[str] | None = None) -> int:
         "--draw",
         action="store_true",
         help="Export Graphviz DOT and PNG",
+    )
+
+    parser.add_argument(
+        "--animate",
+        action="store_true",
+        help="Render stack animation video via Manim",
+    )
+
+    parser.add_argument(
+        "--preview",
+        action="store_true",
+        help="Render and open the stack animation in a video viewer (implies --animate)",
+    )
+
+    parser.add_argument(
+        "--ir-mode",
+        choices=["rich", "basic"],
+        default="basic",
+        metavar="MODE",
+        help="IR display mode: rich = full IR source with spotlight cursor, basic = stack-only with badge flash (default: basic)",
+    )
+
+    parser.add_argument(
+        "--speed",
+        type=float,
+        default=1.0,
+        metavar="MULTIPLIER",
+        help="Animation speed multiplier (e.g. 2.0 = twice as fast, 0.5 = half speed; default: 1.0)",
     )
 
     parser.add_argument(
@@ -75,5 +109,14 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Wrote PNG: {png_prefix}.png")
         else:
             print("Graphviz Python package not installed; skipped PNG export.")
+
+    if args.animate or args.preview:
+        if manim_config is not None:
+            manim_config.media_dir = str(outdir)
+        if args.ir_mode == "rich":
+            animation_scene = RichStackSceneSpotlight(stream, speed=args.speed)
+        else:
+            animation_scene = RichStackSceneBadge(stream, speed=args.speed)
+        animation_scene.render(preview=args.preview)
 
     return 0

@@ -1,3 +1,9 @@
+"""Legacy LLVM opcode dispatch handlers preserved for reference.
+
+Not used by the current pipeline.  These handlers pre-date the structured
+llvm_events.py ingestion layer and are kept in-tree for historical context.
+"""
+
 from llvmanim.ingest import LEGACY_ir_helpers as irh
 
 # Included handlers for all instructions, we will only need to implement a

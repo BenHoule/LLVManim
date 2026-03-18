@@ -1,7 +1,7 @@
 """Scene graph construction from IR event streams."""
 
-from collections import defaultdict
 import re
+from collections import defaultdict
 
 from llvmanim.transform.models import (
     CFGBlock,
@@ -18,6 +18,7 @@ def _make_block_id(function_name: str, block_name: str) -> str:
 
 
 def _animation_hint_for_block(block: CFGBlock) -> str:
+    """Return a string animation hint for the given block based on its role."""
     if block.role == "entry":
         return "fade_in_and_focus"
     if block.role == "branch":
@@ -32,6 +33,7 @@ def _animation_hint_for_block(block: CFGBlock) -> str:
 
 
 def _group_blocks(event_stream: ProgramEventStream) -> dict[tuple[str, str], CFGBlock]:
+    """Group events by (function_name, block_name) into CFGBlock objects."""
     grouped: dict[tuple[str, str], CFGBlock] = {}
 
     for event in event_stream.events:
@@ -65,13 +67,14 @@ def _extract_branch_targets_from_text(instr_text: str) -> list[str]:
 
 
 def _extract_edges(blocks: dict[tuple[str, str], CFGBlock]) -> list[CFGEdge]:
+    """Derive control-flow edges from branch terminators within each function."""
     edges: list[CFGEdge] = []
 
     per_function: dict[str, list[CFGBlock]] = defaultdict(list)
     for block in blocks.values():
         per_function[block.function_name].append(block)
 
-    for function_name, function_blocks in per_function.items():
+    for _function_name, function_blocks in per_function.items():
         name_to_id = {b.name: b.id for b in function_blocks}
 
         for block in function_blocks:
@@ -96,6 +99,7 @@ def _extract_edges(blocks: dict[tuple[str, str], CFGBlock]) -> list[CFGEdge]:
 
 
 def _assign_roles(blocks: dict[tuple[str, str], CFGBlock], edges: list[CFGEdge]) -> None:
+    """Set each block's role (entry/branch/merge/exit/linear) from edge topology."""
     indegree: dict[str, int] = defaultdict(int)
     outdegree: dict[str, int] = defaultdict(int)
 
@@ -107,12 +111,12 @@ def _assign_roles(blocks: dict[tuple[str, str], CFGBlock], edges: list[CFGEdge])
         block.indegree = indegree[block.id]
         block.outdegree = outdegree[block.id]
 
-        if block.terminator_opcode == "ret":
-            block.role = "exit"
+        if block.outdegree > 1:
+            block.role = "branch"
         elif block.indegree == 0:
             block.role = "entry"
-        elif block.outdegree > 1:
-            block.role = "branch"
+        elif block.terminator_opcode == "ret":
+            block.role = "exit"
         elif block.indegree > 1:
             block.role = "merge"
         else:

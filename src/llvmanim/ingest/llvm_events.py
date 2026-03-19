@@ -4,7 +4,13 @@ from pathlib import Path
 
 import llvmlite.binding as llvm
 
-from llvmanim.transform.models import EventKind, IREvent, ProgramEventStream
+from llvmanim.transform.models import CFGEdge, EventKind, IREvent, ProgramEventStream
+
+_BASIC_BLOCK_VALUE_KIND = 1  # llvmlite ValueKind.basic_block
+
+_TERMINATOR_OPCODES: frozenset[str] = frozenset(
+    {"br", "switch", "invoke", "indirectbr", "callbr"}
+)
 
 _OPCODE_KINDS: dict[str, EventKind] = {
     "alloca": "alloca",
@@ -63,6 +69,7 @@ def parse_ir_to_events(llvm_ir: str, source_path: str = "<in-memory>") -> Progra
 
     stream = ProgramEventStream(source_path=source_path)
     per_func_index: dict[str, int] = {}
+    edge_seen: set[tuple[str, str]] = set()
 
     for func in module.functions:
         func_name = func.name or "<anon_fn>"
@@ -70,8 +77,9 @@ def parse_ir_to_events(llvm_ir: str, source_path: str = "<in-memory>") -> Progra
 
         for block in func.blocks:
             block_name = block.name
+            instructions = list(block.instructions)
 
-            for instr in block.instructions:
+            for instr in instructions:
                 opcode = instr.opcode
 
                 event = IREvent(
@@ -86,6 +94,21 @@ def parse_ir_to_events(llvm_ir: str, source_path: str = "<in-memory>") -> Progra
                 )
                 stream.events.append(event)
                 per_func_index[func_name] += 1
+
+            # Extract typed CFG edges from the terminator instruction.
+            if instructions:
+                term = instructions[-1]
+                if term.opcode in _TERMINATOR_OPCODES:
+                    source_id = f"{func_name}::{block_name}"
+                    for op in term.operands:
+                        if op.value_kind == _BASIC_BLOCK_VALUE_KIND:
+                            target_id = f"{func_name}::{op.name}"
+                            key = (source_id, target_id)
+                            if key not in edge_seen:
+                                edge_seen.add(key)
+                                stream.cfg_edges.append(
+                                    CFGEdge(source=source_id, target=target_id)
+                                )
 
     return stream
 

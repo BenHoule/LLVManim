@@ -126,7 +126,7 @@ def _assign_roles(blocks: dict[tuple[str, str], CFGBlock], edges: list[CFGEdge])
 def build_scene_graph(event_stream: ProgramEventStream) -> SceneGraph:
     """Construct a scene graph from a stream of IREvents."""
     blocks = _group_blocks(event_stream)
-    edges = _extract_edges(blocks)
+    edges = event_stream.cfg_edges if event_stream.cfg_edges else _extract_edges(blocks)
     _assign_roles(blocks, edges)
 
     graph = SceneGraph()

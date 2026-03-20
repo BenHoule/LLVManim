@@ -84,11 +84,22 @@ class SceneNode:
 
 
 @dataclass(slots=True)
+class TraceOverlay:
+    """Runtime path overlay: which blocks/edges were actually traversed."""
+
+    visited_nodes: list[str] = field(default_factory=list)
+    traversed_edges: list[tuple[str, str]] = field(default_factory=list)
+    entry_order: list[str] = field(default_factory=list)
+    termination_reason: str = ""
+
+
+@dataclass(slots=True)
 class SceneGraph:
     """Scene graph for LLVM IR visualization."""
 
     nodes: list[SceneNode] = field(default_factory=list)
     edges: list[CFGEdge] = field(default_factory=list)
+    overlay: TraceOverlay | None = None
 
 
 @dataclass(slots=True)

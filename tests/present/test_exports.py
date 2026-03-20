@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 from llvmanim.ingest import parse_ir_to_events
 from llvmanim.present import export_cfg_dot, export_scene_graph_json
 from llvmanim.present.graphviz_export import _gv_id, export_cfg_png
-from llvmanim.transform.models import SceneGraph
+from llvmanim.transform.models import SceneGraph, TraceOverlay
 from llvmanim.transform.scene import build_scene_graph
 
 
@@ -97,6 +97,77 @@ def test_export_cfg_png_returns_false_when_graphviz_unavailable(tmp_path: Path, 
     with patch.dict(sys.modules, {"graphviz": None, "graphviz.backend": None}):
         result = export_cfg_png(branch_graph, tmp_path / "cfg")
     assert result is False
+
+
+# ── Overlay-aware Graphviz export ─────────────────────────────────
+
+
+def _branch_graph_with_overlay(branch_graph: SceneGraph) -> SceneGraph:
+    """Return branch_graph with an overlay marking entry→yes as traversed."""
+    branch_graph.overlay = TraceOverlay(
+        visited_nodes=["f::entry", "f::yes"],
+        traversed_edges=[("f::entry", "f::yes")],
+        entry_order=["f::entry", "f::yes"],
+        termination_reason="ret",
+    )
+    return branch_graph
+
+
+def test_export_dot_overlay_highlights_visited_nodes(tmp_path: Path, branch_graph: SceneGraph) -> None:
+    """Visited nodes receive a green fill when overlay is present."""
+    graph = _branch_graph_with_overlay(branch_graph)
+    output = tmp_path / "cfg.dot"
+
+    export_cfg_dot(graph, output)
+
+    text = output.read_text(encoding="utf-8")
+    # Visited nodes get green fill
+    assert '#d4edda' in text
+    # Unvisited node (f::no) gets gray fill
+    assert '#e0e0e0' in text
+
+
+def test_export_dot_overlay_highlights_traversed_edges(tmp_path: Path, branch_graph: SceneGraph) -> None:
+    """Traversed edges get bold/colored styling; others get dashed gray."""
+    graph = _branch_graph_with_overlay(branch_graph)
+    output = tmp_path / "cfg.dot"
+
+    export_cfg_dot(graph, output)
+
+    text = output.read_text(encoding="utf-8")
+    # Traversed edge entry→yes has blue styling
+    assert '#0056b3' in text
+    assert 'penwidth=2.0' in text
+    # Non-traversed edge entry→no has gray dashed styling
+    assert '#cccccc' in text
+    assert 'dashed' in text
+
+
+def test_export_dot_no_overlay_is_plain(tmp_path: Path, branch_graph: SceneGraph) -> None:
+    """Without overlay, DOT has no fill or edge style attributes."""
+    output = tmp_path / "cfg.dot"
+
+    export_cfg_dot(branch_graph, output)
+
+    text = output.read_text(encoding="utf-8")
+    assert 'fillcolor' not in text
+    assert 'penwidth' not in text
+    assert 'dashed' not in text
+
+
+def test_export_dot_overlay_preserves_all_nodes_and_edges(tmp_path: Path, branch_graph: SceneGraph) -> None:
+    """Overlay never removes base graph structure; all 3 nodes and 2 edges remain."""
+    graph = _branch_graph_with_overlay(branch_graph)
+    output = tmp_path / "cfg.dot"
+
+    export_cfg_dot(graph, output)
+
+    text = output.read_text(encoding="utf-8")
+    assert '"f::entry"' in text
+    assert '"f::yes"' in text
+    assert '"f::no"' in text
+    assert '"f::entry" -> "f::yes"' in text
+    assert '"f::entry" -> "f::no"' in text
 
 
 def test_export_cfg_png_returns_true_when_graphviz_available(tmp_path: Path, branch_graph: SceneGraph) -> None:

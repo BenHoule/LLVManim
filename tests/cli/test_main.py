@@ -1,5 +1,6 @@
 """CLI smoke tests."""
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -530,3 +531,117 @@ def test_export_analysis_metadata_writes_file(tmp_path, capsys) -> None:
     data = json.loads(meta_out.read_text())
     assert data["version"] == 1
     assert "Wrote analysis metadata" in capsys.readouterr().out
+
+
+# ── Trace overlay CLI flags ──────────────────────────────────────
+
+_LOOP_IR = """\
+define i32 @main() {
+entry:
+    br label %loop
+loop:
+    %c = icmp eq i32 0, 0
+    br i1 %c, label %loop, label %exit
+exit:
+    ret i32 0
+}
+"""
+
+
+def _write_trace_json(path: Path) -> None:
+    """Write a minimal valid trace JSON file."""
+    data = {
+        "version": 1,
+        "source": "",
+        "entry_order": ["main::entry", "main::loop", "main::exit"],
+        "visited_nodes": ["main::entry", "main::loop", "main::exit"],
+        "traversed_edges": [
+            ["main::entry", "main::loop"],
+            ["main::loop", "main::exit"],
+        ],
+        "termination_reason": "ret",
+    }
+    path.write_text(json.dumps(data))
+
+
+def test_import_trace_bad_path_returns_one(tmp_path, capsys) -> None:
+    """--import-trace with a nonexistent path returns 1."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    code = main(argv=[str(ll_file), "--import-trace", str(tmp_path / "nope.json")])
+    assert code == 1
+    assert "not found" in capsys.readouterr().out
+
+
+def test_import_trace_malformed_returns_one(tmp_path, capsys) -> None:
+    """--import-trace with invalid JSON returns 1 with actionable message."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    bad = tmp_path / "bad.json"
+    bad.write_text("{oops}")
+    code = main(argv=[str(ll_file), "--import-trace", str(bad)])
+    assert code == 1
+    assert "invalid trace file" in capsys.readouterr().out.lower()
+
+
+def test_import_trace_populates_overlay(tmp_path, capsys) -> None:
+    """--import-trace loads a trace and applies it to the scene graph."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    trace_file = tmp_path / "trace.json"
+    _write_trace_json(trace_file)
+
+    outdir = tmp_path / "out"
+    code = main(argv=[str(ll_file), "--import-trace", str(trace_file), "--draw", "--outdir", str(outdir)])
+    assert code == 0
+
+    # DOT output should contain overlay styling
+    dot_text = (outdir / "cfg_main.dot").read_text()
+    assert "#d4edda" in dot_text  # visited node fill
+
+
+def test_export_trace_writes_file(tmp_path, capsys) -> None:
+    """--import-trace + --export-trace round-trips the trace to a new file."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    trace_in = tmp_path / "trace_in.json"
+    _write_trace_json(trace_in)
+    trace_out = tmp_path / "trace_out.json"
+
+    code = main(argv=[
+        str(ll_file),
+        "--import-trace", str(trace_in),
+        "--export-trace", str(trace_out),
+    ])
+    assert code == 0
+    assert trace_out.exists()
+
+    data = json.loads(trace_out.read_text())
+    assert data["version"] == 1
+    assert "Wrote trace" in capsys.readouterr().out
+
+
+def test_export_trace_without_import_warns(tmp_path, capsys) -> None:
+    """--export-trace without --import-trace prints a warning."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    trace_out = tmp_path / "trace_out.json"
+
+    code = main(argv=[str(ll_file), "--export-trace", str(trace_out)])
+    assert code == 0
+    assert "no trace overlay to export" in capsys.readouterr().out.lower()
+    assert not trace_out.exists()
+
+
+def test_no_trace_flag_produces_no_overlay(tmp_path) -> None:
+    """Without --import-trace, DOT output has no overlay styling."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    outdir = tmp_path / "out"
+
+    code = main(argv=[str(ll_file), "--draw", "--outdir", str(outdir)])
+    assert code == 0
+
+    dot_text = (outdir / "cfg_main.dot").read_text()
+    assert "fillcolor" not in dot_text
+    assert "penwidth" not in dot_text

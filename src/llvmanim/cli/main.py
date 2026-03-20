@@ -14,6 +14,7 @@ from llvmanim.ingest.analysis_metadata_io import (
     save_analysis_metadata,
 )
 from llvmanim.ingest.cfg_edge_io import CFGEdgeIOError, load_cfg_edges, save_cfg_edges
+from llvmanim.ingest.trace_io import TraceIOError, load_trace, save_trace
 from llvmanim.present import export_cfg_dot, export_cfg_png, export_scene_graph_json
 from llvmanim.present.rich_stack_scene import RichStackSceneBadge, RichStackSceneSpotlight
 from llvmanim.transform.models import BlockMetadata, SceneGraph
@@ -204,6 +205,18 @@ def main(argv: list[str] | None = None) -> int:
         help="Export analysis metadata to a JSON file",
     )
 
+    parser.add_argument(
+        "--import-trace",
+        metavar="PATH",
+        help="Import a runtime path trace from a JSON file for overlay visualization",
+    )
+
+    parser.add_argument(
+        "--export-trace",
+        metavar="PATH",
+        help="Export the trace overlay to a JSON file",
+    )
+
     args = parser.parse_args(argv)
 
     input_path = Path(args.input)
@@ -241,6 +254,24 @@ def main(argv: list[str] | None = None) -> int:
             return 1
 
     graph = build_scene_graph(stream, analysis_metadata=analysis_metadata)
+
+    if args.import_trace:
+        trace_path = Path(args.import_trace)
+        if not trace_path.exists():
+            print(f"Error: trace file not found: {trace_path}")
+            return 1
+        try:
+            graph.overlay = load_trace(trace_path)
+        except TraceIOError as exc:
+            print(f"Error: invalid trace file: {exc}")
+            return 1
+
+    if args.export_trace:
+        if graph.overlay is None:
+            print("Warning: no trace overlay to export (use --import-trace first)")
+        else:
+            save_trace(graph.overlay, args.export_trace, source=stream.source_path)
+            print(f"Wrote trace: {args.export_trace}")
 
     if args.export_analysis_metadata:
         meta = _collect_analysis_metadata(graph)

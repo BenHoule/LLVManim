@@ -299,6 +299,83 @@ def test_find_latest_file_returns_none_when_no_matches(tmp_path) -> None:
     assert _find_latest_file(tmp_path, "*.mp4") is None
 
 
+# ── CFG edge I/O CLI tests ───────────────────────────────────────
+
+
+_BRANCH_IR = """\
+define i32 @f(i1 %c) {
+entry:
+    br i1 %c, label %yes, label %no
+yes:
+    ret i32 1
+no:
+    ret i32 0
+}
+"""
+
+
+def test_import_cfg_edges_bad_path_returns_one(tmp_path, capsys) -> None:
+    """--import-cfg-edges with a nonexistent path returns 1."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_BRANCH_IR)
+    code = main(argv=[str(ll_file), "--import-cfg-edges", str(tmp_path / "nope.json")])
+    assert code == 1
+    assert "not found" in capsys.readouterr().out
+
+
+def test_import_cfg_edges_malformed_returns_one(tmp_path, capsys) -> None:
+    """--import-cfg-edges with invalid JSON returns 1 with actionable message."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_BRANCH_IR)
+    bad = tmp_path / "bad.json"
+    bad.write_text("{oops}")
+    code = main(argv=[str(ll_file), "--import-cfg-edges", str(bad)])
+    assert code == 1
+    assert "invalid cfg edge file" in capsys.readouterr().out.lower()
+
+
+def test_import_cfg_edges_overrides_llvmlite_edges(tmp_path, capsys) -> None:
+    """--import-cfg-edges replaces llvmlite-extracted edges with file edges."""
+    import json
+
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_BRANCH_IR)
+    edge_file = tmp_path / "cfg.json"
+    edge_file.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "source": "",
+                "functions": [
+                    {
+                        "name": "f",
+                        "blocks": [
+                            {"name": "entry", "id": "f::entry", "successors": ["f::yes"]},
+                            {"name": "yes", "id": "f::yes", "successors": []},
+                        ],
+                    }
+                ],
+            }
+        )
+    )
+    code = main(argv=[str(ll_file), "--import-cfg-edges", str(edge_file)])
+    assert code == 0
+
+
+def test_export_cfg_edges_writes_file(tmp_path, capsys) -> None:
+    """--export-cfg-edges writes a valid CFG edge JSON file."""
+    import json
+
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_BRANCH_IR)
+    out = tmp_path / "edges.json"
+    code = main(argv=[str(ll_file), "--export-cfg-edges", str(out)])
+    assert code == 0
+    data = json.loads(out.read_text())
+    assert data["version"] == 1
+    assert "Wrote CFG edges" in capsys.readouterr().out
+
+
 def test_find_latest_file_returns_most_recent_match(tmp_path) -> None:
     """_find_latest_file returns the most recently modified matching file."""
     from llvmanim.cli.main import _find_latest_file

@@ -5,6 +5,8 @@ LLVManim parses LLVM IR (`.ll`) into a typed event stream, derives a CFG-style s
 ## Current Capabilities
 
 - Parse LLVM IR into `ProgramEventStream` events using `llvmlite`
+- Extract typed CFG edges directly from llvmlite terminator operands (`br`, `switch`, `invoke`, `indirectbr`, `callbr`)
+- Import/export CFG edges as JSON (`--import-cfg-edges` / `--export-cfg-edges`)
 - Build a scene graph where each CFG block becomes a `SceneNode`
 - Export scene graph JSON (`scene_graph.json`)
 - Export Graphviz DOT (`cfg_main.dot`) and, when Graphviz binaries are available, PNG (`cfg_main.png`)
@@ -30,6 +32,13 @@ sudo apt install graphviz
 ```
 
 ## Setup And Validation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/BenHoule/LLVManim.git
+cd LLVManim
+```
 
 Install project dependencies:
 
@@ -107,6 +116,8 @@ Default input is `tests/ingest/testdata/double.ll` when no positional argument i
 - `--gif-fps <int>`: GIF conversion FPS when `--format gif` (default: `12`)
 - `--gif-width <int>`: GIF conversion width in px when `--format gif` (default: `960`)
 - `--outdir <path>`: output directory (default: current directory)
+- `--import-cfg-edges <path>`: load CFG edges from a JSON file instead of extracting them from IR
+- `--export-cfg-edges <path>`: write extracted CFG edges to a JSON file
 
 ### Common Examples
 
@@ -154,6 +165,8 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │  uv run llvmanim input.ll [--json] [--draw] [--animate]     │
 │                           [--preview] [--ir-mode basic|rich]│
 │                           [--speed N] [--outdir PATH]       │
+│                           [--import-cfg-edges PATH]         │
+│                           [--export-cfg-edges PATH]         │
 │                                                             │
 │  • Parses flags; opens .ll file                             │
 │  • Calls parse_module_to_events → build_scene_graph         │
@@ -165,8 +178,11 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │                      Ingest (ingest/)                       │
 │                                                             │
 │  parse_module_to_events(path) → ProgramEventStream          │
+│  load_cfg_edges(path) → list[CFGEdge]   (--import-cfg-edges)│
+│  save_cfg_edges(edges, path)            (--export-cfg-edges)│
 │                                                             │
 │  • llvmlite: parse module, walk functions/blocks/instrs     │
+│  • Typed CFG edges extracted from terminator operands       │
 │  • Each IREvent carries: function_name, block_name, opcode, │
 │    text, kind, index_in_function, debug_line, operands      │
 │  • kind ∈ {alloca, load, store, call, ret, br, other}       │
@@ -179,7 +195,7 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │  build_scene_graph(stream) → SceneGraph                     │
 │                                                             │
 │  • Groups events by (function, block) → CFGBlock            │
-│  • Extracts branch edges from br terminator text            │
+│  • Uses typed CFG edges from ingest (or imported JSON)      │
 │  • Assigns block roles from edge topology:                  │
 │      entry · linear · branch · merge · exit                 │
 │  • Each block → SceneNode with id, label, role,             │

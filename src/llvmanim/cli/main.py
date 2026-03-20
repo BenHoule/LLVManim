@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 
 from llvmanim.ingest import parse_module_to_events
+from llvmanim.ingest.cfg_edge_io import CFGEdgeIOError, load_cfg_edges, save_cfg_edges
 from llvmanim.present import export_cfg_dot, export_cfg_png, export_scene_graph_json
 from llvmanim.present.rich_stack_scene import RichStackSceneBadge, RichStackSceneSpotlight
 from llvmanim.transform.scene import build_scene_graph
@@ -157,6 +158,18 @@ def main(argv: list[str] | None = None) -> int:
         help="GIF conversion width in pixels when --format gif (default: 960)",
     )
 
+    parser.add_argument(
+        "--import-cfg-edges",
+        metavar="PATH",
+        help="Import CFG edges from a JSON file instead of extracting from IR",
+    )
+
+    parser.add_argument(
+        "--export-cfg-edges",
+        metavar="PATH",
+        help="Export extracted CFG edges to a JSON file",
+    )
+
     args = parser.parse_args(argv)
 
     input_path = Path(args.input)
@@ -169,7 +182,23 @@ def main(argv: list[str] | None = None) -> int:
     outdir.mkdir(parents=True, exist_ok=True)
 
     stream = parse_module_to_events(input_path.as_posix())
+
+    if args.import_cfg_edges:
+        edge_path = Path(args.import_cfg_edges)
+        if not edge_path.exists():
+            print(f"Error: CFG edge file not found: {edge_path}")
+            return 1
+        try:
+            stream.cfg_edges = load_cfg_edges(edge_path)
+        except CFGEdgeIOError as exc:
+            print(f"Error: invalid CFG edge file: {exc}")
+            return 1
+
     graph = build_scene_graph(stream)
+
+    if args.export_cfg_edges:
+        save_cfg_edges(stream.cfg_edges, args.export_cfg_edges, source=stream.source_path)
+        print(f"Wrote CFG edges: {args.export_cfg_edges}")
 
     print(f"Loaded IR from: {stream.source_path}")
     print(f"Event count: {len(stream.events)}")

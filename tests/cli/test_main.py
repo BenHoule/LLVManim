@@ -193,6 +193,29 @@ def test_main_ir_mode_rich_uses_spotlight_scene(tmp_path) -> None:
     MockSpotlight.return_value.render.assert_called_once_with(preview=False)
 
 
+def test_main_ir_mode_rich_ssa_uses_spotlight_with_enable_ssa(tmp_path) -> None:
+    """--ir-mode rich-ssa instantiates RichStackSceneSpotlight with enable_ssa=True."""
+    from unittest.mock import patch
+
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text("""
+        define i32 @f() {
+        entry:
+            ret i32 0
+        }
+    """)
+    with patch("llvmanim.cli.main.RichStackSceneSpotlight") as MockSpotlight, \
+         patch("llvmanim.cli.main.RichStackSceneBadge") as MockBadge:
+        code = main(argv=[str(ll_file), "--animate", "--ir-mode", "rich-ssa"])
+    assert code == 0
+    MockSpotlight.assert_called_once()
+    # Verify enable_ssa=True was passed
+    _, kwargs = MockSpotlight.call_args
+    assert kwargs.get("enable_ssa") is True
+    MockBadge.assert_not_called()
+    MockSpotlight.return_value.render.assert_called_once_with(preview=False)
+
+
 def test_main_ir_mode_basic_uses_badge_scene(tmp_path) -> None:
     """--ir-mode basic (default) instantiates RichStackSceneBadge."""
     from unittest.mock import patch

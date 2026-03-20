@@ -140,10 +140,10 @@ def main(argv: list[str] | None = None) -> int:
 
     parser.add_argument(
         "--ir-mode",
-        choices=["rich", "basic"],
+        choices=["rich", "rich-ssa", "basic"],
         default="basic",
         metavar="MODE",
-        help="IR display mode: rich = full IR source with spotlight cursor, basic = stack-only with badge flash (default: basic)",
+        help="IR display mode: rich = IR source + spotlight cursor, rich-ssa = IR + SSA values + stack (3-column), basic = stack-only with badge flash (default: basic)",
     )
 
     parser.add_argument(
@@ -368,6 +368,8 @@ def main(argv: list[str] | None = None) -> int:
             manim_config.format = render_format
         if args.ir_mode == "rich":
             animation_scene = RichStackSceneSpotlight(stream, speed=args.speed)
+        elif args.ir_mode == "rich-ssa":
+            animation_scene = RichStackSceneSpotlight(stream, speed=args.speed, enable_ssa=True)
         else:
             animation_scene = RichStackSceneBadge(stream, speed=args.speed)
         animation_scene.render(preview=args.preview)

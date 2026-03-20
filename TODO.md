@@ -3,7 +3,7 @@
 ## Now
 - [ ] Fix double-pop behavior at transform/trace level (remove renderer guard dependency)
 - [ ] Drive rich IR panel from pipeline display model instead of reparsing `.ll`
-- [ ] Wire `enable_ssa` into CLI (e.g. `--ir-mode rich-ssa` or `--ssa` flag)
+- [x] Wire `enable_ssa` into CLI (`--ir-mode rich-ssa`)
 
 ## Next
 - [ ] Numeric runtime values in SSA panel (`display_value` swap-point is ready in `ssa_formatting.py`)
@@ -56,7 +56,7 @@
 - [x] PR7: CFG animations
 - [x] PR8: CLI CFG flags + docs
 - [x] PR9: SSA bridge panel (`feature/ssa-bridge-panel`)
-- [ ] PR10: wire `enable_ssa` into CLI
+- [x] PR10: wire `enable_ssa` into CLI
 
 ---
 
@@ -103,4 +103,4 @@
 - [x] Add focused tests for `binop`/`compare` classification + command mapping + rendering behavior
 - [x] SSA panel integration tests (trace dispatch, 3-column layout, pop cleanup)
 - [ ] Open/track issue(s) for remaining architectural TODOs (rich-scene parser dependency, call-trace ownership)
-- [ ] Wire `enable_ssa` into CLI (`--ir-mode rich-ssa` or dedicated `--ssa` flag)
+- [x] Wire `enable_ssa` into CLI (`--ir-mode rich-ssa`)

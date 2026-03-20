@@ -17,7 +17,7 @@ LLVManim parses LLVM IR (`.ll`) into a typed event stream, derives a CFG-style s
 - Render call-stack animations through Manim CE:
   - `--ir-mode basic`: stack-only with per-cell badge flash
   - `--ir-mode rich`: IR source panel + moving spotlight cursor + stack view
-  - `enable_ssa=True` (programmatic): 3-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results
+  - `--ir-mode rich-ssa`: 3-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results
 - `ssa_formatting.py`: shared SSA display formatting with a single swap-point for future numeric runtime values
 - `RichTraceStep` and `build_execution_trace(include_ssa=True)` for binop/compare/load trace steps
 - Render CFG traversal animations (`--cfg-animate`) using DOT-derived layout from `opt -passes=dot-cfg`
@@ -140,7 +140,7 @@ Default input is `tests/ingest/testdata/double.ll` when no positional argument i
 - `--draw`: write `cfg_main.dot`; also attempts `cfg_main.png`
 - `--animate`: render stack animation video via Manim
 - `--preview`: open rendered animation in viewer (implies animation render)
-- `--ir-mode {basic,rich}`: choose animation style (default: `basic`)
+- `--ir-mode {basic,rich,rich-ssa}`: choose animation style (default: `basic`; `rich-ssa` enables 3-column SSA panel)
 - `--speed <float>`: animation speed multiplier (default: `1.0`)
 - `--format {mp4,gif}`: animation output format (default: `mp4`)
 - `--gif-fps <int>`: GIF conversion FPS when `--format gif` (default: `12`)

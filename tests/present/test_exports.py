@@ -38,6 +38,15 @@ def test_export_scene_graph_json_has_expected_top_level_shape(tmp_path: Path, br
     assert len(payload["edges"]) == 2
 
 
+def test_export_scene_graph_json_includes_edge_labels(tmp_path: Path, branch_graph: SceneGraph) -> None:
+    """JSON edge entries should include T/F labels from conditional branches."""
+    output = tmp_path / "scene_graph.json"
+    export_scene_graph_json(branch_graph, output)
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    edge_labels = {e["label"] for e in payload["edges"]}
+    assert edge_labels == {"T", "F"}
+
+
 def test_export_scene_graph_json_preserves_event_operands_and_debug_line(tmp_path: Path) -> None:
     """Event payload should preserve operand lists and debug_line nullability."""
     stream = parse_ir_to_events("""
@@ -230,3 +239,30 @@ def test_export_cfg_png_uses_sanitized_ids_for_nodes_and_edges(tmp_path: Path, b
     assert "f__no" in node_ids
     assert ("f__entry", "f__yes") in edge_pairs
     assert ("f__entry", "f__no") in edge_pairs
+
+
+# ── T/F edge labels in DOT export ─────────────────────────────────
+
+
+def test_export_dot_includes_tf_edge_labels(tmp_path: Path, branch_graph: SceneGraph) -> None:
+    """DOT export should include T/F labels on conditional branch edges."""
+    output = tmp_path / "cfg.dot"
+    export_cfg_dot(branch_graph, output)
+    text = output.read_text(encoding="utf-8")
+    assert 'label="T"' in text
+    assert 'label="F"' in text
+
+
+def test_export_dot_overlay_includes_tf_labels(tmp_path: Path, branch_graph: SceneGraph) -> None:
+    """T/F labels should also appear when overlay styling is active."""
+    branch_graph.overlay = TraceOverlay(
+        visited_nodes=["f::entry", "f::yes"],
+        traversed_edges=[("f::entry", "f::yes")],
+        entry_order=["f::entry", "f::yes"],
+        termination_reason="ret",
+    )
+    output = tmp_path / "cfg.dot"
+    export_cfg_dot(branch_graph, output)
+    text = output.read_text(encoding="utf-8")
+    assert 'label="T"' in text
+    assert 'label="F"' in text

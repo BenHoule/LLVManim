@@ -7,12 +7,14 @@
 
 ## Next
 - [ ] Fix double-pop behavior at transform/trace level (remove renderer guard dependency)
-- [ ] Move call-trace ownership out of presentation (`rich_stack_scene`) into transform pipeline
 - [ ] Drive rich IR panel from pipeline display model instead of reparsing `.ll`
 
 ## Later
-- [ ] Design and implement CFG animations
-- [ ] Add CLI flag(s) for CFG animation mode once feature lands
+- [x] Design and implement CFG animations
+- [x] Add CLI flag(s) for CFG animation mode once feature lands
+- [x] Add test coverage for non-br terminators (switch, invoke, indirectbr, callbr)
+- [x] Deprecate regex edge-extraction fallback in `scene.py` once terminator tests pass (removed entirely)
+- [x] Add T/F branch-direction labels to semantic DOT in `graphviz_export.py`
 
 ## Issue Dependency Sequence
 
@@ -25,14 +27,13 @@
 
 ### Milestone 2 — call-stack correctness + architecture
 - [ ] Transform: fix duplicate `pop_stack_frame` generation on conditional branches
-- [ ] Architecture: move execution-trace builder from presentation to transform layer
-	Depends on: double-pop fix (or lands together in same PR)
+- [x] Architecture: move execution-trace builder from presentation to transform layer
 - [ ] Architecture: remove `.ll` reparsing in `rich_stack_scene` via pipeline display lines
 	Depends on: transform-owned trace/display model
 
 ### Milestone 3 — CFG animation productization
-- [ ] Presentation: add CFG animation scenes from `SceneGraph` nodes/edges
-- [ ] CLI: expose CFG animation mode and output controls
+- [x] Presentation: add CFG animation scenes from `SceneGraph` nodes/edges
+- [x] CLI: expose CFG animation mode and output controls
 	Depends on: CFG animation scenes
 
 ### Recommended PR Order
@@ -40,10 +41,10 @@
 - [ ] PR2: Transform `binop` action mapping
 - [ ] PR3: `binop` test coverage
 - [ ] PR4: double-pop root-cause fix
-- [ ] PR5: move trace builder to transform
+- [x] PR5: move trace builder to transform
 - [ ] PR6: remove rich-scene `.ll` reparsing
-- [ ] PR7: CFG animations
-- [ ] PR8: CLI CFG flags + docs
+- [x] PR7: CFG animations
+- [x] PR8: CLI CFG flags + docs
 
 ---
 
@@ -68,7 +69,9 @@
 - [x] Support stack animation modes (`basic` badge + `rich` spotlight)
 - [ ] Generate `rich_stack_scene.py` from actual pipeline output instead of reparsing `.ll`
 - [ ] Design `binop` animations and implement them in existing scenes
-- [ ] CFG animations
+- [x] CFG animations (via `cfg_animation_scene.py` + `dot_layout.py`)
+- [x] Add T/F branch labels to semantic DOT export
+- [ ] Improve sandbox CFG animation prototype (see TODOs in `sandbox/manim_CE/cfg_traversal.py`)
 
 ---
 
@@ -76,7 +79,7 @@
 - [x] Parse input + run ingest → transform pipeline
 - [x] Support `--json`, `--draw`, `--animate`, `--preview`, `--ir-mode`, `--speed`, `--outdir`
 - [x] Support animation output format selection (`mp4` / `gif`) with ffmpeg conversion
-- [ ] Add dedicated CLI flag(s) for CFG animation mode (once CFG animations exist)
+- [x] Add dedicated CLI flag(s) for CFG animation mode (`--cfg-animate`, `--dot-cfg`)
 
 ---
 

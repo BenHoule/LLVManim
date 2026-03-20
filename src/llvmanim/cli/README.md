@@ -32,6 +32,14 @@ Default input when none is supplied: `tests/ingest/testdata/double.ll`.
 | `--gif-fps FPS` | `12` | GIF conversion frame rate when `--format gif` |
 | `--gif-width PX` | `960` | GIF conversion width when `--format gif` |
 | `--outdir PATH` | `.` | Output directory (created if absent) |
+| `--cfg-animate` | off | Render a CFG traversal animation (requires `--dot-cfg` and `--import-trace`) |
+| `--dot-cfg PATH` | — | Path to a `.dot` file from `opt -passes=dot-cfg` for CFG layout |
+| `--import-cfg-edges PATH` | — | Import CFG edges from a JSON file instead of extracting from IR |
+| `--export-cfg-edges PATH` | — | Export extracted CFG edges to a JSON file |
+| `--import-analysis-metadata PATH` | — | Import domtree/loop analysis metadata from a JSON file |
+| `--export-analysis-metadata PATH` | — | Export analysis metadata to a JSON file |
+| `--import-trace PATH` | — | Import a runtime path trace from a JSON file for overlay visualization |
+| `--export-trace PATH` | — | Export the trace overlay to a JSON file |
 
 ## Animation Modes
 

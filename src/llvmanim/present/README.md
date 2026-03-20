@@ -2,11 +2,13 @@
 
 Presentation-layer modules for LLVManim.
 
-## Active CLI Rendering Path
+## Active CLI Rendering Paths
 
-The CLI currently renders animations through `rich_stack_scene.py`.
+The CLI provides two animation pipelines:
 
-Flow used by `llvmanim.cli.main`:
+### Stack Animation (`--animate` / `--preview`)
+
+Rendered through `rich_stack_scene.py`:
 
 1. Parse `.ll` file into `ProgramEventStream`.
 2. Build one of two Manim scenes from that stream:
@@ -14,12 +16,23 @@ Flow used by `llvmanim.cli.main`:
    - `RichStackSceneSpotlight` (`--ir-mode rich`)
 3. Call `scene.render(preview=...)`.
 
+### CFG Traversal Animation (`--cfg-animate`)
+
+Rendered through `cfg_animation_scene.py`:
+
+1. Parse `.ll` file and build a `SceneGraph` with `TraceOverlay`.
+2. Load DOT layout from `--dot-cfg` via `ingest.dot_layout`.
+3. Build `CFGAnimationScene` with positioned nodes and routed edges.
+4. Animate the runtime execution path stepping through blocks one at a time.
+
+Requires `--dot-cfg` (DOT layout file) and `--import-trace` (runtime path trace).
+
 `RichStackSceneSpotlight` additionally builds a per-function IR source registry from the input `.ll` and keeps a moving cursor aligned to the current instruction.
 
 ## Export Utilities
 
 - `json_export.py`: serializes `SceneGraph` to JSON (`scene_graph.json`)
-- `graphviz_export.py`: writes DOT and optionally renders PNG with `graphviz`
+- `graphviz_export.py`: writes DOT and optionally renders PNG with `graphviz`; renders T/F labels on conditional branch edges
 
 These are used by CLI flags:
 
@@ -46,3 +59,15 @@ RenderStep
             └── slots: list[StackSlotView]
                   └── name: str
 ```
+
+## Files
+
+| File | Purpose |
+|---|---|
+| `rich_stack_scene.py` | Badge and spotlight stack animation scenes |
+| `cfg_animation_scene.py` | CFG traversal animation scene with DOT layout and trace overlay |
+| `json_export.py` | Serialize `SceneGraph` to JSON |
+| `graphviz_export.py` | Write DOT and optionally render PNG via `graphviz` |
+| `render_stack_model.py` | Reduce `AnimationCommand` values into `RenderStep` stack snapshots |
+| `scene_builder.py` | Wrap render steps in `LLVManimScene` |
+| `manim_stack.py` | `StackAnimationScene` — frame push/pop/slot animations via `StackMobjectManager` |

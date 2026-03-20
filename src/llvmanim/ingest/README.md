@@ -30,17 +30,28 @@ ProgramEventStream
       └── operands: list[str]
 ```
 
-`EventKind` is one of: `alloca`, `load`, `store`, `call`, `ret`, `br`, `other`.
+`ProgramEventStream` also carries a `cfg_edges: list[CFGEdge]` field populated
+by the ingest layer for all terminator types (br, switch, invoke, etc.) via
+llvmlite. These typed edges are consumed directly by the transform layer's
+`build_scene_graph`.
 
+`EventKind` is one of: `alloca`, `load`, `store`, `binop`, `compare`, `call`, `ret`, `br`, `other`.
+
+Arithmetic opcodes (`add`, `sub`, `mul`, `sdiv`, …) are tagged `binop`.
+Comparison opcodes (`icmp`, `fcmp`) are tagged `compare`.
 Instructions whose opcode does not appear in the classification table (e.g.
-`icmp`, `add`, `getelementptr`) are tagged `other` and are typically skipped
-by the transform layer.
+`getelementptr`, `phi`) are tagged `other` and are typically skipped by the
+transform layer.
 
 ## Files
 
 | File | Purpose |
 |---|---|
 | `llvm_events.py` | `parse_ir_to_events` and `parse_module_to_events` |
+| `cfg_edge_io.py` | Import/export CFG edges as JSON sidecars |
+| `trace_io.py` | Import/export runtime path traces as JSON sidecars |
+| `analysis_metadata_io.py` | Import/export domtree/loop analysis metadata as JSON |
+| `dot_layout.py` | Parse `.dot` files from `opt -passes=dot-cfg` into `DotLayout` for CFG animation |
 | `LEGACY_ir_helpers.py` | Superseded helpers; kept for reference |
 | `LEGACY_llvmparser.py` | Superseded parser; kept for reference |
 | `LEGACY_ophandlers.py` | Superseded op handlers; kept for reference |

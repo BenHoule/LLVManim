@@ -645,3 +645,103 @@ def test_no_trace_flag_produces_no_overlay(tmp_path) -> None:
     dot_text = (outdir / "cfg_main.dot").read_text()
     assert "fillcolor" not in dot_text
     assert "penwidth" not in dot_text
+
+
+# ── CFG animate CLI flags ────────────────────────────────────────
+
+
+def test_cfg_animate_requires_dot_cfg(tmp_path, capsys) -> None:
+    """--cfg-animate without --dot-cfg returns error."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    trace_file = tmp_path / "trace.json"
+    _write_trace_json(trace_file)
+    code = main(argv=[str(ll_file), "--cfg-animate", "--import-trace", str(trace_file)])
+    assert code == 1
+    assert "--dot-cfg" in capsys.readouterr().out
+
+
+def test_cfg_animate_requires_trace(tmp_path, capsys) -> None:
+    """--cfg-animate without --import-trace returns error."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    dot_file = tmp_path / "cfg.dot"
+    dot_file.write_text("digraph { a -> b }")
+    code = main(argv=[str(ll_file), "--cfg-animate", "--dot-cfg", str(dot_file)])
+    assert code == 1
+    assert "--import-trace" in capsys.readouterr().out
+
+
+def test_cfg_animate_dot_file_not_found(tmp_path, capsys) -> None:
+    """--cfg-animate with nonexistent DOT file returns error."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    trace_file = tmp_path / "trace.json"
+    _write_trace_json(trace_file)
+    code = main(argv=[
+        str(ll_file), "--cfg-animate",
+        "--dot-cfg", str(tmp_path / "nope.dot"),
+        "--import-trace", str(trace_file),
+    ])
+    assert code == 1
+    assert "not found" in capsys.readouterr().out.lower()
+
+
+def test_cfg_animate_dot_layout_error(tmp_path, capsys) -> None:
+    """--cfg-animate with invalid DOT file returns error."""
+    from unittest.mock import patch
+
+    from llvmanim.ingest.dot_layout import DotLayoutError
+
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    dot_file = tmp_path / "cfg.dot"
+    dot_file.write_text("bad dot")
+    trace_file = tmp_path / "trace.json"
+    _write_trace_json(trace_file)
+
+    with patch("llvmanim.cli.main.compute_dot_layout", side_effect=DotLayoutError("test error")):
+        code = main(argv=[
+            str(ll_file), "--cfg-animate",
+            "--dot-cfg", str(dot_file),
+            "--import-trace", str(trace_file),
+        ])
+    assert code == 1
+    assert "test error" in capsys.readouterr().out
+
+
+def test_cfg_animate_renders_scene(tmp_path, capsys) -> None:
+    """--cfg-animate with valid inputs invokes CFGAnimationScene.render."""
+    from unittest.mock import patch
+
+    from llvmanim.ingest.dot_layout import DotLayout, DotNodeLayout
+
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text(_LOOP_IR)
+    dot_file = tmp_path / "cfg.dot"
+    dot_file.write_text("digraph { entry -> loop -> exit }")
+    trace_file = tmp_path / "trace.json"
+    _write_trace_json(trace_file)
+
+    mock_layout = DotLayout(
+        nodes={
+            "entry": DotNodeLayout("entry", 100, 200, 100, 50),
+            "loop": DotNodeLayout("loop", 100, 150, 100, 50),
+            "exit": DotNodeLayout("exit", 100, 100, 100, 50),
+        },
+        edges=[],
+        bounding_box=(0, 0, 200, 300),
+    )
+
+    with patch("llvmanim.cli.main.compute_dot_layout", return_value=mock_layout), \
+         patch("llvmanim.cli.main.CFGAnimationScene") as mock_scene_cls:
+        mock_instance = mock_scene_cls.return_value
+        code = main(argv=[
+            str(ll_file), "--cfg-animate",
+            "--dot-cfg", str(dot_file),
+            "--import-trace", str(trace_file),
+            "--outdir", str(tmp_path / "out"),
+        ])
+    assert code == 0
+    mock_scene_cls.assert_called_once()
+    mock_instance.render.assert_called_once()

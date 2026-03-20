@@ -1,6 +1,5 @@
 """Scene graph construction from IR event streams."""
 
-import re
 from collections import defaultdict
 
 from llvmanim.transform.models import (
@@ -60,47 +59,6 @@ def _group_blocks(event_stream: ProgramEventStream) -> dict[tuple[str, str], CFG
     return grouped
 
 
-def _extract_branch_targets_from_text(instr_text: str) -> list[str]:
-    """
-    Examples:
-      br i1 %cond, label %yes, label %no
-      br label %while.cond
-    """
-    return re.findall(r"label\s+%([\w.\-]+)", instr_text)
-
-
-def _extract_edges(blocks: dict[tuple[str, str], CFGBlock]) -> list[CFGEdge]:
-    """Derive control-flow edges from branch terminators within each function."""
-    edges: list[CFGEdge] = []
-    seen: set[tuple[str, str]] = set()
-
-    per_function: dict[str, list[CFGBlock]] = defaultdict(list)
-    for block in blocks.values():
-        per_function[block.function_name].append(block)
-
-    for _function_name, function_blocks in per_function.items():
-        name_to_id = {b.name: b.id for b in function_blocks}
-
-        for block in function_blocks:
-            if not block.events:
-                continue
-
-            terminator = block.events[-1]
-            if terminator.opcode != "br":
-                continue
-
-            targets = _extract_branch_targets_from_text(terminator.text)
-            for target_name in targets:
-                if target_name in name_to_id:
-                    edge_key = (block.id, name_to_id[target_name])
-                    if edge_key in seen:
-                        continue
-                    seen.add(edge_key)
-                    edges.append(CFGEdge(source=edge_key[0], target=edge_key[1]))
-
-    return edges
-
-
 def _assign_roles(blocks: dict[tuple[str, str], CFGBlock], edges: list[CFGEdge]) -> None:
     """Set each block's role (entry/branch/merge/exit/linear) from edge topology."""
     indegree: dict[str, int] = defaultdict(int)
@@ -148,9 +106,13 @@ def build_scene_graph(
     *,
     analysis_metadata: dict[str, BlockMetadata] | None = None,
 ) -> SceneGraph:
-    """Construct a scene graph from a stream of IREvents."""
+    """Construct a scene graph from a stream of IREvents.
+
+    Edges are taken from *event_stream.cfg_edges*, which the ingest layer
+    populates for all terminator types via llvmlite.
+    """
     blocks = _group_blocks(event_stream)
-    edges = event_stream.cfg_edges if event_stream.cfg_edges else _extract_edges(blocks)
+    edges = list(event_stream.cfg_edges)
     _assign_roles(blocks, edges)
 
     if analysis_metadata:

@@ -1,6 +1,6 @@
 """Rich call-stack Manim CE scenes for LLVManim.
 
-Two display modes are provided, selected via the ``--ir-mode`` CLI flag:
+Three display modes are provided:
 
   basic (--ir-mode basic)  — Stack-only layout.  Each arriving frame header or
                              slot row is labelled in yellow then fades to white,
@@ -12,11 +12,18 @@ Two display modes are provided, selected via the ``--ir-mode`` CLI flag:
                              cursor advances to the current instruction and
                              FadeTransforms to the callee's IR on each call/ret.
 
+  rich + SSA (enable_ssa)  — Three-column layout (IR Source | SSA Values | Stack).
+                             Binop, compare, and load operations produce SSA value
+                             rows in the centre panel.  Rows persist until their
+                             owning stack frame is popped.  Activated programmatically
+                             via ``RichStackSceneSpotlight(stream, enable_ssa=True)``.
+
 Public API
 ----------
 build_ir_registry        — parse a .ll file → per-function display-line lists
 RichStackSceneBadge      — ``--ir-mode basic`` scene; accepts a ProgramEventStream
 RichStackSceneSpotlight  — ``--ir-mode rich``  scene; accepts a ProgramEventStream
+                           (pass ``enable_ssa=True`` for 3-column SSA mode)
 """
 
 from __future__ import annotations

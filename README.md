@@ -17,6 +17,9 @@ LLVManim parses LLVM IR (`.ll`) into a typed event stream, derives a CFG-style s
 - Render call-stack animations through Manim CE:
   - `--ir-mode basic`: stack-only with per-cell badge flash
   - `--ir-mode rich`: IR source panel + moving spotlight cursor + stack view
+  - `enable_ssa=True` (programmatic): 3-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results
+- `ssa_formatting.py`: shared SSA display formatting with a single swap-point for future numeric runtime values
+- `RichTraceStep` and `build_execution_trace(include_ssa=True)` for binop/compare/load trace steps
 - Render CFG traversal animations (`--cfg-animate`) using DOT-derived layout from `opt -passes=dot-cfg`
 
 ## Requirements
@@ -233,7 +236,8 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │                     Transform (transform/)                      │
 │                                                                 │
 │  build_scene_graph(stream, analysis_metadata=...) → SceneGraph  │
-│  build_execution_trace(stream) → list[TraceStep]                │
+│  build_execution_trace(stream, include_ssa=...) →               │
+│      list[TraceStep] | list[RichTraceStep]                      │
 │  build_animation_commands(stream) → list[AnimationCommand]      │
 │                                                                 │
 │  • Groups events by (function, block) → CFGBlock                │
@@ -252,8 +256,9 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │    scene_graph.json  │ │    --ir-mode basic → RichStackSceneBadge│
 │                      │ │    --ir-mode rich →                     │
 │  --draw →            │ │      RichStackSceneSpotlight            │
-│    cfg_main.dot      │ │                                         │
-│    cfg_main.png      │ │  --cfg-animate →                        │
+│    cfg_main.dot      │ │      (enable_ssa=True → 3-col SSA mode) │
+│    cfg_main.png      │ │                                         │
+│    (needs graphviz)  │ │  --cfg-animate →                        │
 │    (needs graphviz)  │ │    CFGAnimationScene (DOT layout +      │
 │                      │ │    trace overlay traversal)             │
 └──────────────────────┘ └─────────────────────────────────────────┘

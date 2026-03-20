@@ -1,5 +1,7 @@
 ## Plan: CFG Sidecar + Domtree/Loop + Runtime Overlay
 
+> **Status:** Phases A, B, and C are **complete**. All items below have been implemented and merged to `main`. This document is retained for historical reference.
+
 Preserve the original `.ll` as the canonical visualization source and introduce analysis sidecars (CFG/domtree/loop/runtime trace) to improve correctness and path highlighting without rewriting or replacing input IR. Implement in three phases: (A) replace regex CFG edge extraction with LLVM-generated CFG artifact import, (B) enrich scene metadata with dominance/loop structure, and (C) overlay runtime taken-path data on top of the unchanged original CFG.
 
 **Guiding Constraints**

@@ -8,9 +8,15 @@ import subprocess
 from pathlib import Path
 
 from llvmanim.ingest import parse_module_to_events
+from llvmanim.ingest.analysis_metadata_io import (
+    AnalysisMetadataIOError,
+    load_analysis_metadata,
+    save_analysis_metadata,
+)
 from llvmanim.ingest.cfg_edge_io import CFGEdgeIOError, load_cfg_edges, save_cfg_edges
 from llvmanim.present import export_cfg_dot, export_cfg_png, export_scene_graph_json
 from llvmanim.present.rich_stack_scene import RichStackSceneBadge, RichStackSceneSpotlight
+from llvmanim.transform.models import BlockMetadata, SceneGraph
 from llvmanim.transform.scene import build_scene_graph
 
 try:
@@ -76,6 +82,22 @@ def _convert_mp4_to_gif(mp4_path: Path, gif_path: Path, fps: int, width: int) ->
         palette_path.unlink(missing_ok=True)
 
     return True
+
+
+def _collect_analysis_metadata(graph: SceneGraph) -> dict[str, BlockMetadata]:
+    """Extract per-block analysis metadata from a built scene graph."""
+    result: dict[str, BlockMetadata] = {}
+    for node in graph.nodes:
+        blk = node.block
+        result[blk.id] = BlockMetadata(
+            idom=blk.idom,
+            dom_depth=blk.dom_depth,
+            is_loop_header=blk.is_loop_header,
+            loop_depth=blk.loop_depth,
+            loop_id=blk.loop_id,
+            is_backedge_target=blk.is_backedge_target,
+        )
+    return result
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -170,6 +192,18 @@ def main(argv: list[str] | None = None) -> int:
         help="Export extracted CFG edges to a JSON file",
     )
 
+    parser.add_argument(
+        "--import-analysis-metadata",
+        metavar="PATH",
+        help="Import domtree/loop analysis metadata from a JSON file",
+    )
+
+    parser.add_argument(
+        "--export-analysis-metadata",
+        metavar="PATH",
+        help="Export analysis metadata to a JSON file",
+    )
+
     args = parser.parse_args(argv)
 
     input_path = Path(args.input)
@@ -194,7 +228,24 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Error: invalid CFG edge file: {exc}")
             return 1
 
-    graph = build_scene_graph(stream)
+    analysis_metadata = None
+    if args.import_analysis_metadata:
+        meta_path = Path(args.import_analysis_metadata)
+        if not meta_path.exists():
+            print(f"Error: analysis metadata file not found: {meta_path}")
+            return 1
+        try:
+            analysis_metadata = load_analysis_metadata(meta_path)
+        except AnalysisMetadataIOError as exc:
+            print(f"Error: invalid analysis metadata file: {exc}")
+            return 1
+
+    graph = build_scene_graph(stream, analysis_metadata=analysis_metadata)
+
+    if args.export_analysis_metadata:
+        meta = _collect_analysis_metadata(graph)
+        save_analysis_metadata(meta, args.export_analysis_metadata, source=stream.source_path)
+        print(f"Wrote analysis metadata: {args.export_analysis_metadata}")
 
     if args.export_cfg_edges:
         save_cfg_edges(stream.cfg_edges, args.export_cfg_edges, source=stream.source_path)

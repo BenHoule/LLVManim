@@ -12,28 +12,10 @@ from llvmanim.transform.models import SceneGraph
 from llvmanim.transform.scene import build_scene_graph
 
 
-def _build_graph() -> SceneGraph:
-    """Return a small two-branch SceneGraph for use across export tests."""
-    stream = parse_ir_to_events("""
-        define void @f(ptr %p) {
-        entry:
-          %x = alloca i32
-          %cond = icmp eq i32 1, 1
-          br i1 %cond, label %yes, label %no
-        yes:
-          ret void
-        no:
-          ret void
-        }
-    """)
-    return build_scene_graph(stream)
-
-
-def test_export_scene_graph_json(tmp_path: Path) -> None:
-    graph = _build_graph()
+def test_export_scene_graph_json(tmp_path: Path, branch_graph: SceneGraph) -> None:
     output = tmp_path / "scene_graph.json"
 
-    export_scene_graph_json(graph, output)
+    export_scene_graph_json(branch_graph, output)
 
     assert output.exists()
     text = output.read_text(encoding="utf-8")
@@ -42,12 +24,11 @@ def test_export_scene_graph_json(tmp_path: Path) -> None:
     assert "f::no" in text
 
 
-def test_export_scene_graph_json_has_expected_top_level_shape(tmp_path: Path) -> None:
+def test_export_scene_graph_json_has_expected_top_level_shape(tmp_path: Path, branch_graph: SceneGraph) -> None:
     """JSON export should include top-level nodes/edges arrays with stable keys."""
-    graph = _build_graph()
     output = tmp_path / "scene_graph.json"
 
-    export_scene_graph_json(graph, output)
+    export_scene_graph_json(branch_graph, output)
 
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert set(payload) == {"nodes", "edges"}
@@ -84,21 +65,19 @@ def test_export_scene_graph_json_preserves_event_operands_and_debug_line(tmp_pat
     assert all(event["debug_line"] is None for event in events)
 
 
-def test_export_scene_graph_json_accepts_string_output_path(tmp_path: Path) -> None:
+def test_export_scene_graph_json_accepts_string_output_path(tmp_path: Path, branch_graph: SceneGraph) -> None:
     """export_scene_graph_json should accept both Path and string paths."""
-    graph = _build_graph()
     output = tmp_path / "scene_graph_via_string.json"
 
-    export_scene_graph_json(graph, str(output))
+    export_scene_graph_json(branch_graph, str(output))
 
     assert output.exists()
 
 
-def test_export_cfg_dot(tmp_path: Path) -> None:
-    graph = _build_graph()
+def test_export_cfg_dot(tmp_path: Path, branch_graph: SceneGraph) -> None:
     output = tmp_path / "cfg.dot"
 
-    export_cfg_dot(graph, output)
+    export_cfg_dot(branch_graph, output)
 
     assert output.exists()
     text = output.read_text(encoding="utf-8")
@@ -113,17 +92,16 @@ def test_gv_id_sanitizes_special_characters() -> None:
     assert _gv_id("already_safe") == "already_safe"
 
 
-def test_export_cfg_png_returns_false_when_graphviz_unavailable(tmp_path: Path) -> None:
+def test_export_cfg_png_returns_false_when_graphviz_unavailable(tmp_path: Path, branch_graph: SceneGraph) -> None:
     """export_cfg_png returns False gracefully when the graphviz package is not installed."""
-    graph = _build_graph()
     with patch.dict(sys.modules, {"graphviz": None, "graphviz.backend": None}):
-        result = export_cfg_png(graph, tmp_path / "cfg")
+        result = export_cfg_png(branch_graph, tmp_path / "cfg")
     assert result is False
 
 
-def test_export_cfg_png_returns_true_when_graphviz_available(tmp_path: Path) -> None:
+def test_export_cfg_png_returns_true_when_graphviz_available(tmp_path: Path, branch_graph: SceneGraph) -> None:
     """export_cfg_png calls graphviz and returns True when the package is present."""
-    graph = _build_graph()
+    graph = branch_graph
 
     mock_dot = MagicMock()
     mock_gv = MagicMock()
@@ -139,29 +117,27 @@ def test_export_cfg_png_returns_true_when_graphviz_available(tmp_path: Path) -> 
     mock_dot.render.assert_called_once()
 
 
-def test_export_cfg_png_returns_false_when_dot_executable_missing(tmp_path: Path) -> None:
+def test_export_cfg_png_returns_false_when_dot_executable_missing(tmp_path: Path, branch_graph: SceneGraph) -> None:
     """export_cfg_png returns False when the dot executable is not found."""
     from graphviz.backend.execute import ExecutableNotFound
 
-    graph = _build_graph()
     with patch("graphviz.Digraph.render", side_effect=ExecutableNotFound(["dot"])):
-        result = export_cfg_png(graph, tmp_path / "cfg")
+        result = export_cfg_png(branch_graph, tmp_path / "cfg")
     assert result is False
 
 
-def test_export_cfg_png_returns_false_when_dot_process_fails(tmp_path: Path) -> None:
+def test_export_cfg_png_returns_false_when_dot_process_fails(tmp_path: Path, branch_graph: SceneGraph) -> None:
     """export_cfg_png returns False when graphviz render process returns an error."""
     from graphviz.backend.execute import CalledProcessError
 
-    graph = _build_graph()
     with patch("graphviz.Digraph.render", side_effect=CalledProcessError(1, ["dot"])):
-        result = export_cfg_png(graph, tmp_path / "cfg")
+        result = export_cfg_png(branch_graph, tmp_path / "cfg")
     assert result is False
 
 
-def test_export_cfg_png_uses_sanitized_ids_for_nodes_and_edges(tmp_path: Path) -> None:
+def test_export_cfg_png_uses_sanitized_ids_for_nodes_and_edges(tmp_path: Path, branch_graph: SceneGraph) -> None:
     """export_cfg_png should pass Graphviz-safe IDs to dot.node() and dot.edge()."""
-    graph = _build_graph()
+    graph = branch_graph
 
     mock_dot = MagicMock()
     mock_gv = MagicMock()

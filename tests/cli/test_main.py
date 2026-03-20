@@ -445,3 +445,88 @@ def test_convert_mp4_to_gif_returns_true_when_commands_succeed(tmp_path) -> None
 
     assert ok is True
     assert mock_run.call_count == 2
+
+
+# ── Analysis metadata CLI flags ───────────────────────────────────
+
+
+def test_import_analysis_metadata_bad_path_returns_one(tmp_path, capsys) -> None:
+    """--import-analysis-metadata with missing file returns 1."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text("""
+        define i32 @f() { entry: ret i32 0 }
+    """)
+    code = main(argv=[str(ll_file), "--import-analysis-metadata", str(tmp_path / "nope.json")])
+    assert code == 1
+    assert "not found" in capsys.readouterr().out
+
+
+def test_import_analysis_metadata_malformed_returns_one(tmp_path, capsys) -> None:
+    """--import-analysis-metadata with invalid JSON returns 1."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text("""
+        define i32 @f() { entry: ret i32 0 }
+    """)
+    bad = tmp_path / "bad.json"
+    bad.write_text("not json")
+    code = main(argv=[str(ll_file), "--import-analysis-metadata", str(bad)])
+    assert code == 1
+    assert "invalid analysis metadata" in capsys.readouterr().out.lower()
+
+
+def test_import_analysis_metadata_applies_to_graph(tmp_path, capsys) -> None:
+    """--import-analysis-metadata applies metadata to the scene graph."""
+    import json
+
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text("""
+        define void @f() {
+        entry:
+          br label %loop
+        loop:
+          %c = icmp eq i32 0, 0
+          br i1 %c, label %loop, label %exit
+        exit:
+          ret void
+        }
+    """)
+    meta = {
+        "version": 1,
+        "source": "",
+        "functions": [
+            {
+                "name": "f",
+                "blocks": [
+                    {"id": "f::loop", "is_loop_header": True, "loop_depth": 1},
+                ],
+            }
+        ],
+    }
+    meta_path = tmp_path / "meta.json"
+    meta_path.write_text(json.dumps(meta))
+
+    code = main(argv=[str(ll_file), "--json", "--outdir", str(tmp_path), "--import-analysis-metadata", str(meta_path)])
+    assert code == 0
+
+    scene = json.loads((tmp_path / "scene_graph.json").read_text())
+    loop_nodes = [n for n in scene["nodes"] if n["label"] == "loop"]
+    assert len(loop_nodes) == 1
+    assert loop_nodes[0]["animation_hint"] == "pulse_loop_header"
+
+
+def test_export_analysis_metadata_writes_file(tmp_path, capsys) -> None:
+    """--export-analysis-metadata writes a valid JSON metadata file."""
+    import json
+
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text("""
+        define i32 @f() { entry: ret i32 0 }
+    """)
+    meta_out = tmp_path / "meta_out.json"
+    code = main(argv=[str(ll_file), "--export-analysis-metadata", str(meta_out)])
+    assert code == 0
+    assert meta_out.exists()
+
+    data = json.loads(meta_out.read_text())
+    assert data["version"] == 1
+    assert "Wrote analysis metadata" in capsys.readouterr().out

@@ -61,3 +61,6 @@ known-first-party = ["llvmanim"]
 
 [tool.coverage.run]
 source = ["llvmanim"]
+
+[tool.coverage.report]
+fail_under = 80

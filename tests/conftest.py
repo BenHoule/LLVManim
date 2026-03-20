@@ -6,6 +6,10 @@ from pathlib import Path
 
 import pytest
 
+from llvmanim.ingest.llvm_events import parse_ir_to_events
+from llvmanim.transform.models import ProgramEventStream, SceneGraph
+from llvmanim.transform.scene import build_scene_graph
+
 _ALL_KINDS_IR = """
 define void @f(ptr %p) {
 entry:
@@ -26,6 +30,26 @@ no:
 declare void @g()
 """
 
+_BRANCH_IR = """
+define void @f(ptr %p) {
+entry:
+  %x = alloca i32
+  %cond = icmp eq i32 1, 1
+  br i1 %cond, label %yes, label %no
+yes:
+  ret void
+no:
+  ret void
+}
+"""
+
+_MINIMAL_IR = """
+define i32 @f() {
+entry:
+  ret i32 0
+}
+"""
+
 
 @pytest.fixture
 def all_kinds_ir() -> str:
@@ -43,6 +67,24 @@ def double_ll_path() -> Path:
 def double_ll_text(double_ll_path: Path) -> str:
     """Contents of canonical file-based ingestion fixture."""
     return double_ll_path.read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def minimal_stream() -> ProgramEventStream:
+    """Pre-parsed stream from a minimal single-block IR function."""
+    return parse_ir_to_events(_MINIMAL_IR)
+
+
+@pytest.fixture
+def branch_stream() -> ProgramEventStream:
+    """Pre-parsed stream from a two-branch IR function (entry → yes/no)."""
+    return parse_ir_to_events(_BRANCH_IR)
+
+
+@pytest.fixture
+def branch_graph(branch_stream: ProgramEventStream) -> SceneGraph:
+    """Pre-built scene graph from branch_stream: 3 nodes, 2 edges."""
+    return build_scene_graph(branch_stream)
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:

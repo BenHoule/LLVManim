@@ -1,7 +1,7 @@
 """Tests for CFG scene graph construction from IR event streams."""
 
 from llvmanim.ingest.llvm_events import parse_ir_to_events
-from llvmanim.transform.models import CFGBlock, ProgramEventStream, SceneGraph
+from llvmanim.transform.models import BlockMetadata, CFGBlock, ProgramEventStream, SceneGraph
 from llvmanim.transform.scene import (
   _animation_hint_for_block,
   _extract_edges,
@@ -250,3 +250,130 @@ def test_animation_hint_for_linear_memory_block() -> None:
   ]
 
   assert _animation_hint_for_block(block) == "show_memory_activity"
+
+
+# ── Analysis metadata integration ──────────────────────────────────
+
+
+def test_loop_header_metadata_overrides_animation_hint() -> None:
+    """A block marked as loop header gets the pulse_loop_header hint."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          br label %loop
+        loop:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %loop, label %exit
+        exit:
+          ret void
+        }
+    """)
+    metadata = {
+        "f::loop": BlockMetadata(is_loop_header=True, loop_depth=1, loop_id="L0"),
+    }
+    graph = build_scene_graph(stream, analysis_metadata=metadata)
+    node_map = {n.block.name: n for n in graph.nodes}
+
+    assert node_map["loop"].block.is_loop_header is True
+    assert node_map["loop"].animation_hint == "pulse_loop_header"
+
+
+def test_metadata_applies_domtree_fields() -> None:
+    """Dominator-tree fields are copied onto matching blocks."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %yes, label %no
+        yes:
+          ret void
+        no:
+          ret void
+        }
+    """)
+    metadata = {
+        "f::entry": BlockMetadata(dom_depth=0),
+        "f::yes": BlockMetadata(idom="f::entry", dom_depth=1),
+        "f::no": BlockMetadata(idom="f::entry", dom_depth=1),
+    }
+    graph = build_scene_graph(stream, analysis_metadata=metadata)
+    node_map = {n.block.name: n for n in graph.nodes}
+
+    assert node_map["yes"].block.idom == "f::entry"
+    assert node_map["yes"].block.dom_depth == 1
+    assert node_map["no"].block.idom == "f::entry"
+    assert node_map["entry"].block.dom_depth == 0
+
+
+def test_metadata_applies_loop_fields() -> None:
+    """Loop metadata fields are copied onto matching blocks."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          br label %header
+        header:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %body, label %exit
+        body:
+          br label %header
+        exit:
+          ret void
+        }
+    """)
+    metadata = {
+        "f::header": BlockMetadata(
+            is_loop_header=True,
+            loop_depth=1,
+            loop_id="loop_0",
+            is_backedge_target=True,
+        ),
+        "f::body": BlockMetadata(loop_depth=1, loop_id="loop_0"),
+    }
+    graph = build_scene_graph(stream, analysis_metadata=metadata)
+    node_map = {n.block.name: n for n in graph.nodes}
+
+    assert node_map["header"].block.is_loop_header is True
+    assert node_map["header"].block.loop_id == "loop_0"
+    assert node_map["header"].block.is_backedge_target is True
+    assert node_map["body"].block.loop_depth == 1
+    assert node_map["body"].block.loop_id == "loop_0"
+
+
+def test_metadata_ignores_unknown_block_ids() -> None:
+    """Metadata for blocks not in the graph is silently ignored."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          ret void
+        }
+    """)
+    metadata = {
+        "f::nonexistent": BlockMetadata(dom_depth=5),
+    }
+    graph = build_scene_graph(stream, analysis_metadata=metadata)
+
+    assert len(graph.nodes) == 1
+    assert graph.nodes[0].block.dom_depth == 0  # unchanged
+
+
+def test_no_metadata_preserves_original_behavior() -> None:
+    """Without metadata, roles and hints are derived from topology alone."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %cond = icmp eq i32 0, 0
+          br i1 %cond, label %yes, label %no
+        yes:
+          ret void
+        no:
+          ret void
+        }
+    """)
+    graph_without = build_scene_graph(stream)
+    graph_with_none = build_scene_graph(stream, analysis_metadata=None)
+    graph_with_empty = build_scene_graph(stream, analysis_metadata={})
+
+    def _snapshot(g: SceneGraph) -> set[tuple[str, str, str]]:
+        return {(n.block.name, n.role, n.animation_hint) for n in g.nodes}
+
+    assert _snapshot(graph_without) == _snapshot(graph_with_none) == _snapshot(graph_with_empty)

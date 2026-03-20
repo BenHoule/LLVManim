@@ -83,8 +83,17 @@ Pytest markers used by the suite:
 
 - `unit`: deterministic tests without external dependencies
 - `integration`: tests crossing multiple LLVManim layers
-- `contract`: tests around external dependency boundaries
+- `contract`: tests asserting behavior at external dependency boundaries
 - `e2e`: end-to-end entrypoint/workflow tests
+
+Markers are applied automatically by directory path convention in `tests/conftest.py` — no per-test decoration needed:
+
+| Path prefix | Marker(s) applied |
+|---|---|
+| `tests/ingest/`, `tests/transform/` | `unit` |
+| `tests/present/` | `integration` (+ `contract` for `test_exports.py`) |
+| `tests/cli/`, `tests/test_pipeline.py` | `integration` |
+| `tests/test_entrypoints.py` | `e2e` |
 
 Example marker runs:
 
@@ -93,6 +102,19 @@ uv run pytest -q -m unit
 uv run pytest -q -m integration
 uv run pytest -q -m "contract or e2e"
 ```
+
+### Shared Test Fixtures
+
+Common deterministic inputs are defined in `tests/conftest.py` and available to all tests:
+
+| Fixture | Type | Contents |
+|---|---|---|
+| `all_kinds_ir` | `str` | IR snippet exercising every supported `EventKind` |
+| `double_ll_path` | `Path` | Path to `tests/ingest/testdata/double.ll` |
+| `double_ll_text` | `str` | Contents of `double.ll` |
+| `minimal_stream` | `ProgramEventStream` | Parsed stream from a single-block `ret i32 0` function |
+| `branch_stream` | `ProgramEventStream` | Parsed stream from a two-branch `entry → yes/no` function |
+| `branch_graph` | `SceneGraph` | Scene graph from `branch_stream` (3 nodes, 2 edges) |
 
 ## CLI Usage
 

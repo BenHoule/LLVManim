@@ -53,6 +53,14 @@ class CFGBlock:
     indegree: int = 0
     outdegree: int = 0
     memory_ops: list[IREvent] = field(default_factory=list)
+    # Dominator-tree metadata (optional, from analysis import)
+    idom: str | None = None
+    dom_depth: int = 0
+    # Loop metadata (optional, from analysis import)
+    is_loop_header: bool = False
+    loop_depth: int = 0
+    loop_id: str | None = None
+    is_backedge_target: bool = False
 
 
 @dataclass(slots=True)
@@ -81,3 +89,15 @@ class SceneGraph:
 
     nodes: list[SceneNode] = field(default_factory=list)
     edges: list[CFGEdge] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class BlockMetadata:
+    """Per-block dominator-tree and loop-structure metadata."""
+
+    idom: str | None = None
+    dom_depth: int = 0
+    is_loop_header: bool = False
+    loop_depth: int = 0
+    loop_id: str | None = None
+    is_backedge_target: bool = False

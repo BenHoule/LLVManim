@@ -4,6 +4,7 @@ import re
 from collections import defaultdict
 
 from llvmanim.transform.models import (
+    BlockMetadata,
     CFGBlock,
     CFGEdge,
     ProgramEventStream,
@@ -19,6 +20,8 @@ def _make_block_id(function_name: str, block_name: str) -> str:
 
 def _animation_hint_for_block(block: CFGBlock) -> str:
     """Return a string animation hint for the given block based on its role."""
+    if block.is_loop_header:
+        return "pulse_loop_header"
     if block.role == "entry":
         return "fade_in_and_focus"
     if block.role == "branch":
@@ -123,11 +126,35 @@ def _assign_roles(blocks: dict[tuple[str, str], CFGBlock], edges: list[CFGEdge])
             block.role = "linear"
 
 
-def build_scene_graph(event_stream: ProgramEventStream) -> SceneGraph:
+def _apply_analysis_metadata(
+    blocks: dict[tuple[str, str], CFGBlock],
+    metadata: dict[str, BlockMetadata],
+) -> None:
+    """Copy analysis metadata onto matching blocks."""
+    for block in blocks.values():
+        meta = metadata.get(block.id)
+        if meta is None:
+            continue
+        block.idom = meta.idom
+        block.dom_depth = meta.dom_depth
+        block.is_loop_header = meta.is_loop_header
+        block.loop_depth = meta.loop_depth
+        block.loop_id = meta.loop_id
+        block.is_backedge_target = meta.is_backedge_target
+
+
+def build_scene_graph(
+    event_stream: ProgramEventStream,
+    *,
+    analysis_metadata: dict[str, BlockMetadata] | None = None,
+) -> SceneGraph:
     """Construct a scene graph from a stream of IREvents."""
     blocks = _group_blocks(event_stream)
     edges = event_stream.cfg_edges if event_stream.cfg_edges else _extract_edges(blocks)
     _assign_roles(blocks, edges)
+
+    if analysis_metadata:
+        _apply_analysis_metadata(blocks, analysis_metadata)
 
     graph = SceneGraph()
 

@@ -38,6 +38,7 @@ class ProgramEventStream:
     source_path: str
     events: list[IREvent] = field(default_factory=list)
     cfg_edges: list["CFGEdge"] = field(default_factory=list)
+    display_lines: dict[str, list[str]] = field(default_factory=dict)
 
 
 @dataclass(slots=True)

@@ -222,6 +222,7 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │  load_analysis_metadata(path) → dict[str, BlockMetadata]        │
 │  load_trace(path) → TraceOverlay                                │
 │  compute_dot_layout(path) → DotLayout                           │
+│  build_display_lines(ir_text) → dict[str, list[str]]            │
 │                                                                 │
 │  • llvmlite: parse module, walk functions/blocks/instrs         │
 │  • Typed CFG edges from all terminator operands (br, switch,    │
@@ -229,6 +230,7 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │  • Each IREvent carries: function_name, block_name, opcode,     │
 │    text, kind, index_in_function, debug_line, operands          │
 │  • kind ∈ {alloca,load,store,binop,compare,call,ret,br,other}   │
+│  • display_lines: per-function cleaned IR for rich-scene panels │
 └──────────────┬──────────────────────────────────────────────────┘
                │ ProgramEventStream
                ▼

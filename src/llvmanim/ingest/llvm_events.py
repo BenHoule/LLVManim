@@ -4,6 +4,7 @@ from pathlib import Path
 
 import llvmlite.binding as llvm
 
+from llvmanim.ingest.display_lines import build_display_lines
 from llvmanim.transform.models import CFGEdge, EventKind, IREvent, ProgramEventStream
 
 _BASIC_BLOCK_VALUE_KIND = 1  # llvmlite ValueKind.basic_block
@@ -68,6 +69,7 @@ def parse_ir_to_events(llvm_ir: str, source_path: str = "<in-memory>") -> Progra
     module.verify()  # Ensures module is well-formed
 
     stream = ProgramEventStream(source_path=source_path)
+    stream.display_lines = build_display_lines(llvm_ir)
     per_func_index: dict[str, int] = {}
     edge_seen: set[tuple[str, str]] = set()
 

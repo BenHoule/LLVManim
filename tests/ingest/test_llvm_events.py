@@ -230,6 +230,29 @@ def test_parse_ir_invalid_input_raises() -> None:
         parse_ir_to_events("this is not valid llvm ir")
 
 
+# ── display_lines pipeline integration ───────────────────────────
+
+
+def test_parse_ir_to_events_populates_display_lines() -> None:
+    """parse_ir_to_events should build display_lines from the IR text automatically."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          %x = alloca i32
+          ret void
+        }
+    """)
+    assert "f" in stream.display_lines
+    assert any("alloca" in line for line in stream.display_lines["f"])
+    assert stream.display_lines["f"][-1] == "}"
+
+
+def test_parse_module_populates_display_lines() -> None:
+    """parse_module_to_events should also populate display_lines."""
+    stream = parse_module_to_events("tests/ingest/testdata/double.ll")
+    assert len(stream.display_lines) > 0
+
+
 # ── Typed CFG edge extraction ───────────────────────────────────────────────────
 
 

@@ -27,7 +27,10 @@ Rendered through `cfg_animation_scene.py`:
 
 Requires `--dot-cfg` (DOT layout file) and `--import-trace` (runtime path trace).
 
-`RichStackSceneSpotlight` additionally builds a per-function IR source registry from the input `.ll` and keeps a moving cursor aligned to the current instruction.
+`RichStackSceneSpotlight` reads per-function IR display lines from
+`ProgramEventStream.display_lines` (populated at ingest time) and keeps a
+moving cursor aligned to the current instruction.  It never re-reads the
+`.ll` file.
 
 ## Export Utilities
 

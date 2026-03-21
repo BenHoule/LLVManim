@@ -3,10 +3,21 @@
 from __future__ import annotations
 
 from llvmanim.transform.models import IREvent, ProgramEventStream
-from llvmanim.transform.trace import _extract_callee, build_execution_trace
+from llvmanim.transform.trace import (
+    RichTraceStep,
+    _extract_callee,
+    build_execution_trace,
+)
 
 
-def _event(fn: str, kind: str, text: str, idx: int, opcode: str | None = None) -> IREvent:
+def _event(
+    fn: str,
+    kind: str,
+    text: str,
+    idx: int,
+    opcode: str | None = None,
+    operands: list[str] | None = None,
+) -> IREvent:
     return IREvent(
         function_name=fn,
         block_name="entry",
@@ -15,6 +26,7 @@ def _event(fn: str, kind: str, text: str, idx: int, opcode: str | None = None) -
         kind=kind,  # type: ignore[arg-type]
         index_in_function=idx,
         debug_line=None,
+        operands=operands or [],
     )
 
 
@@ -62,4 +74,99 @@ def test_build_execution_trace_honors_max_depth() -> None:
     assert trace == [
         ("push", "main", ""),
         ("pop", "main", "ret i32 0"),
+    ]
+
+
+def test_include_ssa_emits_binop_compare_load() -> None:
+    """include_ssa=True should emit binop, compare, and load trace steps."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _event("main", "alloca", "%x = alloca i32", 0, opcode="alloca"),
+            _event(
+                "main",
+                "load",
+                "%1 = load i32, ptr %x",
+                1,
+                opcode="load",
+                operands=["%x"],
+            ),
+            _event(
+                "main",
+                "binop",
+                "%mul = mul nsw i32 2, %1",
+                2,
+                opcode="mul",
+                operands=["2", "%1"],
+            ),
+            _event(
+                "main",
+                "compare",
+                "%cmp = icmp slt i32 %mul, 100",
+                3,
+                opcode="icmp",
+                operands=["%mul", "100"],
+            ),
+            _event("main", "ret", "ret i32 0", 4, opcode="ret"),
+        ],
+    )
+
+    trace = build_execution_trace(stream, entry="main", include_ssa=True)
+
+    assert trace == [
+        RichTraceStep("push", "main", "", []),
+        RichTraceStep("alloca", "main", "%x = alloca i32", []),
+        RichTraceStep("load", "main", "%1 = load i32, ptr %x", ["%x"]),
+        RichTraceStep("binop", "main", "%mul = mul nsw i32 2, %1", ["2", "%1"]),
+        RichTraceStep("compare", "main", "%cmp = icmp slt i32 %mul, 100", ["%mul", "100"]),
+        RichTraceStep("pop", "main", "ret i32 0", []),
+    ]
+
+
+def test_include_ssa_false_skips_binop_compare_load() -> None:
+    """Default mode (include_ssa=False) should skip binop/compare/load events."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _event("main", "alloca", "%x = alloca i32", 0, opcode="alloca"),
+            _event(
+                "main", "binop", "%mul = mul nsw i32 2, %1", 1,
+                opcode="mul", operands=["2", "%1"],
+            ),
+            _event("main", "ret", "ret i32 0", 2, opcode="ret"),
+        ],
+    )
+
+    trace = build_execution_trace(stream, entry="main")
+
+    assert trace == [
+        ("push", "main", ""),
+        ("alloca", "main", "%x = alloca i32"),
+        ("pop", "main", "ret i32 0"),
+    ]
+
+
+def test_include_ssa_with_calls() -> None:
+    """include_ssa=True should descend into callees and emit SSA events there."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _event("main", "call", "call void @foo()", 0, opcode="call"),
+            _event("main", "ret", "ret i32 0", 1, opcode="ret"),
+            _event(
+                "foo", "binop", "%r = add i32 1, 2", 0,
+                opcode="add", operands=["1", "2"],
+            ),
+            _event("foo", "ret", "ret void", 1, opcode="ret"),
+        ],
+    )
+
+    trace = build_execution_trace(stream, entry="main", include_ssa=True)
+
+    assert trace == [
+        RichTraceStep("push", "main", "", []),
+        RichTraceStep("push", "foo", "", []),
+        RichTraceStep("binop", "foo", "%r = add i32 1, 2", ["1", "2"]),
+        RichTraceStep("pop", "foo", "ret void", []),
+        RichTraceStep("pop", "main", "ret i32 0", []),
     ]

@@ -100,15 +100,27 @@ def parse_ir_to_events(llvm_ir: str, source_path: str = "<in-memory>") -> Progra
                 term = instructions[-1]
                 if term.opcode in _TERMINATOR_OPCODES:
                     source_id = f"{func_name}::{block_name}"
-                    for op in term.operands:
-                        if op.value_kind == _BASIC_BLOCK_VALUE_KIND:
-                            target_id = f"{func_name}::{op.name}"
-                            key = (source_id, target_id)
-                            if key not in edge_seen:
-                                edge_seen.add(key)
-                                stream.cfg_edges.append(
-                                    CFGEdge(source=source_id, target=target_id)
+                    bb_targets = [
+                        op for op in term.operands
+                        if op.value_kind == _BASIC_BLOCK_VALUE_KIND
+                    ]
+                    # Conditional br: llvmlite operand order is [false, true].
+                    is_cond_br = term.opcode == "br" and len(bb_targets) == 2
+                    for idx, op in enumerate(bb_targets):
+                        target_id = f"{func_name}::{op.name}"
+                        key = (source_id, target_id)
+                        if key not in edge_seen:
+                            edge_seen.add(key)
+                            label = ""
+                            if is_cond_br:
+                                label = "F" if idx == 0 else "T"
+                            stream.cfg_edges.append(
+                                CFGEdge(
+                                    source=source_id,
+                                    target=target_id,
+                                    label=label,
                                 )
+                            )
 
     return stream
 

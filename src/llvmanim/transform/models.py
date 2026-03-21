@@ -70,6 +70,7 @@ class CFGEdge:
     source: str
     target: str
     kind: str = "control_flow"
+    label: str = ""
 
 
 @dataclass(slots=True)

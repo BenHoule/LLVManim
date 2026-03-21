@@ -14,8 +14,10 @@ from llvmanim.ingest.analysis_metadata_io import (
     save_analysis_metadata,
 )
 from llvmanim.ingest.cfg_edge_io import CFGEdgeIOError, load_cfg_edges, save_cfg_edges
+from llvmanim.ingest.dot_layout import DotLayoutError, compute_dot_layout
 from llvmanim.ingest.trace_io import TraceIOError, load_trace, save_trace
 from llvmanim.present import export_cfg_dot, export_cfg_png, export_scene_graph_json
+from llvmanim.present.cfg_animation_scene import CFGAnimationScene
 from llvmanim.present.rich_stack_scene import RichStackSceneBadge, RichStackSceneSpotlight
 from llvmanim.transform.models import BlockMetadata, SceneGraph
 from llvmanim.transform.scene import build_scene_graph
@@ -138,10 +140,10 @@ def main(argv: list[str] | None = None) -> int:
 
     parser.add_argument(
         "--ir-mode",
-        choices=["rich", "basic"],
+        choices=["rich", "rich-ssa", "basic"],
         default="basic",
         metavar="MODE",
-        help="IR display mode: rich = full IR source with spotlight cursor, basic = stack-only with badge flash (default: basic)",
+        help="IR display mode: rich = IR source + spotlight cursor, rich-ssa = IR + SSA values + stack (3-column), basic = stack-only with badge flash (default: basic)",
     )
 
     parser.add_argument(
@@ -179,6 +181,18 @@ def main(argv: list[str] | None = None) -> int:
         default=960,
         metavar="PX",
         help="GIF conversion width in pixels when --format gif (default: 960)",
+    )
+
+    parser.add_argument(
+        "--cfg-animate",
+        action="store_true",
+        help="Render a CFG traversal animation (requires --dot-cfg and --import-trace)",
+    )
+
+    parser.add_argument(
+        "--dot-cfg",
+        metavar="PATH",
+        help="Path to a .dot file from 'opt -passes=dot-cfg' for CFG layout",
     )
 
     parser.add_argument(
@@ -305,6 +319,48 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print("Graphviz Python package not installed; skipped PNG export.")
 
+    if args.cfg_animate:
+        if not args.dot_cfg:
+            print("Error: --cfg-animate requires --dot-cfg <path-to-.dot-file>")
+            return 1
+        if graph.overlay is None or not graph.overlay.entry_order:
+            print("Error: --cfg-animate requires --import-trace with a non-empty entry_order")
+            return 1
+        dot_path = Path(args.dot_cfg)
+        if not dot_path.exists():
+            print(f"Error: DOT file not found: {dot_path}")
+            return 1
+        try:
+            dot_layout = compute_dot_layout(dot_path)
+        except DotLayoutError as exc:
+            print(f"Error: {exc}")
+            return 1
+
+        render_format = "mp4" if args.format == "gif" else args.format
+        if manim_config is not None:
+            manim_config.media_dir = str(outdir)
+            manim_config.format = render_format
+
+        source_name = Path(stream.source_path).name
+        cfg_title = f"CFG Traversal  ·  {source_name}"
+        cfg_scene = CFGAnimationScene(
+            graph, dot_layout, speed=args.speed, title=cfg_title,
+        )
+        cfg_scene.render(preview=args.preview)
+        print("Rendered CFG traversal animation.")
+
+        if args.format == "gif":
+            mp4_path = _find_latest_file(outdir, "*.mp4")
+            if mp4_path is None:
+                print("Warning: could not find rendered mp4 to convert into GIF.")
+            else:
+                gif_path = mp4_path.with_suffix(".gif")
+                converted = _convert_mp4_to_gif(
+                    mp4_path, gif_path, fps=max(args.gif_fps, 1), width=max(args.gif_width, 64),
+                )
+                if converted:
+                    print(f"Wrote GIF: {gif_path}")
+
     if args.animate or args.preview:
         render_format = "mp4" if args.format == "gif" else args.format
         if manim_config is not None:
@@ -312,6 +368,8 @@ def main(argv: list[str] | None = None) -> int:
             manim_config.format = render_format
         if args.ir_mode == "rich":
             animation_scene = RichStackSceneSpotlight(stream, speed=args.speed)
+        elif args.ir_mode == "rich-ssa":
+            animation_scene = RichStackSceneSpotlight(stream, speed=args.speed, enable_ssa=True)
         else:
             animation_scene = RichStackSceneBadge(stream, speed=args.speed)
         animation_scene.render(preview=args.preview)

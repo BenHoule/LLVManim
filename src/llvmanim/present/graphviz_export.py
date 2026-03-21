@@ -61,9 +61,14 @@ def export_cfg_dot(graph: SceneGraph, output_path: str | Path) -> None:
         edge_attrs = ""
         if overlay:
             if (edge.source, edge.target) in traversed:
-                edge_attrs = ' [color="#0056b3", penwidth=2.0]'
+                edge_attrs = ' [color="#0056b3", penwidth=2.0'
             else:
-                edge_attrs = ' [color="#cccccc", style=dashed]'
+                edge_attrs = ' [color="#cccccc", style=dashed'
+            if edge.label:
+                edge_attrs += f', label="{edge.label}"'
+            edge_attrs += "]"
+        elif edge.label:
+            edge_attrs = f' [label="{edge.label}"]'
         lines.append(f'    "{edge.source}" -> "{edge.target}"{edge_attrs}')
 
     lines.append("}")
@@ -118,6 +123,8 @@ def export_cfg_png(graph: SceneGraph, output_prefix: str | Path) -> bool:
                 edge_attrs = {"color": "#0056b3", "penwidth": "2.0"}
             else:
                 edge_attrs = {"color": "#cccccc", "style": "dashed"}
+        if edge.label:
+            edge_attrs["label"] = edge.label
         dot.edge(_gv_id(edge.source), _gv_id(edge.target), **edge_attrs)
 
     try:

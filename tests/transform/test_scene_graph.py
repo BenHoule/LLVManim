@@ -4,7 +4,6 @@ from llvmanim.ingest.llvm_events import parse_ir_to_events
 from llvmanim.transform.models import BlockMetadata, CFGBlock, ProgramEventStream, SceneGraph
 from llvmanim.transform.scene import (
   _animation_hint_for_block,
-  _extract_edges,
   build_scene_graph,
 )
 
@@ -184,36 +183,7 @@ def test_build_scene_graph_linear_block_gets_highlight_hint() -> None:
     assert node_map["left"].animation_hint == "highlight_block"
 
 
-def test_extract_edges_skips_empty_blocks() -> None:
-    """Edge extraction should ignore blocks with no events instead of failing."""
-    empty_block = CFGBlock(id="f::empty", name="empty", function_name="f", events=[])
-    ret_block = CFGBlock(
-        id="f::retblock",
-        name="retblock",
-        function_name="f",
-        events=[
-            parse_ir_to_events(
-                """
-                define void @f() {
-                retblock:
-                  ret void
-                }
-                """
-            ).events[0]
-        ],
-    )
-
-    edges = _extract_edges(
-        {
-            ("f", "empty"): empty_block,
-            ("f", "retblock"): ret_block,
-        }
-    )
-
-    assert edges == []
-
-
-def test_extract_edges_deduplicates_duplicate_branch_targets() -> None:
+def test_build_scene_graph_deduplicates_duplicate_branch_targets() -> None:
     """A branch that names the same target twice should produce one unique edge."""
     stream = parse_ir_to_events(
         """
@@ -377,3 +347,24 @@ def test_no_metadata_preserves_original_behavior() -> None:
         return {(n.block.name, n.role, n.animation_hint) for n in g.nodes}
 
     assert _snapshot(graph_without) == _snapshot(graph_with_none) == _snapshot(graph_with_empty)
+
+
+
+# ── T/F edge labels from ingest layer ──────────────────────────────
+
+
+def test_scene_graph_preserves_edge_labels() -> None:
+    """Edge labels (T/F) from cfg_edges are preserved in the scene graph."""
+    stream = parse_ir_to_events("""
+        define void @f(i1 %cond) {
+        entry:
+          br i1 %cond, label %yes, label %no
+        yes:
+          ret void
+        no:
+          ret void
+        }
+    """)
+    graph = build_scene_graph(stream)
+    labels = {e.label for e in graph.edges}
+    assert labels == {"T", "F"}

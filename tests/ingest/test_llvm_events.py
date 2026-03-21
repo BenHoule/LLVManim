@@ -93,6 +93,131 @@ def test_kind_from_opcode_none_returns_other() -> None:
     assert _kind_from_opcode(None) == "other"
 
 
+# ── Conditional br T/F labels ────────────────────────────────────
+
+
+def test_conditional_br_edges_have_tf_labels() -> None:
+    """Conditional br should produce two edges labelled T and F."""
+    stream = parse_ir_to_events("""
+        define void @f(i1 %cond) {
+        entry:
+          br i1 %cond, label %yes, label %no
+        yes:
+          ret void
+        no:
+          ret void
+        }
+    """)
+    edges = stream.cfg_edges
+    assert len(edges) == 2
+    labels = {e.label for e in edges}
+    assert labels == {"T", "F"}
+    true_edge = next(e for e in edges if e.label == "T")
+    false_edge = next(e for e in edges if e.label == "F")
+    assert true_edge.target == "f::yes"
+    assert false_edge.target == "f::no"
+
+
+def test_unconditional_br_edge_has_no_label() -> None:
+    """Unconditional br should produce one edge with no label."""
+    stream = parse_ir_to_events("""
+        define void @f() {
+        entry:
+          br label %next
+        next:
+          ret void
+        }
+    """)
+    assert len(stream.cfg_edges) == 1
+    assert stream.cfg_edges[0].label == ""
+
+
+# ── Non-br terminator edge extraction ────────────────────────────
+
+
+def test_switch_edges_extracted() -> None:
+    """Switch terminators produce edges to all case targets and default."""
+    stream = parse_ir_to_events("""
+        define i32 @test_switch(i32 %x) {
+        entry:
+          switch i32 %x, label %default [
+            i32 0, label %case0
+            i32 1, label %case1
+          ]
+        case0:
+          ret i32 10
+        case1:
+          ret i32 20
+        default:
+          ret i32 -1
+        }
+    """)
+    edges = stream.cfg_edges
+    targets = {e.target for e in edges}
+    assert targets == {"test_switch::case0", "test_switch::case1", "test_switch::default"}
+    assert all(e.source == "test_switch::entry" for e in edges)
+
+
+def test_invoke_edges_extracted() -> None:
+    """Invoke terminators produce edges to normal and unwind destinations."""
+    stream = parse_ir_to_events("""
+        declare i32 @may_throw()
+        declare i32 @__gxx_personality_v0(...)
+
+        define i32 @test_invoke() personality ptr @__gxx_personality_v0 {
+        entry:
+          %val = invoke i32 @may_throw()
+            to label %normal unwind label %exception
+        normal:
+          ret i32 %val
+        exception:
+          %lp = landingpad { ptr, i32 } catch ptr null
+          ret i32 -1
+        }
+    """)
+    edges = stream.cfg_edges
+    entry_edges = [e for e in edges if e.source == "test_invoke::entry"]
+    targets = {e.target for e in entry_edges}
+    assert targets == {"test_invoke::normal", "test_invoke::exception"}
+
+
+def test_indirectbr_edges_extracted() -> None:
+    """Indirectbr terminators produce edges to all possible targets."""
+    stream = parse_ir_to_events("""
+        define void @test_indirectbr(ptr %addr) {
+        entry:
+          indirectbr ptr %addr, [label %target1, label %target2]
+        target1:
+          ret void
+        target2:
+          ret void
+        }
+    """)
+    edges = stream.cfg_edges
+    targets = {e.target for e in edges}
+    assert targets == {"test_indirectbr::target1", "test_indirectbr::target2"}
+
+
+def test_callbr_edges_extracted() -> None:
+    """Callbr terminators produce edges to fallthrough and indirect targets."""
+    ir = (
+        "define i32 @test_callbr() {\n"
+        "entry:\n"
+        '  callbr void asm sideeffect "nop", '
+        '"!i,~{dirflag},~{fpsr},~{flags}"() '
+        "to label %normal [label %alt]\n"
+        "normal:\n"
+        "  ret i32 0\n"
+        "alt:\n"
+        "  ret i32 1\n"
+        "}\n"
+    )
+    stream = parse_ir_to_events(ir)
+    edges = stream.cfg_edges
+    targets = {e.target for e in edges}
+    assert targets == {"test_callbr::normal", "test_callbr::alt"}
+
+
 def test_parse_module_missing_file_raises_file_not_found() -> None:
     """parse_module_to_events should raise FileNotFoundError for missing source files."""
     with pytest.raises(FileNotFoundError):

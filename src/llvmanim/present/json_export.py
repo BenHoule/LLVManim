@@ -58,6 +58,7 @@ def _scene_graph_to_dict(graph: SceneGraph) -> dict:
                 "source": edge.source,
                 "target": edge.target,
                 "kind": edge.kind,
+                "label": edge.label,
             }
             for edge in graph.edges
         ],

@@ -5,14 +5,22 @@ LLVManim parses LLVM IR (`.ll`) into a typed event stream, derives a CFG-style s
 ## Current Capabilities
 
 - Parse LLVM IR into `ProgramEventStream` events using `llvmlite`
+- Classify events: `alloca`, `load`, `store`, `binop`, `compare`, `call`, `ret`, `br` (others tagged `other`)
 - Extract typed CFG edges directly from llvmlite terminator operands (`br`, `switch`, `invoke`, `indirectbr`, `callbr`)
+- Assign T/F direction labels to conditional branch edges
 - Import/export CFG edges as JSON (`--import-cfg-edges` / `--export-cfg-edges`)
-- Build a scene graph where each CFG block becomes a `SceneNode`
+- Import/export domtree and loop analysis metadata as JSON (`--import-analysis-metadata` / `--export-analysis-metadata`)
+- Import/export runtime path traces as JSON (`--import-trace` / `--export-trace`)
+- Build a scene graph where each CFG block becomes a `SceneNode` with optional `TraceOverlay`
 - Export scene graph JSON (`scene_graph.json`)
 - Export Graphviz DOT (`cfg_main.dot`) and, when Graphviz binaries are available, PNG (`cfg_main.png`)
 - Render call-stack animations through Manim CE:
   - `--ir-mode basic`: stack-only with per-cell badge flash
   - `--ir-mode rich`: IR source panel + moving spotlight cursor + stack view
+  - `--ir-mode rich-ssa`: 3-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results
+- `ssa_formatting.py`: shared SSA display formatting with a single swap-point for future numeric runtime values
+- `RichTraceStep` and `build_execution_trace(include_ssa=True)` for binop/compare/load trace steps
+- Render CFG traversal animations (`--cfg-animate`) using DOT-derived layout from `opt -passes=dot-cfg`
 
 ## Requirements
 
@@ -130,16 +138,22 @@ Default input is `tests/ingest/testdata/double.ll` when no positional argument i
 
 - `--json`: write `scene_graph.json`
 - `--draw`: write `cfg_main.dot`; also attempts `cfg_main.png`
-- `--animate`: render animation video via Manim
+- `--animate`: render stack animation video via Manim
 - `--preview`: open rendered animation in viewer (implies animation render)
-- `--ir-mode {basic,rich}`: choose animation style (default: `basic`)
+- `--ir-mode {basic,rich,rich-ssa}`: choose animation style (default: `basic`; `rich-ssa` enables 3-column SSA panel)
 - `--speed <float>`: animation speed multiplier (default: `1.0`)
 - `--format {mp4,gif}`: animation output format (default: `mp4`)
 - `--gif-fps <int>`: GIF conversion FPS when `--format gif` (default: `12`)
 - `--gif-width <int>`: GIF conversion width in px when `--format gif` (default: `960`)
 - `--outdir <path>`: output directory (default: current directory)
+- `--cfg-animate`: render a CFG traversal animation (requires `--dot-cfg` and `--import-trace`)
+- `--dot-cfg <path>`: path to a `.dot` file from `opt -passes=dot-cfg` for CFG layout
 - `--import-cfg-edges <path>`: load CFG edges from a JSON file instead of extracting them from IR
 - `--export-cfg-edges <path>`: write extracted CFG edges to a JSON file
+- `--import-analysis-metadata <path>`: load domtree/loop analysis metadata from a JSON file
+- `--export-analysis-metadata <path>`: write analysis metadata to a JSON file
+- `--import-trace <path>`: load a runtime path trace from a JSON file for overlay visualization
+- `--export-trace <path>`: write the trace overlay to a JSON file
 
 ### Common Examples
 
@@ -182,72 +196,78 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 ## Pipeline (Current Implementation)
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         CLI (cli/)                          │
-│  uv run llvmanim input.ll [--json] [--draw] [--animate]     │
-│                           [--preview] [--ir-mode basic|rich]│
-│                           [--speed N] [--outdir PATH]       │
-│                           [--import-cfg-edges PATH]         │
-│                           [--export-cfg-edges PATH]         │
-│                                                             │
-│  • Parses flags; opens .ll file                             │
-│  • Calls parse_module_to_events → build_scene_graph         │
-│  • Dispatches to export and/or animation paths              │
-└──────────────┬─────────────────────────────────────────────-┘
+┌────────────────────────────────────────────────────────────────┐
+│                           CLI (cli/)                           │
+│  uv run llvmanim input.ll [--json] [--draw] [--animate]        │
+│                           [--preview] [--ir-mode basic|rich]   │
+│                           [--speed N] [--format mp4|gif]       │
+│                           [--cfg-animate] [--dot-cfg PATH]     │
+│                           [--import-trace PATH]                │
+│                           [--import-cfg-edges PATH]            │
+│                           [--import-analysis-metadata PATH]    │
+│                           [--outdir PATH]                      │
+│                                                                │
+│  • Parses flags; opens .ll file                                │
+│  • Calls parse_module_to_events → build_scene_graph            │
+│  • Optionally loads additional JSON (edges, metadata, trace)   │
+│  • Dispatches to export and/or animation paths                 │
+└──────────────┬─────────────────────────────────────────────────┘
                │ .ll file path
                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      Ingest (ingest/)                       │
-│                                                             │
-│  parse_module_to_events(path) → ProgramEventStream          │
-│  load_cfg_edges(path) → list[CFGEdge]   (--import-cfg-edges)│
-│  save_cfg_edges(edges, path)            (--export-cfg-edges)│
-│                                                             │
-│  • llvmlite: parse module, walk functions/blocks/instrs     │
-│  • Typed CFG edges extracted from terminator operands       │
-│  • Each IREvent carries: function_name, block_name, opcode, │
-│    text, kind, index_in_function, debug_line, operands      │
-│  • kind ∈ {alloca, load, store, call, ret, br, other}       │
-└──────────────┬──────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        Ingest (ingest/)                         │
+│                                                                 │
+│  parse_module_to_events(path) → ProgramEventStream              │
+│  load_cfg_edges(path) → list[CFGEdge]                           │
+│  load_analysis_metadata(path) → dict[str, BlockMetadata]        │
+│  load_trace(path) → TraceOverlay                                │
+│  compute_dot_layout(path) → DotLayout                           │
+│                                                                 │
+│  • llvmlite: parse module, walk functions/blocks/instrs         │
+│  • Typed CFG edges from all terminator operands (br, switch,    │
+│    invoke, indirectbr, callbr) with T/F labels on cond. br      │
+│  • Each IREvent carries: function_name, block_name, opcode,     │
+│    text, kind, index_in_function, debug_line, operands          │
+│  • kind ∈ {alloca,load,store,binop,compare,call,ret,br,other}   │
+└──────────────┬──────────────────────────────────────────────────┘
                │ ProgramEventStream
                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Transform (transform/)                    │
-│                                                             │
-│  build_scene_graph(stream) → SceneGraph                     │
-│                                                             │
-│  • Groups events by (function, block) → CFGBlock            │
-│  • Uses typed CFG edges from ingest (or imported JSON)      │
-│  • Assigns block roles from edge topology:                  │
-│      entry · linear · branch · merge · exit                 │
-│  • Each block → SceneNode with id, label, role,             │
-│    animation_hint                                           │
-└──────┬────────────────────────────────────┬─────────────────┘
-       │ SceneGraph                         │ ProgramEventStream
-       ▼                                    ▼
-┌──────────────────────┐      ┌─────────────────────────────────┐
-│  Export (present/)   │      │  Animation (present/)           │
-│                      │      │                                 │
-│  --json →            │      │  --animate / --preview          │
-│    scene_graph.json  │      │                                 │
-│                      │      │  build_execution_trace(stream)  │
-│  --draw →            │      │   → TraceStep list              │
-│    cfg_main.dot      │      │                                 │
-│    cfg_main.png      │      │  --ir-mode basic                │
-│    (needs graphviz)  │      │    RichStackSceneBadge          │
-│                      │      │      stack-only, badge flash    │
-│                      │      │  --ir-mode rich                 │
-│                      │      │    RichStackSceneSpotlight      │
-│                      │      │      IR panel + cursor + stack  │
-│                      │      │                                 │
-│                      │      │  scene.render(preview=...)      │
-│                      │      │   → Manim CE MP4                │
-└──────────────────────┘      └─────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     Transform (transform/)                      │
+│                                                                 │
+│  build_scene_graph(stream, analysis_metadata=...) → SceneGraph  │
+│  build_execution_trace(stream, include_ssa=...) →               │
+│      list[TraceStep] | list[RichTraceStep]                      │
+│  build_animation_commands(stream) → list[AnimationCommand]      │
+│                                                                 │
+│  • Groups events by (function, block) → CFGBlock                │
+│  • Uses typed CFG edges from ingest (or imported JSON)          │
+│  • Assigns block roles from edge topology:                      │
+│      entry · linear · branch · merge · exit                     │
+│  • Applies optional domtree/loop metadata                       │
+│  • Attaches optional TraceOverlay for runtime path highlighting │
+└──────┬────────────────────────────────────────┬─────────────────┘
+       │ SceneGraph                              │ ProgramEventStream
+       ▼                                        ▼
+┌──────────────────────┐ ┌─────────────────────────────────────────┐
+│  Export (present/)   │ │  Animation (present/)                   │
+│                      │ │                                         │
+│  --json →            │ │  --animate / --preview                  │
+│    scene_graph.json  │ │    --ir-mode basic → RichStackSceneBadge│
+│                      │ │    --ir-mode rich →                     │
+│  --draw →            │ │      RichStackSceneSpotlight            │
+│    cfg_main.dot      │ │      (enable_ssa=True → 3-col SSA mode) │
+│    cfg_main.png      │ │                                         │
+│    (needs graphviz)  │ │  --cfg-animate →                        │
+│    (needs graphviz)  │ │    CFGAnimationScene (DOT layout +      │
+│                      │ │    trace overlay traversal)             │
+└──────────────────────┘ └─────────────────────────────────────────┘
 ```
 
 ## Notes
 
 - DOT export does not require system Graphviz binaries; PNG export does.
 - GIF output renders MP4 first and then converts via `ffmpeg` palette workflow to reduce peak memory usage.
-- `pyproject.toml` includes both `manim` and `manimgl` dependencies, but the current CLI animation path uses Manim Community Edition scenes in `src/llvmanim/present/rich_stack_scene.py`.
+- `--cfg-animate` renders a CFG traversal animation using Graphviz layout from an `opt -passes=dot-cfg` DOT file (`--dot-cfg`) and a runtime trace (`--import-trace`).
+- `pyproject.toml` includes both `manim` and `manimgl` dependencies, but the current CLI animation path uses Manim Community Edition scenes in `src/llvmanim/present/`.
 - Sandbox directories contain experimental scripts and examples and are not used by the package entrypoint.

@@ -199,7 +199,7 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 ┌────────────────────────────────────────────────────────────────┐
 │                           CLI (cli/)                           │
 │  uv run llvmanim input.ll [--json] [--draw] [--animate]        │
-│                           [--preview] [--ir-mode basic|rich]   │
+│                     [--preview] [--ir-mode basic|rich|rich-ssa]│
 │                           [--speed N] [--format mp4|gif]       │
 │                           [--cfg-animate] [--dot-cfg PATH]     │
 │                           [--import-trace PATH]                │
@@ -257,9 +257,9 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │  --json →            │ │  --animate / --preview                  │
 │    scene_graph.json  │ │    --ir-mode basic → RichStackSceneBadge│
 │                      │ │    --ir-mode rich →                     │
-│  --draw →            │ │      RichStackSceneSpotlight            │
-│    cfg_main.dot      │ │      (enable_ssa=True → 3-col SSA mode) │
-│    cfg_main.png      │ │                                         │
+│  --draw →            │ │      RichStackSceneSpotlight (2-col)    │
+│    cfg_main.dot      │ │    --ir-mode rich-ssa →                 │
+│    cfg_main.png      │ │      RichStackSceneSpotlight (3-col SSA)│
 │    (needs graphviz)  │ │  --cfg-animate →                        │
 │    (needs graphviz)  │ │    CFGAnimationScene (DOT layout +      │
 │                      │ │    trace overlay traversal)             │

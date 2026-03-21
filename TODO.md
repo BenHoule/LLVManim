@@ -98,8 +98,8 @@
 ---
 
 # Other
-- [x] Add broad unit test coverage across ingest / transform / present / cli modules (288 tests, 84% coverage)
+- [x] Add broad unit test coverage across ingest / transform / present / cli modules (302 tests, 84% coverage)
 - [x] Add focused tests for `binop`/`compare` classification + command mapping + rendering behavior
 - [x] SSA panel integration tests (trace dispatch, 3-column layout, pop cleanup)
-- [ ] Open/track issue(s) for remaining architectural TODOs (rich-scene parser dependency, call-trace ownership)
+- [x] Open/track issue(s) for remaining architectural TODOs (rich-scene parser dependency, call-trace ownership)
 - [x] Wire `enable_ssa` into CLI (`--ir-mode rich-ssa`)

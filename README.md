@@ -199,7 +199,7 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 ┌────────────────────────────────────────────────────────────────┐
 │                           CLI (cli/)                           │
 │  uv run llvmanim input.ll [--json] [--draw] [--animate]        │
-│                           [--preview] [--ir-mode basic|rich]   │
+│                     [--preview] [--ir-mode basic|rich|rich-ssa]│
 │                           [--speed N] [--format mp4|gif]       │
 │                           [--cfg-animate] [--dot-cfg PATH]     │
 │                           [--import-trace PATH]                │
@@ -222,6 +222,7 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │  load_analysis_metadata(path) → dict[str, BlockMetadata]        │
 │  load_trace(path) → TraceOverlay                                │
 │  compute_dot_layout(path) → DotLayout                           │
+│  build_display_lines(ir_text) → dict[str, list[str]]            │
 │                                                                 │
 │  • llvmlite: parse module, walk functions/blocks/instrs         │
 │  • Typed CFG edges from all terminator operands (br, switch,    │
@@ -229,6 +230,7 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │  • Each IREvent carries: function_name, block_name, opcode,     │
 │    text, kind, index_in_function, debug_line, operands          │
 │  • kind ∈ {alloca,load,store,binop,compare,call,ret,br,other}   │
+│  • display_lines: per-function cleaned IR for rich-scene panels │
 └──────────────┬──────────────────────────────────────────────────┘
                │ ProgramEventStream
                ▼
@@ -255,9 +257,9 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │  --json →            │ │  --animate / --preview                  │
 │    scene_graph.json  │ │    --ir-mode basic → RichStackSceneBadge│
 │                      │ │    --ir-mode rich →                     │
-│  --draw →            │ │      RichStackSceneSpotlight            │
-│    cfg_main.dot      │ │      (enable_ssa=True → 3-col SSA mode) │
-│    cfg_main.png      │ │                                         │
+│  --draw →            │ │      RichStackSceneSpotlight (2-col)    │
+│    cfg_main.dot      │ │    --ir-mode rich-ssa →                 │
+│    cfg_main.png      │ │      RichStackSceneSpotlight (3-col SSA)│
 │    (needs graphviz)  │ │  --cfg-animate →                        │
 │    (needs graphviz)  │ │    CFGAnimationScene (DOT layout +      │
 │                      │ │    trace overlay traversal)             │

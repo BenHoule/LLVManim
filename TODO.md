@@ -2,7 +2,7 @@
 
 ## Now
 - [ ] Fix double-pop behavior at transform/trace level (remove renderer guard dependency)
-- [ ] Drive rich IR panel from pipeline display model instead of reparsing `.ll`
+- [x] Drive rich IR panel from pipeline display model instead of reparsing `.ll`
 - [x] Wire `enable_ssa` into CLI (`--ir-mode rich-ssa`)
 
 ## Next
@@ -39,8 +39,7 @@
 - [ ] Transform: fix duplicate `pop_stack_frame` generation on conditional branches
 	Note: temporary pop guard exists in `render_stack_model.py`
 - [x] Architecture: move execution-trace builder from presentation to transform layer
-- [ ] Architecture: remove `.ll` reparsing in `rich_stack_scene` via pipeline display lines
-	Depends on: transform-owned trace/display model
+- [x] Architecture: remove `.ll` reparsing in `rich_stack_scene` via pipeline display lines
 
 ### Milestone 4 — CFG animation productization ✅
 - [x] Presentation: add CFG animation scenes from `SceneGraph` nodes/edges
@@ -52,7 +51,7 @@
 - [x] PR3: `binop`/`compare` test coverage
 - [ ] PR4: double-pop root-cause fix
 - [x] PR5: move trace builder to transform
-- [ ] PR6: remove rich-scene `.ll` reparsing
+- [x] PR6: remove rich-scene `.ll` reparsing (`feature/ir-display-model`)
 - [x] PR7: CFG animations
 - [x] PR8: CLI CFG flags + docs
 - [x] PR9: SSA bridge panel (`feature/ssa-bridge-panel`)
@@ -83,7 +82,7 @@
 - [x] Support stack animation modes (`basic` badge + `rich` spotlight)
 - [x] SSA bridge panel: opt-in 3-column layout via `RichStackSceneSpotlight(enable_ssa=True)`
 - [x] `ssa_formatting.py` — shared SSA display formatting (single swap-point for future numeric values)
-- [ ] Generate `rich_stack_scene.py` from actual pipeline output instead of reparsing `.ll`
+- [x] Generate `rich_stack_scene.py` from actual pipeline output instead of reparsing `.ll`
 - [x] CFG animations (via `cfg_animation_scene.py` + `dot_layout.py`)
 - [x] Add T/F branch labels to semantic DOT export
 - [ ] Improve sandbox CFG animation prototype (see TODOs in `sandbox/manim_CE/cfg_traversal.py`)
@@ -99,8 +98,8 @@
 ---
 
 # Other
-- [x] Add broad unit test coverage across ingest / transform / present / cli modules (288 tests, 84% coverage)
+- [x] Add broad unit test coverage across ingest / transform / present / cli modules (302 tests, 84% coverage)
 - [x] Add focused tests for `binop`/`compare` classification + command mapping + rendering behavior
 - [x] SSA panel integration tests (trace dispatch, 3-column layout, pop cleanup)
-- [ ] Open/track issue(s) for remaining architectural TODOs (rich-scene parser dependency, call-trace ownership)
+- [x] Open/track issue(s) for remaining architectural TODOs (rich-scene parser dependency, call-trace ownership)
 - [x] Wire `enable_ssa` into CLI (`--ir-mode rich-ssa`)

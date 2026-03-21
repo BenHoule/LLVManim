@@ -26,7 +26,7 @@ Default input when none is supplied: `tests/ingest/testdata/double.ll`.
 | `--draw` | off | Write `cfg_main.dot` (and `cfg_main.png` if Graphviz binaries are present) |
 | `--animate` | off | Render stack animation video via Manim |
 | `--preview` | off | Render and open video in viewer (implies `--animate`) |
-| `--ir-mode {basic,rich}` | `basic` | Animation display mode |
+| `--ir-mode {basic,rich,rich-ssa}` | `basic` | Animation display mode |
 | `--speed FLOAT` | `1.0` | Animation speed multiplier |
 | `--format {mp4,gif}` | `mp4` | Animation output format |
 | `--gif-fps FPS` | `12` | GIF conversion frame rate when `--format gif` |
@@ -45,6 +45,7 @@ Default input when none is supplied: `tests/ingest/testdata/double.ll`.
 
 - `basic` — stack-only layout; arriving cells flash yellow then settle to white (`RichStackSceneBadge`)
 - `rich` — two-column layout with full IR source on the left and a moving yellow cursor; stack on the right (`RichStackSceneSpotlight`)
+- `rich-ssa` — three-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results alongside the rich spotlight view (`RichStackSceneSpotlight` with `enable_ssa=True`)
 
 ## GIF Output Notes
 

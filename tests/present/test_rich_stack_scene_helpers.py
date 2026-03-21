@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
+from llvmanim.ingest.display_lines import build_display_lines, clean_ir_line
 from llvmanim.present.rich_stack_scene import (
     _call_site_idx,
-    _clean_ir_line,
     _find_line_idx,
-    build_ir_registry,
 )
 
 
 def test_clean_ir_line_removes_noise_tokens() -> None:
     raw = "  call noalias noundef dso_local ptr @f(ptr %x), align 8, !dbg !12 #3 ; trailing comment"
-    cleaned = _clean_ir_line(raw)
+    cleaned = clean_ir_line(raw)
 
     assert "noalias" not in cleaned
     assert "noundef" not in cleaned
@@ -24,9 +23,8 @@ def test_clean_ir_line_removes_noise_tokens() -> None:
     assert "@f" in cleaned
 
 
-def test_build_ir_registry_collects_functions_and_skips_intrinsics(tmp_path) -> None:
-    ir_file = tmp_path / "demo.ll"
-    ir_file.write_text(
+def test_build_display_lines_collects_functions_and_skips_intrinsics() -> None:
+    registry = build_display_lines(
         """
 define i32 @main() #0 {
 entry:
@@ -41,8 +39,6 @@ entry:
 }
 """.strip()
     )
-
-    registry = build_ir_registry(ir_file.as_posix())
 
     assert set(registry) == {"main", "helper"}
     assert any(line.startswith("define i32 @main") for line in registry["main"])

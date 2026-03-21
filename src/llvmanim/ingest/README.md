@@ -30,10 +30,15 @@ ProgramEventStream
       └── operands: list[str]
 ```
 
-`ProgramEventStream` also carries a `cfg_edges: list[CFGEdge]` field populated
-by the ingest layer for all terminator types (br, switch, invoke, etc.) via
-llvmlite. These typed edges are consumed directly by the transform layer's
-`build_scene_graph`.
+`ProgramEventStream` also carries:
+
+- `cfg_edges: list[CFGEdge]` — populated by the ingest layer for all
+  terminator types (br, switch, invoke, etc.) via llvmlite.  These typed
+  edges are consumed directly by the transform layer's `build_scene_graph`.
+- `display_lines: dict[str, list[str]]` — per-function cleaned IR source
+  lines built at ingest time by `build_display_lines`.  The presentation
+  layer reads these directly for IR source panels, avoiding a second file
+  read.
 
 `EventKind` is one of: `alloca`, `load`, `store`, `binop`, `compare`, `call`, `ret`, `br`, `other`.
 
@@ -51,6 +56,7 @@ transform layer.
 | `cfg_edge_io.py` | Import/export CFG edges as JSON sidecars |
 | `trace_io.py` | Import/export runtime path traces as JSON sidecars |
 | `analysis_metadata_io.py` | Import/export domtree/loop analysis metadata as JSON |
+| `display_lines.py` | `build_display_lines` and `clean_ir_line` — IR text → display-ready lines |
 | `dot_layout.py` | Parse `.dot` files from `opt -passes=dot-cfg` into `DotLayout` for CFG animation |
 | `LEGACY_ir_helpers.py` | Superseded helpers; kept for reference |
 | `LEGACY_llvmparser.py` | Superseded parser; kept for reference |

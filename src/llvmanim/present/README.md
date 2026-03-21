@@ -11,9 +11,10 @@ The CLI provides two animation pipelines:
 Rendered through `rich_stack_scene.py`:
 
 1. Parse `.ll` file into `ProgramEventStream`.
-2. Build one of two Manim scenes from that stream:
+2. Build one of three Manim scenes from that stream:
    - `RichStackSceneBadge` (`--ir-mode basic`)
    - `RichStackSceneSpotlight` (`--ir-mode rich`)
+   - `RichStackSceneSpotlight` with `enable_ssa=True` (`--ir-mode rich-ssa`) — 3-column layout (IR Source | SSA Values | Stack)
 3. Call `scene.render(preview=...)`.
 
 ### CFG Traversal Animation (`--cfg-animate`)
@@ -27,7 +28,10 @@ Rendered through `cfg_animation_scene.py`:
 
 Requires `--dot-cfg` (DOT layout file) and `--import-trace` (runtime path trace).
 
-`RichStackSceneSpotlight` additionally builds a per-function IR source registry from the input `.ll` and keeps a moving cursor aligned to the current instruction.
+`RichStackSceneSpotlight` reads per-function IR display lines from
+`ProgramEventStream.display_lines` (populated at ingest time) and keeps a
+moving cursor aligned to the current instruction.  It never re-reads the
+`.ll` file.
 
 ## Export Utilities
 
@@ -64,7 +68,8 @@ RenderStep
 
 | File | Purpose |
 |---|---|
-| `rich_stack_scene.py` | Badge and spotlight stack animation scenes |
+| `rich_stack_scene.py` | Badge and spotlight stack animation scenes (basic, rich, rich-ssa) |
+| `ssa_formatting.py` | Shared SSA display formatting (value labels, op colors, name extraction) |
 | `cfg_animation_scene.py` | CFG traversal animation scene with DOT layout and trace overlay |
 | `json_export.py` | Serialize `SceneGraph` to JSON |
 | `graphviz_export.py` | Write DOT and optionally render PNG via `graphviz` |

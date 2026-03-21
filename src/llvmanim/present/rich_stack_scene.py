@@ -15,20 +15,22 @@ Three display modes are provided:
   rich + SSA (enable_ssa)  — Three-column layout (IR Source | SSA Values | Stack).
                              Binop, compare, and load operations produce SSA value
                              rows in the centre panel.  Rows persist until their
-                             owning stack frame is popped.  Activated programmatically
-                             via ``RichStackSceneSpotlight(stream, enable_ssa=True)``.
+                             owning stack frame is popped.  Activated via
+                             ``--ir-mode rich-ssa`` or programmatically with
+                             ``RichStackSceneSpotlight(stream, enable_ssa=True)``.
+
+IR display lines are built at ingest time and stored in
+``ProgramEventStream.display_lines`` so that the presentation layer never
+re-reads the ``.ll`` file.
 
 Public API
 ----------
-build_ir_registry        — parse a .ll file → per-function display-line lists
 RichStackSceneBadge      — ``--ir-mode basic`` scene; accepts a ProgramEventStream
 RichStackSceneSpotlight  — ``--ir-mode rich``  scene; accepts a ProgramEventStream
                            (pass ``enable_ssa=True`` for 3-column SSA mode)
 """
 
 from __future__ import annotations
-
-import re
 
 from manim import (
     BLUE_D,
@@ -58,6 +60,7 @@ from manim import (
     VGroup,
 )
 
+from llvmanim.ingest.display_lines import clean_ir_line
 from llvmanim.present.ssa_formatting import (
     OP_COLORS,
     extract_ssa_name,
@@ -66,73 +69,9 @@ from llvmanim.present.ssa_formatting import (
 from llvmanim.transform.models import ProgramEventStream
 from llvmanim.transform.trace import RichTraceStep, TraceStep, build_execution_trace
 
-# ── IR registry ────────────────────────────────────────────────────────────────
-# TODO: build_ir_registry re-parses the .ll file from scratch because IREvent
-# only carries flat instruction strings — no define signature, block labels,
-# blank lines, or closing brace.  Long-term fix: extend IREvent (or add a
-# parallel DisplayLine model) so that the ingestion layer emits display-ready
-# text and this second parse can be removed.
-
-_DBG_META_RE = re.compile(r",?\s*![a-zA-Z0-9_.]+\s+!\d+|,?\s*!\d+\b")
-_DEFINE_RE = re.compile(r"^define\b.*?@(\w+)\s*\(")
-
-
-def _clean_ir_line(raw: str) -> str:
-    """Strip comments, debug metadata, attribute refs, and verbose type qualifiers.
-
-    Returns the display-friendly version of a raw .ll source line.
-    """
-    # Strip ; comments (block-label preds notes live here too)
-    line = raw.split(";")[0].rstrip()
-    # Strip debug metadata tokens: , !dbg !17, , !llvm.loop !32, etc.
-    line = _DBG_META_RE.sub("", line)
-    # Strip function attribute group references: #0, #1, etc.
-    line = re.sub(r"\s+#\d+\b", "", line)
-    # Strip verbose type qualifiers that add length without adding insight
-    line = re.sub(r"\bnoalias\s+", "", line)
-    line = re.sub(r"\bnoundef\s+", "", line)
-    line = re.sub(r"\bdso_local\s+", "", line)
-    line = re.sub(r",\s*align\s+\d+", "", line)
-    return line.rstrip(", ")
-
-
-def build_ir_registry(source_path: str) -> dict[str, list[str]]:
-    """Parse a .ll file and return per-function display-line lists.
-
-    Keys are bare function names (no @).  Display lines are:
-      - Cleaned with _clean_ir_line (debug metadata, attribute refs removed).
-      - @llvm intrinsic call lines omitted (they add noise, not insight).
-      - Blank lines between basic blocks preserved for readability.
-    """
-    registry: dict[str, list[str]] = {}
-    current_func: str | None = None
-    current_lines: list[str] = []
-
-    with open(source_path) as fh:
-        for raw in fh:
-            line = raw.rstrip()
-            m = _DEFINE_RE.match(line)
-            if m:
-                current_func = m.group(1)
-                current_lines = [_clean_ir_line(line)]
-                continue
-            if current_func is None:
-                continue
-            stripped = line.strip()
-            if stripped == "}":
-                current_lines.append("}")
-                registry[current_func] = list(current_lines)
-                current_func = None
-                current_lines = []
-                continue
-            # Skip llvm intrinsic call lines entirely
-            if "@llvm." in stripped:
-                continue
-            clean = _clean_ir_line(line)
-            if clean.strip():  # skip lines that are blank after cleaning
-                current_lines.append(clean)
-
-    return registry
+# Keep a module-level alias so existing callers that imported the private
+# name continue to work (e.g. tests, downstream notebooks).
+_clean_ir_line = clean_ir_line
 
 
 # ── Execution trace (relocated to llvmanim.transform.trace) ─────────────────────
@@ -477,7 +416,7 @@ class RichStackSceneSpotlight(_StackBase):
     """Option A — Two-column layout with a moving IR source cursor.
 
     Left panel  — full IR source for the currently executing function,
-                  rendered from the .ll file via build_ir_registry.
+                  rendered from ``stream.display_lines``.
     Right panel — live animated stack (inherited from _StackBase).
 
     A yellow SurroundingRectangle cursor advances to the current instruction
@@ -502,7 +441,7 @@ class RichStackSceneSpotlight(_StackBase):
     ) -> None:
         self._enable_ssa = enable_ssa
         trace = build_execution_trace(stream, entry, include_ssa=enable_ssa)
-        self._ir_registry = build_ir_registry(stream.source_path)
+        self._ir_registry = stream.display_lines
         if enable_ssa:
             self._STACK_X = _3COL_STACK_X
             self._SLOT_WIDTH = _3COL_SLOT_W

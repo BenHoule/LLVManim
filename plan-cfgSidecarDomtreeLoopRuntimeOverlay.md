@@ -161,7 +161,7 @@ Preserve the original `.ll` as the canonical visualization source and introduce 
 
 6. Sidecar format never specified. JSON is the obvious choice given `export_scene_graph_json` exists, but the plan never commits to a format.
 
-7. `build_ir_registry()` in *rich_stack_scene.py* also reparses .ll. This is separate from build_execution_trace but the same category of architectural debt. The plan should note it.
+7. ~~`build_ir_registry()` in *rich_stack_scene.py* also reparses .ll.~~ **Resolved** — IR display lines are now built at ingest time via `build_display_lines` and flow through `ProgramEventStream.display_lines`.
 
 8. The xray ELF binary in the repo root appears to be an XRay-instrumented binary relevant to Phase C. Not mentioned in the plan.
 
@@ -198,9 +198,9 @@ Preserve the original .ll as canonical visualization source. Introduce typed CFG
 - Dependency: step 0.1.
 
 
-#### Step 0.3: Note build_ir_registry reparse debt
-- `build_ir_registry` in the present layer reparses the .ll file for IR display lines. Document as future work — not blocking but should eventually be pipeline-driven.
-- Dependency: none (documentation only).
+#### Step 0.3: ~~Note build_ir_registry reparse debt~~ **Done**
+- ~~`build_ir_registry` in the present layer reparses the .ll file for IR display lines.~~ Resolved: `build_display_lines` in ingest layer now provides `ProgramEventStream.display_lines`; `build_ir_registry` removed.
+- Dependency: none.
 
 #### Relevant files:
 *pyproject.toml* — add import-linter contracts

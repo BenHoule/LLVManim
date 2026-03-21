@@ -6,7 +6,6 @@ from llvmanim.ingest.display_lines import build_display_lines, clean_ir_line
 from llvmanim.present.rich_stack_scene import (
     _call_site_idx,
     _find_line_idx,
-    build_ir_registry,
 )
 
 
@@ -24,9 +23,8 @@ def test_clean_ir_line_removes_noise_tokens() -> None:
     assert "@f" in cleaned
 
 
-def test_build_ir_registry_collects_functions_and_skips_intrinsics(tmp_path) -> None:
-    ir_file = tmp_path / "demo.ll"
-    ir_file.write_text(
+def test_build_display_lines_collects_functions_and_skips_intrinsics() -> None:
+    registry = build_display_lines(
         """
 define i32 @main() #0 {
 entry:
@@ -41,8 +39,6 @@ entry:
 }
 """.strip()
     )
-
-    registry = build_ir_registry(ir_file.as_posix())
 
     assert set(registry) == {"main", "helper"}
     assert any(line.startswith("define i32 @main") for line in registry["main"])
@@ -64,20 +60,4 @@ def test_find_line_idx_and_call_site_idx() -> None:
     assert _find_line_idx(lines, "does not exist") == 0
     assert _call_site_idx(lines, "foo") == 2
     assert _call_site_idx(lines, "bar") == 0
-
-
-def test_build_ir_registry_delegates_to_build_display_lines(tmp_path) -> None:
-    """build_ir_registry (file wrapper) produces the same result as build_display_lines (text)."""
-    ir_text = """\
-define void @f() {
-entry:
-  ret void
-}
-"""
-    ir_file = tmp_path / "same.ll"
-    ir_file.write_text(ir_text)
-
-    from_file = build_ir_registry(ir_file.as_posix())
-    from_text = build_display_lines(ir_text)
-    assert from_file == from_text
 

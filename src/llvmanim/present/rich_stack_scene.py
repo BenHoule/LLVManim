@@ -21,12 +21,10 @@ Three display modes are provided:
 
 IR display lines are built at ingest time and stored in
 ``ProgramEventStream.display_lines`` so that the presentation layer never
-re-reads the ``.ll`` file.  ``build_ir_registry`` is retained as a thin
-wrapper for callers that only have a file path.
+re-reads the ``.ll`` file.
 
 Public API
 ----------
-build_ir_registry        — (deprecated) parse a .ll file → display lines
 RichStackSceneBadge      — ``--ir-mode basic`` scene; accepts a ProgramEventStream
 RichStackSceneSpotlight  — ``--ir-mode rich``  scene; accepts a ProgramEventStream
                            (pass ``enable_ssa=True`` for 3-column SSA mode)
@@ -62,7 +60,7 @@ from manim import (
     VGroup,
 )
 
-from llvmanim.ingest.display_lines import build_display_lines, clean_ir_line
+from llvmanim.ingest.display_lines import clean_ir_line
 from llvmanim.present.ssa_formatting import (
     OP_COLORS,
     extract_ssa_name,
@@ -70,21 +68,6 @@ from llvmanim.present.ssa_formatting import (
 )
 from llvmanim.transform.models import ProgramEventStream
 from llvmanim.transform.trace import RichTraceStep, TraceStep, build_execution_trace
-
-# ── IR registry ────────────────────────────────────────────────────────────────
-
-
-def build_ir_registry(source_path: str) -> dict[str, list[str]]:
-    """Parse a .ll file and return per-function display-line lists.
-
-    .. deprecated::
-        Prefer ``stream.display_lines`` which is populated at ingest time,
-        avoiding a second file read.  This wrapper remains for callers that
-        only have a file path.
-    """
-    with open(source_path, encoding="utf-8") as fh:
-        return build_display_lines(fh.read())
-
 
 # Keep a module-level alias so existing callers that imported the private
 # name continue to work (e.g. tests, downstream notebooks).
@@ -433,7 +416,7 @@ class RichStackSceneSpotlight(_StackBase):
     """Option A — Two-column layout with a moving IR source cursor.
 
     Left panel  — full IR source for the currently executing function,
-                  rendered from the .ll file via build_ir_registry.
+                  rendered from ``stream.display_lines``.
     Right panel — live animated stack (inherited from _StackBase).
 
     A yellow SurroundingRectangle cursor advances to the current instruction

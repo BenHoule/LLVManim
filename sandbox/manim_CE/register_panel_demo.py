@@ -392,8 +392,8 @@ def _build_ir_panel(func_name: str) -> VGroup:
     group = VGroup()
     for i, line in enumerate(lines):
         txt = Text(line, font="Monospace", font_size=_IR_FONT_SIZE)
-        txt.move_to([_IR_PANEL_X, _IR_PANEL_TOP_Y - i * _IR_LINE_SPACING, 0])
-        txt.align_to([_IR_PANEL_X - 2.2, 0, 0], direction=LEFT)
+        txt.move_to((_IR_PANEL_X, _IR_PANEL_TOP_Y - i * _IR_LINE_SPACING, 0))
+        txt.align_to((_IR_PANEL_X - 2.2, 0, 0), direction=LEFT)
         group.add(txt)
     return group
 
@@ -473,15 +473,15 @@ class RegisterPanelDemo(Scene):
 
         # Column headers
         ir_lbl = Text("IR Source", font_size=19, color=GREY_B)
-        ir_lbl.move_to([_IR_PANEL_X, 2.7, 0])
+        ir_lbl.move_to((_IR_PANEL_X, 2.7, 0))
         self.add(ir_lbl)
 
         ssa_lbl = Text("SSA Values", font_size=19, color=GREY_B)
-        ssa_lbl.move_to([_SSA_PANEL_X, 2.7, 0])
+        ssa_lbl.move_to((_SSA_PANEL_X, 2.7, 0))
         self.add(ssa_lbl)
 
         stack_lbl = Text("Stack  (grows ↓)", font_size=19, color=GREY_B)
-        stack_lbl.move_to([_STACK_X, 2.7, 0])
+        stack_lbl.move_to((_STACK_X, 2.7, 0))
         self.add(stack_lbl)
 
         # IR panel — starts with @main
@@ -616,7 +616,7 @@ class RegisterPanelDemo(Scene):
         color = _OP_COLORS.get(action, GREY_B)
 
         mob = _ssa_row(name, display_value, color)
-        mob.move_to([_SSA_PANEL_X, self._ssa_cursor_y - _SSA_ROW_H / 2, 0])
+        mob.move_to((_SSA_PANEL_X, self._ssa_cursor_y - _SSA_ROW_H / 2, 0))
         self._ssa_cursor_y -= _SSA_ROW_H + _SSA_GAP
 
         self._ssa_entries.append((mob, func_name))

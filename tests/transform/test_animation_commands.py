@@ -96,3 +96,25 @@ def test_build_animation_commands_ignores_extra_returns_without_matching_call() 
     assert pushes == 1
     assert pops == 1
     assert underflow_signals == 0
+
+
+def test_build_animation_commands_populates_target() -> None:
+    """Commands should have a non-empty target field."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _event(function_name="main", kind="call"),
+            _event(function_name="main", kind="alloca", block_name="entry"),
+            _event(function_name="main", kind="ret"),
+        ],
+    )
+    commands = build_animation_commands(stream)
+
+    push_cmd = next(c for c in commands if c.action == "push_stack_frame")
+    assert push_cmd.target == "main"
+
+    alloca_cmd = next(c for c in commands if c.action == "create_stack_slot")
+    assert "::" in alloca_cmd.target  # "main::entry"
+
+    pop_cmd = next(c for c in commands if c.action == "pop_stack_frame")
+    assert pop_cmd.target == "main"

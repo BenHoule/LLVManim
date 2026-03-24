@@ -14,9 +14,9 @@ from llvmanim.present.cfg_animation_scene import (
 )
 from llvmanim.transform.models import (
     CFGBlock,
-    CFGEdge,
     EventKind,
     IREvent,
+    SceneEdge,
     SceneGraph,
     SceneNode,
 )
@@ -34,10 +34,32 @@ def _event(fn: str, block: str, opcode: str, text: str = "", kind: EventKind = "
     )
 
 
+def _cfg_node(block: CFGBlock, hint: str = "highlight_block") -> SceneNode:
+    """Create a SceneNode from a CFGBlock using a properties-based shape."""
+    return SceneNode(
+        id=block.id,
+        label=block.name,
+        kind="cfg_block",
+        properties={
+            "block_name": block.name,
+            "function_name": block.function_name,
+            "role": block.role,
+            "terminator_opcode": block.terminator_opcode,
+            "events": block.events,
+            "memory_ops": block.memory_ops,
+            "indegree": block.indegree,
+            "outdegree": block.outdegree,
+        },
+        animation_hint=hint,
+    )
+
+
 def _simple_graph() -> SceneGraph:
     """Build a 2-node graph for testing."""
     entry_block = CFGBlock(
-        id="f::entry", name="entry", function_name="f",
+        id="f::entry",
+        name="entry",
+        function_name="f",
         events=[
             _event("f", "entry", "alloca", "%x = alloca i32", "alloca"),
             _event("f", "entry", "br", "br label %exit", "br"),
@@ -46,17 +68,19 @@ def _simple_graph() -> SceneGraph:
         role="entry",
     )
     exit_block = CFGBlock(
-        id="f::exit", name="exit", function_name="f",
+        id="f::exit",
+        name="exit",
+        function_name="f",
         events=[_event("f", "exit", "ret", "ret i32 0", "ret")],
         terminator_opcode="ret",
         role="exit",
     )
     return SceneGraph(
         nodes=[
-            SceneNode(id="f::entry", label="entry", role="entry", block=entry_block, animation_hint="fade_in_and_focus"),
-            SceneNode(id="f::exit", label="exit", role="exit", block=exit_block, animation_hint="fade_out"),
+            _cfg_node(entry_block, "fade_in_and_focus"),
+            _cfg_node(exit_block, "fade_out"),
         ],
-        edges=[CFGEdge(source="f::entry", target="f::exit")],
+        edges=[SceneEdge(source="f::entry", target="f::exit")],
     )
 
 
@@ -69,7 +93,8 @@ def _simple_layout() -> DotLayout:
         },
         edges=[
             DotEdgeLayout(
-                source="entry", target="exit",
+                source="entry",
+                target="exit",
                 spline_points=[(200, 230), (200, 200), (200, 170), (200, 140), (200, 120)],
             ),
         ],
@@ -100,35 +125,41 @@ def test_coord_mapper_size_scales() -> None:
 
 def test_block_summary_ret() -> None:
     block = CFGBlock(
-        id="f::exit", name="exit", function_name="f",
+        id="f::exit",
+        name="exit",
+        function_name="f",
         events=[_event("f", "exit", "ret", "ret i32 0", "ret")],
         terminator_opcode="ret",
     )
-    node = SceneNode(id="f::exit", label="exit", role="exit", block=block, animation_hint="fade_out")
+    node = _cfg_node(block, "fade_out")
     assert "ret" in _block_summary(node)
 
 
 def test_block_summary_branch() -> None:
     block = CFGBlock(
-        id="f::cond", name="cond", function_name="f",
+        id="f::cond",
+        name="cond",
+        function_name="f",
         events=[_event("f", "cond", "br", "br i1 %cmp, label %yes, label %no", "br")],
         terminator_opcode="br",
     )
-    node = SceneNode(id="f::cond", label="cond", role="branch", block=block, animation_hint="pulse_and_split")
+    node = _cfg_node(block, "pulse_and_split")
     summary = _block_summary(node)
     assert "br i1 %cmp" in summary
 
 
 def test_block_summary_call() -> None:
     block = CFGBlock(
-        id="f::entry", name="entry", function_name="f",
+        id="f::entry",
+        name="entry",
+        function_name="f",
         events=[
             _event("f", "entry", "call", "call void @helper()", "call"),
             _event("f", "entry", "ret", "ret void", "ret"),
         ],
         terminator_opcode="ret",
     )
-    node = SceneNode(id="f::entry", label="entry", role="entry", block=block, animation_hint="fade_in_and_focus")
+    node = _cfg_node(block)
     summary = _block_summary(node)
     assert "call @helper" in summary
 

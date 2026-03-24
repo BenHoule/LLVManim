@@ -5,6 +5,7 @@ from llvmanim.transform.models import BlockMetadata, CFGBlock, ProgramEventStrea
 from llvmanim.transform.scene import (
   _animation_hint_for_block,
   build_scene_graph,
+  build_stack_scene_graph,
 )
 
 
@@ -29,8 +30,8 @@ def test_build_scene_graph_single_block() -> None:
     graph = build_scene_graph(stream)
     assert len(graph.nodes) == 1
     assert len(graph.edges) == 0
-    assert graph.nodes[0].block.function_name == "f"
-    assert graph.nodes[0].block.name == "entry"
+    assert graph.nodes[0].properties["function_name"] == "f"
+    assert graph.nodes[0].label == "entry"
 
 
 def test_build_scene_graph_groups_events_by_block() -> None:
@@ -47,7 +48,7 @@ def test_build_scene_graph_groups_events_by_block() -> None:
         }
     """)
     graph = build_scene_graph(stream)
-    block_names = {node.block.name for node in graph.nodes}
+    block_names = {node.label for node in graph.nodes}
     assert block_names == {"entry", "yes", "no"}
 
 
@@ -81,7 +82,7 @@ def test_build_scene_graph_assigns_entry_role() -> None:
         }
     """)
     graph = build_scene_graph(stream)
-    assert graph.nodes[0].role == "entry"
+    assert graph.nodes[0].properties["role"] == "entry"
 
 
 def test_build_scene_graph_assigns_exit_role() -> None:
@@ -96,8 +97,8 @@ def test_build_scene_graph_assigns_exit_role() -> None:
         }
     """)
     graph = build_scene_graph(stream)
-    node_map = {n.block.name: n for n in graph.nodes}
-    assert node_map["done"].role == "exit"
+    node_map = {n.label: n for n in graph.nodes}
+    assert node_map["done"].properties["role"] == "exit"
 
 
 def test_build_scene_graph_assigns_branch_role() -> None:
@@ -114,12 +115,12 @@ def test_build_scene_graph_assigns_branch_role() -> None:
         }
     """)
     graph = build_scene_graph(stream)
-    node_map = {n.block.name: n for n in graph.nodes}
-    assert node_map["entry"].role == "branch"
+    node_map = {n.label: n for n in graph.nodes}
+    assert node_map["entry"].properties["role"] == "branch"
 
 
 def test_build_scene_graph_block_carries_memory_ops() -> None:
-    """Alloca/load/store events are captured in block.memory_ops."""
+    """Alloca/load/store events are captured in properties['memory_ops']."""
     stream = parse_ir_to_events("""
         define void @f() {
         entry:
@@ -131,7 +132,7 @@ def test_build_scene_graph_block_carries_memory_ops() -> None:
     """)
     graph = build_scene_graph(stream)
     assert len(graph.nodes) == 1
-    mem_opcodes = [e.opcode for e in graph.nodes[0].block.memory_ops]
+    mem_opcodes = [e.opcode for e in graph.nodes[0].properties["memory_ops"]]
     assert "alloca" in mem_opcodes
     assert "store" in mem_opcodes
     assert "load" in mem_opcodes
@@ -155,8 +156,8 @@ def test_build_scene_graph_assigns_merge_role() -> None:
         }
     """)
     graph = build_scene_graph(stream)
-    node_map = {n.block.name: n for n in graph.nodes}
-    assert node_map["merge"].role == "merge"
+    node_map = {n.label: n for n in graph.nodes}
+    assert node_map["merge"].properties["role"] == "merge"
     assert node_map["merge"].animation_hint == "converge"
 
 
@@ -178,8 +179,8 @@ def test_build_scene_graph_linear_block_gets_highlight_hint() -> None:
         }
     """)
     graph = build_scene_graph(stream)
-    node_map = {n.block.name: n for n in graph.nodes}
-    assert node_map["left"].role == "linear"
+    node_map = {n.label: n for n in graph.nodes}
+    assert node_map["left"].properties["role"] == "linear"
     assert node_map["left"].animation_hint == "highlight_block"
 
 
@@ -242,9 +243,9 @@ def test_loop_header_metadata_overrides_animation_hint() -> None:
         "f::loop": BlockMetadata(is_loop_header=True, loop_depth=1, loop_id="L0"),
     }
     graph = build_scene_graph(stream, analysis_metadata=metadata)
-    node_map = {n.block.name: n for n in graph.nodes}
+    node_map = {n.label: n for n in graph.nodes}
 
-    assert node_map["loop"].block.is_loop_header is True
+    assert node_map["loop"].properties["is_loop_header"] is True
     assert node_map["loop"].animation_hint == "pulse_loop_header"
 
 
@@ -267,12 +268,12 @@ def test_metadata_applies_domtree_fields() -> None:
         "f::no": BlockMetadata(idom="f::entry", dom_depth=1),
     }
     graph = build_scene_graph(stream, analysis_metadata=metadata)
-    node_map = {n.block.name: n for n in graph.nodes}
+    node_map = {n.label: n for n in graph.nodes}
 
-    assert node_map["yes"].block.idom == "f::entry"
-    assert node_map["yes"].block.dom_depth == 1
-    assert node_map["no"].block.idom == "f::entry"
-    assert node_map["entry"].block.dom_depth == 0
+    assert node_map["yes"].properties["idom"] == "f::entry"
+    assert node_map["yes"].properties["dom_depth"] == 1
+    assert node_map["no"].properties["idom"] == "f::entry"
+    assert node_map["entry"].properties["dom_depth"] == 0
 
 
 def test_metadata_applies_loop_fields() -> None:
@@ -300,13 +301,13 @@ def test_metadata_applies_loop_fields() -> None:
         "f::body": BlockMetadata(loop_depth=1, loop_id="loop_0"),
     }
     graph = build_scene_graph(stream, analysis_metadata=metadata)
-    node_map = {n.block.name: n for n in graph.nodes}
+    node_map = {n.label: n for n in graph.nodes}
 
-    assert node_map["header"].block.is_loop_header is True
-    assert node_map["header"].block.loop_id == "loop_0"
-    assert node_map["header"].block.is_backedge_target is True
-    assert node_map["body"].block.loop_depth == 1
-    assert node_map["body"].block.loop_id == "loop_0"
+    assert node_map["header"].properties["is_loop_header"] is True
+    assert node_map["header"].properties["loop_id"] == "loop_0"
+    assert node_map["header"].properties["is_backedge_target"] is True
+    assert node_map["body"].properties["loop_depth"] == 1
+    assert node_map["body"].properties["loop_id"] == "loop_0"
 
 
 def test_metadata_ignores_unknown_block_ids() -> None:
@@ -323,7 +324,7 @@ def test_metadata_ignores_unknown_block_ids() -> None:
     graph = build_scene_graph(stream, analysis_metadata=metadata)
 
     assert len(graph.nodes) == 1
-    assert graph.nodes[0].block.dom_depth == 0  # unchanged
+    assert graph.nodes[0].properties["dom_depth"] == 0  # unchanged
 
 
 def test_no_metadata_preserves_original_behavior() -> None:
@@ -344,7 +345,7 @@ def test_no_metadata_preserves_original_behavior() -> None:
     graph_with_empty = build_scene_graph(stream, analysis_metadata={})
 
     def _snapshot(g: SceneGraph) -> set[tuple[str, str, str]]:
-        return {(n.block.name, n.role, n.animation_hint) for n in g.nodes}
+        return {(n.label, n.properties["role"], n.animation_hint) for n in g.nodes}
 
     assert _snapshot(graph_without) == _snapshot(graph_with_none) == _snapshot(graph_with_empty)
 
@@ -368,3 +369,221 @@ def test_scene_graph_preserves_edge_labels() -> None:
     graph = build_scene_graph(stream)
     labels = {e.label for e in graph.edges}
     assert labels == {"T", "F"}
+
+
+# ── build_stack_scene_graph ──────────────────────────────────────
+
+
+def _stack_event(fn, kind, text, idx, *, opcode=None, operands=None):
+    from llvmanim.transform.models import IREvent
+    return IREvent(
+        function_name=fn,
+        block_name="entry",
+        opcode=opcode or kind,
+        text=text,
+        kind=kind,
+        index_in_function=idx,
+        debug_line=None,
+        operands=operands or [],
+    )
+
+
+def test_stack_scene_graph_empty_stream() -> None:
+    """An empty stream produces an empty scene graph."""
+    stream = ProgramEventStream(source_path="<test>")
+    graph = build_stack_scene_graph(stream, entry="main")
+    assert graph.nodes == []
+    assert graph.edges == []
+    assert graph.commands == []
+
+
+def test_stack_scene_graph_single_function() -> None:
+    """A single function with one alloca produces a frame, a slot, and commands."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("main", "alloca", "%x = alloca i32", 0),
+            _stack_event("main", "ret", "ret i32 0", 1),
+        ],
+    )
+    graph = build_stack_scene_graph(stream, entry="main")
+
+    frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
+    slot_nodes = [n for n in graph.nodes if n.kind == "stack_slot"]
+    assert len(frame_nodes) == 1
+    assert len(slot_nodes) == 1
+
+    assert frame_nodes[0].label == "main"
+    assert slot_nodes[0].label == "%x"
+
+    actions = [c.action for c in graph.commands]
+    assert actions == ["push_stack_frame", "create_stack_slot", "pop_stack_frame"]
+
+
+def test_stack_scene_graph_callee_descent() -> None:
+    """Calls descend into defined callees and create call edges."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("main", "call", "call void @foo()", 0),
+            _stack_event("main", "ret", "ret i32 0", 1),
+            _stack_event("foo", "alloca", "%y = alloca i32", 0),
+            _stack_event("foo", "ret", "ret void", 1),
+        ],
+    )
+    graph = build_stack_scene_graph(stream, entry="main")
+
+    frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
+    assert len(frame_nodes) == 2
+    frame_labels = {n.label for n in frame_nodes}
+    assert frame_labels == {"main", "foo"}
+
+    call_edges = [e for e in graph.edges if e.kind == "call"]
+    assert len(call_edges) == 1
+    assert "main" in call_edges[0].source
+    assert "foo" in call_edges[0].target
+
+    actions = [c.action for c in graph.commands]
+    assert actions == [
+        "push_stack_frame",  # main
+        "push_stack_frame",  # foo
+        "create_stack_slot",  # %y in foo
+        "pop_stack_frame",   # foo
+        "pop_stack_frame",   # main
+    ]
+
+
+def test_stack_scene_graph_skips_external_functions() -> None:
+    """External (undefined) callees are silently skipped."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("main", "call", "call void @external()", 0),
+            _stack_event("main", "ret", "ret i32 0", 1),
+        ],
+    )
+    graph = build_stack_scene_graph(stream, entry="main")
+
+    frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
+    assert len(frame_nodes) == 1
+    assert frame_nodes[0].label == "main"
+    assert graph.edges == []
+
+
+def test_stack_scene_graph_skips_llvm_intrinsics() -> None:
+    """LLVM intrinsics (llvm.*) are silently skipped."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("main", "call", "call void @llvm.memcpy.p0.p0.i64(ptr %a, ptr %b, i64 8, i1 false)", 0),
+            _stack_event("main", "ret", "ret i32 0", 1),
+        ],
+    )
+    graph = build_stack_scene_graph(stream, entry="main")
+
+    frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
+    assert len(frame_nodes) == 1
+
+
+def test_stack_scene_graph_max_depth_honored() -> None:
+    """max_depth=0 should only include the entry frame, not callees."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("main", "call", "call void @foo()", 0),
+            _stack_event("main", "ret", "ret i32 0", 1),
+            _stack_event("foo", "ret", "ret void", 0),
+        ],
+    )
+    graph = build_stack_scene_graph(stream, entry="main", max_depth=0)
+
+    frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
+    assert len(frame_nodes) == 1
+    assert frame_nodes[0].label == "main"
+
+
+def test_stack_scene_graph_include_ssa_emits_binop_compare_load() -> None:
+    """include_ssa=True emits binop, compare, and load animation commands."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("main", "alloca", "%x = alloca i32", 0),
+            _stack_event("main", "load", "%1 = load i32, ptr %x", 1, operands=["%x"]),
+            _stack_event("main", "binop", "%mul = mul nsw i32 2, %1", 2, operands=["2", "%1"]),
+            _stack_event("main", "compare", "%cmp = icmp sgt i32 %mul, 5", 3, operands=["%mul", "5"]),
+            _stack_event("main", "ret", "ret i32 %mul", 4),
+        ],
+    )
+    graph = build_stack_scene_graph(stream, entry="main", include_ssa=True)
+
+    actions = [c.action for c in graph.commands]
+    assert "animate_memory_read" in actions
+    assert "animate_binop" in actions
+    assert "animate_compare" in actions
+
+    # Verify operands are passed through
+    binop_cmd = next(c for c in graph.commands if c.action == "animate_binop")
+    assert binop_cmd.params["operands"] == ["2", "%1"]
+
+
+def test_stack_scene_graph_without_ssa_skips_binop() -> None:
+    """Without include_ssa, binop/compare/load events produce no commands."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("main", "binop", "%mul = mul nsw i32 2, %1", 0, operands=["2", "%1"]),
+            _stack_event("main", "ret", "ret i32 0", 1),
+        ],
+    )
+    graph = build_stack_scene_graph(stream, entry="main", include_ssa=False)
+
+    actions = [c.action for c in graph.commands]
+    assert "animate_binop" not in actions
+
+
+def test_stack_scene_graph_branch_events() -> None:
+    """Branch events emit highlight_branch commands."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("main", "br", "br label %exit", 0),
+            _stack_event("main", "ret", "ret i32 0", 1),
+        ],
+    )
+    graph = build_stack_scene_graph(stream, entry="main")
+
+    actions = [c.action for c in graph.commands]
+    assert "highlight_branch" in actions
+
+
+def test_stack_scene_graph_command_targets_reference_node_ids() -> None:
+    """All command targets should reference existing node IDs."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("main", "alloca", "%x = alloca i32", 0),
+            _stack_event("main", "ret", "ret i32 0", 1),
+        ],
+    )
+    graph = build_stack_scene_graph(stream, entry="main")
+
+    node_ids = {n.id for n in graph.nodes}
+    for cmd in graph.commands:
+        assert cmd.target in node_ids, f"Command target {cmd.target!r} not in node IDs"
+
+
+def test_stack_scene_graph_slot_properties() -> None:
+    """Stack slot nodes carry frame_id and function_name in properties."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("main", "alloca", "%ptr = alloca i32", 0),
+            _stack_event("main", "ret", "ret i32 0", 1),
+        ],
+    )
+    graph = build_stack_scene_graph(stream, entry="main")
+
+    slot = next(n for n in graph.nodes if n.kind == "stack_slot")
+    assert slot.properties["function_name"] == "main"
+    assert "frame_id" in slot.properties
+    assert slot.label == "%ptr"

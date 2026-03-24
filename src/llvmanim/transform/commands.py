@@ -1,21 +1,13 @@
 """Translation from IR event streams to typed animation commands."""
 
-from dataclasses import dataclass
-from typing import Literal
+from __future__ import annotations
 
-from llvmanim.transform.models import EventKind, IREvent, ProgramEventStream
-
-ActionKind = Literal[
-    "create_stack_slot",
-    "animate_memory_read",
-    "animate_memory_write",
-    "animate_binop",
-    "animate_compare",
-    "push_stack_frame",
-    "pop_stack_frame",
-    "highlight_branch",
-    "signal_stack_underflow",
-]
+from llvmanim.transform.models import (
+    ActionKind,
+    AnimationCommand,
+    EventKind,
+    ProgramEventStream,
+)
 
 _EVENT_TO_ACTION: dict[EventKind, ActionKind] = {
     "alloca": "create_stack_slot",
@@ -27,14 +19,6 @@ _EVENT_TO_ACTION: dict[EventKind, ActionKind] = {
     "ret": "pop_stack_frame",
     "br": "highlight_branch",
 }
-
-
-@dataclass(slots=True)
-class AnimationCommand:
-    """Represents a single animation command derived from an IREvent."""
-
-    action: ActionKind
-    event: IREvent
 
 
 def build_animation_commands(stream: ProgramEventStream) -> list[AnimationCommand]:
@@ -61,16 +45,28 @@ def build_animation_commands(stream: ProgramEventStream) -> list[AnimationComman
 
         if action == "push_stack_frame":
             pushed_frames += 1
-            commands.append(AnimationCommand(action=action, event=event))
+            commands.append(AnimationCommand(
+                action=action,
+                target=event.function_name,
+                event=event,
+            ))
             continue
 
         if action == "pop_stack_frame":
             if pushed_frames == 0:
                 continue
             pushed_frames -= 1
-            commands.append(AnimationCommand(action=action, event=event))
+            commands.append(AnimationCommand(
+                action=action,
+                target=event.function_name,
+                event=event,
+            ))
             continue
 
-        commands.append(AnimationCommand(action=action, event=event))
+        commands.append(AnimationCommand(
+            action=action,
+            target=f"{event.function_name}::{event.block_name}",
+            event=event,
+        ))
 
     return commands

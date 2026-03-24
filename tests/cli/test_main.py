@@ -84,7 +84,7 @@ def test_main_draw_flag_prints_skipped_when_png_unavailable(tmp_path, capsys) ->
 
 
 def test_main_animate_flag_calls_scene_render(tmp_path) -> None:
-    """--animate flag instantiates RichStackSceneBadge (default) and calls render()."""
+    """--animate flag instantiates StackRenderer (default) and calls render()."""
     from unittest.mock import patch
 
     ll_file = tmp_path / "test.ll"
@@ -95,18 +95,18 @@ def test_main_animate_flag_calls_scene_render(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.RichStackSceneBadge") as MockScene:
+    with patch("llvmanim.cli.main.StackRenderer") as MockScene:
         code = main(argv=[str(ll_file), "--animate"])
     assert code == 0
     MockScene.assert_called_once()
     MockScene.return_value.render.assert_called_once()
 
 
-def test_main_animate_flag_passes_stream_to_scene(tmp_path) -> None:
-    """--animate flag passes a ProgramEventStream to the scene constructor."""
+def test_main_animate_flag_passes_graph_to_scene(tmp_path) -> None:
+    """--animate flag passes a SceneGraph to the StackRenderer constructor."""
     from unittest.mock import patch
 
-    from llvmanim.transform.models import ProgramEventStream
+    from llvmanim.transform.models import SceneGraph
 
     ll_file = tmp_path / "test.ll"
     ll_file.write_text("""
@@ -115,10 +115,10 @@ def test_main_animate_flag_passes_stream_to_scene(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.RichStackSceneBadge") as MockScene:
+    with patch("llvmanim.cli.main.StackRenderer") as MockScene:
         main(argv=[str(ll_file), "--animate"])
-    stream_arg = MockScene.call_args[0][0]
-    assert isinstance(stream_arg, ProgramEventStream)
+    graph_arg = MockScene.call_args[0][0]
+    assert isinstance(graph_arg, SceneGraph)
 
 
 def test_main_preview_flag_calls_render_with_preview(tmp_path) -> None:
@@ -132,7 +132,7 @@ def test_main_preview_flag_calls_render_with_preview(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.RichStackSceneBadge") as MockScene:
+    with patch("llvmanim.cli.main.StackRenderer") as MockScene:
         code = main(argv=[str(ll_file), "--preview"])
     assert code == 0
     MockScene.return_value.render.assert_called_once_with(preview=True)
@@ -149,7 +149,7 @@ def test_main_animate_flag_calls_render_without_preview(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.RichStackSceneBadge") as MockScene:
+    with patch("llvmanim.cli.main.StackRenderer") as MockScene:
         code = main(argv=[str(ll_file), "--animate"])
     assert code == 0
     MockScene.return_value.render.assert_called_once_with(preview=False)
@@ -167,14 +167,14 @@ def test_main_animate_sets_manim_media_dir(tmp_path) -> None:
         }
     """)
     outdir = tmp_path / "out"
-    with patch("llvmanim.cli.main.RichStackSceneBadge"), \
+    with patch("llvmanim.cli.main.StackRenderer"), \
          patch("llvmanim.cli.main.manim_config") as mock_cfg:
         main(argv=[str(ll_file), "--animate", "--outdir", str(outdir)])
     assert mock_cfg.media_dir == str(outdir)
 
 
 def test_main_ir_mode_rich_uses_spotlight_scene(tmp_path) -> None:
-    """--ir-mode rich instantiates RichStackSceneSpotlight instead of RichStackSceneBadge."""
+    """--ir-mode rich instantiates RichStackSceneSpotlight instead of StackRenderer."""
     from unittest.mock import patch
 
     ll_file = tmp_path / "test.ll"
@@ -185,11 +185,11 @@ def test_main_ir_mode_rich_uses_spotlight_scene(tmp_path) -> None:
         }
     """)
     with patch("llvmanim.cli.main.RichStackSceneSpotlight") as MockSpotlight, \
-         patch("llvmanim.cli.main.RichStackSceneBadge") as MockBadge:
+         patch("llvmanim.cli.main.StackRenderer") as MockStack:
         code = main(argv=[str(ll_file), "--animate", "--ir-mode", "rich"])
     assert code == 0
     MockSpotlight.assert_called_once()
-    MockBadge.assert_not_called()
+    MockStack.assert_not_called()
     MockSpotlight.return_value.render.assert_called_once_with(preview=False)
 
 
@@ -205,19 +205,19 @@ def test_main_ir_mode_rich_ssa_uses_spotlight_with_enable_ssa(tmp_path) -> None:
         }
     """)
     with patch("llvmanim.cli.main.RichStackSceneSpotlight") as MockSpotlight, \
-         patch("llvmanim.cli.main.RichStackSceneBadge") as MockBadge:
+         patch("llvmanim.cli.main.StackRenderer") as MockStack:
         code = main(argv=[str(ll_file), "--animate", "--ir-mode", "rich-ssa"])
     assert code == 0
     MockSpotlight.assert_called_once()
     # Verify enable_ssa=True was passed
     _, kwargs = MockSpotlight.call_args
     assert kwargs.get("enable_ssa") is True
-    MockBadge.assert_not_called()
+    MockStack.assert_not_called()
     MockSpotlight.return_value.render.assert_called_once_with(preview=False)
 
 
-def test_main_ir_mode_basic_uses_badge_scene(tmp_path) -> None:
-    """--ir-mode basic (default) instantiates RichStackSceneBadge."""
+def test_main_ir_mode_basic_uses_stack_renderer(tmp_path) -> None:
+    """--ir-mode basic (default) instantiates StackRenderer."""
     from unittest.mock import patch
 
     ll_file = tmp_path / "test.ll"
@@ -227,11 +227,11 @@ def test_main_ir_mode_basic_uses_badge_scene(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.RichStackSceneBadge") as MockBadge, \
+    with patch("llvmanim.cli.main.StackRenderer") as MockStack, \
          patch("llvmanim.cli.main.RichStackSceneSpotlight") as MockSpotlight:
         code = main(argv=[str(ll_file), "--animate", "--ir-mode", "basic"])
     assert code == 0
-    MockBadge.assert_called_once()
+    MockStack.assert_called_once()
     MockSpotlight.assert_not_called()
 
 
@@ -246,7 +246,7 @@ def test_main_speed_flag_passes_multiplier_to_scene(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.RichStackSceneBadge") as MockScene:
+    with patch("llvmanim.cli.main.StackRenderer") as MockScene:
         main(argv=[str(ll_file), "--animate", "--speed", "2.5"])
     _, kwargs = MockScene.call_args
     assert kwargs.get("speed") == 2.5
@@ -263,7 +263,7 @@ def test_main_speed_default_is_1(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.RichStackSceneBadge") as MockScene:
+    with patch("llvmanim.cli.main.StackRenderer") as MockScene:
         main(argv=[str(ll_file), "--animate"])
     _, kwargs = MockScene.call_args
     assert kwargs.get("speed") == 1.0
@@ -280,7 +280,7 @@ def test_main_gif_renders_manim_as_mp4(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.RichStackSceneBadge"), \
+    with patch("llvmanim.cli.main.StackRenderer"), \
          patch("llvmanim.cli.main.manim_config") as mock_cfg, \
          patch("llvmanim.cli.main._find_latest_file", return_value=None):
         code = main(argv=[str(ll_file), "--animate", "--format", "gif"])
@@ -302,7 +302,7 @@ def test_main_gif_calls_conversion_when_mp4_found(tmp_path) -> None:
     """)
     fake_mp4 = tmp_path / "media" / "videos" / "scene.mp4"
 
-    with patch("llvmanim.cli.main.RichStackSceneBadge"), \
+    with patch("llvmanim.cli.main.StackRenderer"), \
          patch("llvmanim.cli.main._find_latest_file", return_value=fake_mp4), \
          patch("llvmanim.cli.main._convert_mp4_to_gif", return_value=True) as mock_convert:
         code = main(argv=[str(ll_file), "--animate", "--format", "gif", "--gif-fps", "10", "--gif-width", "720"])
@@ -402,6 +402,8 @@ def test_export_cfg_edges_writes_file(tmp_path, capsys) -> None:
 
 def test_find_latest_file_returns_most_recent_match(tmp_path) -> None:
     """_find_latest_file returns the most recently modified matching file."""
+    import os
+
     from llvmanim.cli.main import _find_latest_file
 
     older = tmp_path / "a.mp4"
@@ -409,8 +411,9 @@ def test_find_latest_file_returns_most_recent_match(tmp_path) -> None:
     older.write_text("old")
     newer.write_text("new")
 
-    older.touch()
-    newer.touch()
+    # Set explicit distinct mtimes to avoid filesystem resolution flakiness.
+    os.utime(older, (1000, 1000))
+    os.utime(newer, (2000, 2000))
 
     assert _find_latest_file(tmp_path, "*.mp4") == newer
 
@@ -734,7 +737,7 @@ def test_cfg_animate_dot_layout_error(tmp_path, capsys) -> None:
 
 
 def test_cfg_animate_renders_scene(tmp_path, capsys) -> None:
-    """--cfg-animate with valid inputs invokes CFGAnimationScene.render."""
+    """--cfg-animate with valid inputs invokes CFGRenderer.render."""
     from unittest.mock import patch
 
     from llvmanim.ingest.dot_layout import DotLayout, DotNodeLayout
@@ -757,7 +760,7 @@ def test_cfg_animate_renders_scene(tmp_path, capsys) -> None:
     )
 
     with patch("llvmanim.cli.main.compute_dot_layout", return_value=mock_layout), \
-         patch("llvmanim.cli.main.CFGAnimationScene") as mock_scene_cls:
+         patch("llvmanim.cli.main.CFGRenderer") as mock_scene_cls:
         mock_instance = mock_scene_cls.return_value
         code = main(argv=[
             str(ll_file), "--cfg-animate",

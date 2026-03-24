@@ -31,9 +31,10 @@ def test_export_scene_graph_json_has_expected_top_level_shape(tmp_path: Path, br
     export_scene_graph_json(branch_graph, output)
 
     payload = json.loads(output.read_text(encoding="utf-8"))
-    assert set(payload) == {"nodes", "edges"}
+    assert set(payload) == {"nodes", "edges", "commands"}
     assert isinstance(payload["nodes"], list)
     assert isinstance(payload["edges"], list)
+    assert isinstance(payload["commands"], list)
     assert len(payload["nodes"]) == 3
     assert len(payload["edges"]) == 2
 

@@ -83,9 +83,11 @@ class _CoordMapper:
 def _block_summary(node: SceneNode) -> str:
     """Build a short text summary from a scene node's block data."""
     parts: list[str] = []
-    block = node.block
+    props = node.properties
+    events = props.get("events", [])
+    terminator_opcode = props.get("terminator_opcode")
 
-    for event in block.events:
+    for event in events:
         if event.kind == "call" and "@llvm." not in event.text:
             import re
 
@@ -93,16 +95,16 @@ def _block_summary(node: SceneNode) -> str:
             if m:
                 parts.append(f"call @{m.group(1)}")
 
-    if block.terminator_opcode == "br" and block.events:
-        term = block.events[-1]
+    if terminator_opcode == "br" and events:
+        term = events[-1]
         import re
 
         m = re.match(r".*?(br i1 %\w+)", term.text)
         if m:
             parts.append(m.group(1))
         else:
-            parts.append(f"br {block.events[-1].opcode}")
-    elif block.terminator_opcode == "ret":
+            parts.append(f"br {events[-1].opcode}")
+    elif terminator_opcode == "ret":
         parts.append("ret")
 
     return "\n".join(parts) if parts else ""
@@ -131,7 +133,7 @@ def _build_block_mob(
     )
 
     title = Text(
-        node.block.name,
+        node.label,
         font="Monospace",
         font_size=20,
         weight=BOLD,
@@ -274,7 +276,7 @@ class CFGAnimationScene(Scene):
         self._node_lookup: dict[str, SceneNode] = {}
         for node in graph.nodes:
             self._node_lookup[node.id] = node
-            self._node_lookup[node.block.name] = node
+            self._node_lookup[node.label] = node
 
     def construct(self) -> None:
         mapper = _CoordMapper(self._layout.bounding_box)
@@ -297,7 +299,7 @@ class CFGAnimationScene(Scene):
     def _draw_graph(self, mapper: _CoordMapper) -> None:
         """Build and fade in all block nodes and edge curves."""
         for node in self._graph.nodes:
-            block_name = node.block.name
+            block_name = node.label
             node_layout = self._layout.nodes.get(block_name)
             if node_layout is None:
                 continue

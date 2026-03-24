@@ -63,7 +63,6 @@ from manim import (
     CubicBezier,
     DashedVMobject,
     FadeIn,
-    FadeOut,
     RoundedRectangle,
     Scene,
     Text,

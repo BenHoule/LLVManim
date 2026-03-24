@@ -17,10 +17,15 @@ from llvmanim.ingest.cfg_edge_io import CFGEdgeIOError, load_cfg_edges, save_cfg
 from llvmanim.ingest.dot_layout import DotLayoutError, compute_dot_layout
 from llvmanim.ingest.trace_io import TraceIOError, load_trace, save_trace
 from llvmanim.present import export_cfg_dot, export_cfg_png, export_scene_graph_json
-from llvmanim.present.cfg_animation_scene import CFGAnimationScene
-from llvmanim.present.rich_stack_scene import RichStackSceneBadge, RichStackSceneSpotlight
+from llvmanim.present.cfg_renderer import CFGRenderer
+from llvmanim.present.rich_stack_scene import RichStackSceneSpotlight
+from llvmanim.present.stack_renderer import StackRenderer
 from llvmanim.transform.models import BlockMetadata, SceneGraph
-from llvmanim.transform.scene import build_scene_graph
+from llvmanim.transform.scene import (
+    _build_overlay_commands,
+    build_scene_graph,
+    build_stack_scene_graph,
+)
 
 try:
     from manim import config as manim_config
@@ -91,14 +96,16 @@ def _collect_analysis_metadata(graph: SceneGraph) -> dict[str, BlockMetadata]:
     """Extract per-block analysis metadata from a built scene graph."""
     result: dict[str, BlockMetadata] = {}
     for node in graph.nodes:
-        blk = node.block
-        result[blk.id] = BlockMetadata(
-            idom=blk.idom,
-            dom_depth=blk.dom_depth,
-            is_loop_header=blk.is_loop_header,
-            loop_depth=blk.loop_depth,
-            loop_id=blk.loop_id,
-            is_backedge_target=blk.is_backedge_target,
+        if node.kind != "cfg_block":
+            continue
+        props = node.properties
+        result[node.id] = BlockMetadata(
+            idom=props.get("idom"),
+            dom_depth=props.get("dom_depth", 0),
+            is_loop_header=props.get("is_loop_header", False),
+            loop_depth=props.get("loop_depth", 0),
+            loop_id=props.get("loop_id"),
+            is_backedge_target=props.get("is_backedge_target", False),
         )
     return result
 
@@ -343,8 +350,15 @@ def main(argv: list[str] | None = None) -> int:
 
         source_name = Path(stream.source_path).name
         cfg_title = f"CFG Traversal  ·  {source_name}"
-        cfg_scene = CFGAnimationScene(
-            graph, dot_layout, speed=args.speed, title=cfg_title,
+
+        # Populate commands from the trace overlay for the new pipeline.
+        graph.commands = _build_overlay_commands(graph)
+
+        cfg_scene = CFGRenderer(
+            graph,
+            dot_layout,
+            speed=args.speed,
+            title=cfg_title,
         )
         cfg_scene.render(preview=args.preview)
         print("Rendered CFG traversal animation.")
@@ -356,7 +370,10 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 gif_path = mp4_path.with_suffix(".gif")
                 converted = _convert_mp4_to_gif(
-                    mp4_path, gif_path, fps=max(args.gif_fps, 1), width=max(args.gif_width, 64),
+                    mp4_path,
+                    gif_path,
+                    fps=max(args.gif_fps, 1),
+                    width=max(args.gif_width, 64),
                 )
                 if converted:
                     print(f"Wrote GIF: {gif_path}")
@@ -367,11 +384,14 @@ def main(argv: list[str] | None = None) -> int:
             manim_config.media_dir = str(outdir)
             manim_config.format = render_format
         if args.ir_mode == "rich":
+            # Rich IR panel mode: use legacy scene (not yet ported to CommandDrivenScene)
             animation_scene = RichStackSceneSpotlight(stream, speed=args.speed)
         elif args.ir_mode == "rich-ssa":
             animation_scene = RichStackSceneSpotlight(stream, speed=args.speed, enable_ssa=True)
         else:
-            animation_scene = RichStackSceneBadge(stream, speed=args.speed)
+            # Basic stack mode: use unified pipeline
+            stack_graph = build_stack_scene_graph(stream)
+            animation_scene = StackRenderer(stack_graph, speed=args.speed)
         animation_scene.render(preview=args.preview)
 
         if args.format == "gif":

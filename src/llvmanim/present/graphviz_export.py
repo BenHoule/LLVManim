@@ -37,12 +37,14 @@ def export_cfg_dot(graph: SceneGraph, output_path: str | Path) -> None:
     lines.append("    rankdir=TB")
 
     for node in graph.nodes:
-        mem_summary = ", ".join(event.opcode for event in node.block.memory_ops)
+        props = node.properties
+        memory_ops = props.get("memory_ops", [])
+        mem_summary = ", ".join(event.opcode for event in memory_ops)
 
         label_lines = [
             node.id,
-            f"role: {node.role}",
-            f"term: {node.block.terminator_opcode}",
+            f"role: {props.get('role', '')}",
+            f"term: {props.get('terminator_opcode', '')}",
         ]
         if mem_summary:
             label_lines.append(f"mem: {mem_summary}")
@@ -98,12 +100,14 @@ def export_cfg_png(graph: SceneGraph, output_prefix: str | Path) -> bool:
     traversed: set[tuple[str, str]] = set(overlay.traversed_edges) if overlay else set()
 
     for node in graph.nodes:
-        mem_summary = ", ".join(event.opcode for event in node.block.memory_ops)
+        props = node.properties
+        memory_ops = props.get("memory_ops", [])
+        mem_summary = ", ".join(event.opcode for event in memory_ops)
 
         label_lines = [
             node.id,  # visible label stays human-readable
-            f"role: {node.role}",
-            f"term: {node.block.terminator_opcode}",
+            f"role: {props.get('role', '')}",
+            f"term: {props.get('terminator_opcode', '')}",
         ]
         if mem_summary:
             label_lines.append(f"mem: {mem_summary}")

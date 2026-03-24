@@ -78,6 +78,12 @@ class StackMobjectManager:
         return []
 
     def _push(self, step: RenderStep) -> list[Animation]:
+        """
+        1. Build new frame mobject from latest state frame
+        2. Position below current top if any
+        3. Save in current_mobjects
+        4. Return FadeIn animation
+        """
         new_frame = step.state.frames[-1]
         mob = frame_to_mobject(new_frame)
         if self.current_mobjects:
@@ -86,12 +92,23 @@ class StackMobjectManager:
         return [FadeIn(mob)]
 
     def _pop(self) -> list[Animation]:
+        """
+        - If no mobjects, no-op
+        1. Pop top mobject
+        2. Return FadeOut animation
+        """
         if not self.current_mobjects:
             return []
         mob = self.current_mobjects.pop()
         return [FadeOut(mob)]
 
     def _create_slot(self, step: RenderStep) -> list[Animation]:
+        """
+        1. Rebuild top frame from latest state
+        2. Move new frame to old frame location
+        3. Replace manager reference
+        4. Return Transform from old to new
+        """
         if not self.current_mobjects:
             return []
         old_mob = self.current_mobjects[-1]
@@ -127,4 +144,3 @@ class StackAnimationScene(Scene):
             animations = self.manager.apply(step)
             if animations:
                 self.play(*animations)
-

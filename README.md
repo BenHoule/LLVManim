@@ -247,11 +247,8 @@ uv run llvmanim tests/ingest/testdata/double.ll --cfg-animate --dot-cfg .main.do
 │                     Transform (transform/)                      │
 │                                                                 │
 │  build_scene_graph(stream, analysis_metadata=...) → SceneGraph  │
-│  build_execution_trace(stream, include_ssa=...) →               │
-│      list[TraceStep] | list[RichTraceStep]                      │
-│  build_animation_commands(stream) → list[AnimationCommand]      │
-│  derive_cfg_trace(graph, function) → TraceOverlay               │
-│                                                                 │
+│  build_stack_scene_graph(stream, include_ssa=...) → SceneGraph  │
+│  derive_cfg_trace(graph, function) → TraceOverlay               ││                                                                 │
 │  • Groups events by (function, block) → CFGBlock                │
 │  • Uses typed CFG edges from ingest (or imported JSON)          │
 │  • Assigns block roles from edge topology:                      │

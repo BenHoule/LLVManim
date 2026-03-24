@@ -46,27 +46,6 @@ These are used by CLI flags:
 - `--json`
 - `--draw`
 
-## Command/RenderStep Stack Path (Still Supported In Code And Tests)
-
-The project also includes a command-to-stack-view pipeline used in unit tests and reusable for scene composition:
-
-1. `transform.commands.build_animation_commands` converts `IREvent` values into typed `AnimationCommand` values.
-2. `render_stack_model.build_render_steps` reduces commands into a sequence of stack snapshots.
-3. `scene_builder.build_scene` wraps those steps in `LLVManimScene`.
-4. `manim_stack.StackAnimationScene` plays frame push/pop/slot animations via `StackMobjectManager`.
-
-## Data Model (RenderStep Path)
-```
-RenderStep
-├── action: ActionKind        (what happened)
-├── event: IREvent            (the IR event that caused it)
-└── state: FrameStackView     (the full stack state AFTER this step)
-      └── frames: list[StackFrameView]
-            ├── function_name: str
-            └── slots: list[StackSlotView]
-                  └── name: str
-```
-
 ## Files
 
 | File | Purpose |
@@ -75,6 +54,6 @@ RenderStep
 | `stack_renderer.py` | Stack animation renderer — basic, rich (IR+cursor), and rich-ssa (IR+SSA+stack) modes |
 | `cfg_renderer.py` | CFG traversal animation renderer with DOT layout and trace overlay |
 | `ssa_formatting.py` | Shared SSA display formatting (value labels, op colors, name extraction) |
-| `cfg_animation_scene.py` | Legacy CFG scene — retained for helper functions used by CFGRenderer |
+| `cfg_animation_scene.py` | Shared helpers for CFG mobject construction (`_build_block_mob`, `_build_edge_mob`, `_CoordMapper`) |
 | `json_export.py` | Serialize `SceneGraph` to JSON |
 | `graphviz_export.py` | Write DOT and optionally render PNG via `graphviz` |

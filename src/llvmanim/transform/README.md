@@ -39,43 +39,9 @@ Steps performed by `build_scene_graph`:
 4. Optionally applies analysis metadata (domtree/loop) onto matching blocks.
 5. Wraps each block in a `SceneNode` with an `animation_hint` string.
 
-### `commands.py`
-
-Flat event-to-action translation used by the `render` layer's
-command/render-step path.
-
-```python
-from llvmanim.transform.commands import build_animation_commands
-
-commands: list[AnimationCommand] = build_animation_commands(stream)
-```
-
-`ActionKind` values and their source `EventKind`:
-
-| EventKind | ActionKind |
-|---|---|
-| `alloca` | `create_stack_slot` |
-| `load` | `animate_memory_read` |
-| `store` | `animate_memory_write` |
-| `call` | `push_stack_frame` |
-| `ret` | `pop_stack_frame` |
-| `binop` | `animate_binop` |
-| `compare` | `animate_compare` |
-| `br` | `highlight_branch` |
-| `other` | *(skipped)* |
-
 ### `trace.py`
 
-Execution-trace builder: simulates a call tree from a flat IR event stream.
-
-```python
-from llvmanim.transform.trace import build_execution_trace
-
-trace: list[TraceStep] = build_execution_trace(stream, entry="main")
-```
-
-Each `TraceStep` is a `(action, func_name, ir_text)` triple where action is
-`"push"`, `"alloca"`, or `"pop"`.
+CFG-trace derivation: builds a static traversal path by walking CFG edges.
 
 #### `derive_cfg_trace`
 

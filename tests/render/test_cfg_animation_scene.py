@@ -1,12 +1,9 @@
-"""Tests for CFGAnimationScene: CFG traversal animation via Manim."""
+"""Tests for cfg_animation_scene helpers: _CoordMapper, _block_summary, _build_block_mob, _build_edge_mob."""
 
 from __future__ import annotations
 
-from manim import Scene
-
 from llvmanim.ingest.dot_layout import DotEdgeLayout, DotLayout, DotNodeLayout
 from llvmanim.render.cfg_animation_scene import (
-    CFGAnimationScene,
     _block_summary,
     _build_block_mob,
     _build_edge_mob,
@@ -205,51 +202,3 @@ def test_build_edge_mob_too_few_points_returns_empty() -> None:
     mapper = _CoordMapper((0, 0, 400, 300))
     mob = _build_edge_mob(edge, mapper)
     assert len(mob) == 0
-
-
-# ── CFGAnimationScene ────────────────────────────────────────────
-
-
-def test_cfg_animation_scene_is_manim_scene() -> None:
-    graph = _simple_graph()
-    layout = _simple_layout()
-    scene = CFGAnimationScene(graph, layout)
-    assert isinstance(scene, Scene)
-
-
-def test_cfg_animation_scene_stores_parameters() -> None:
-    graph = _simple_graph()
-    layout = _simple_layout()
-    scene = CFGAnimationScene(graph, layout, speed=2.0, title="Test CFG")
-    assert scene._speed == 2.0
-    assert scene._title == "Test CFG"
-
-
-def test_cfg_animation_scene_speed_clamped() -> None:
-    graph = _simple_graph()
-    layout = _simple_layout()
-    scene = CFGAnimationScene(graph, layout, speed=0.0)
-    assert scene._speed >= 0.1
-
-
-def test_cfg_animation_scene_resolve_block_name_qualified() -> None:
-    graph = _simple_graph()
-    layout = _simple_layout()
-    scene = CFGAnimationScene(graph, layout)
-    assert scene._resolve_block_name("main::entry") == "entry"
-
-
-def test_cfg_animation_scene_resolve_block_name_bare() -> None:
-    graph = _simple_graph()
-    layout = _simple_layout()
-    scene = CFGAnimationScene(graph, layout)
-    assert scene._resolve_block_name("entry") == "entry"
-
-
-def test_cfg_animation_scene_node_lookup() -> None:
-    graph = _simple_graph()
-    layout = _simple_layout()
-    scene = CFGAnimationScene(graph, layout)
-    assert "entry" in scene._node_lookup
-    assert "f::entry" in scene._node_lookup
-    assert "exit" in scene._node_lookup

@@ -1,15 +1,7 @@
-"""CFG traversal animation scene for Manim Community Edition.
+"""CFG animation helpers: coordinate mapping, block/edge mobject builders.
 
-Builds a CFG visualization from a :class:`SceneGraph` and optionally a
-:class:`DotLayout` for accurate node positioning and edge routing.  If no
-DOT layout is provided, nodes are arranged in a simple top-down flow.
-
-When a :class:`TraceOverlay` is present on the scene graph, the scene
-animates the runtime execution path stepping through blocks one at a time.
-
-Public API
-----------
-CFGAnimationScene  — Manim ``Scene`` subclass for CFG traversal animation.
+These helpers are used by :class:`llvmanim.render.cfg_renderer.CFGRenderer`
+to build Manim mobjects from :class:`SceneNode` / :class:`DotLayout` data.
 """
 
 from __future__ import annotations
@@ -19,20 +11,16 @@ from manim import (
     BOLD,
     DOWN,
     GREY_D,
-    UP,
-    WHITE,
     CubicBezier,
     DashedVMobject,
-    FadeIn,
     RoundedRectangle,
-    Scene,
     Text,
     Triangle,
     VGroup,
 )
 
-from llvmanim.ingest.dot_layout import DotEdgeLayout, DotLayout, DotNodeLayout
-from llvmanim.transform.models import SceneGraph, SceneNode, TraceOverlay
+from llvmanim.ingest.dot_layout import DotEdgeLayout, DotNodeLayout
+from llvmanim.transform.models import SceneNode
 
 # ── Colours ────────────────────────────────────────────────────────────────────
 _UNVISITED_FILL = "#555555"
@@ -234,199 +222,3 @@ def _build_edge_mob(
         group.edge_label = lbl  # type: ignore[attr-defined]
 
     return group
-
-
-# ── Scene ──────────────────────────────────────────────────────────────────────
-
-class CFGAnimationScene(Scene):
-    """Animate a step-by-step CFG traversal using Graphviz-computed layout.
-
-    Parameters
-    ----------
-    graph:
-        The CFG scene graph to visualize.
-    layout:
-        Graphviz-computed layout with node positions and edge splines.
-    speed:
-        Animation speed multiplier (higher = faster).
-    title:
-        Title text shown at the top of the animation.
-    """
-
-    def __init__(
-        self,
-        graph: SceneGraph,
-        layout: DotLayout,
-        speed: float = 1.0,
-        title: str = "CFG Traversal",
-        **kwargs: object,
-    ) -> None:
-        super().__init__(**kwargs)  # type: ignore[arg-type]
-        self._graph = graph
-        self._layout = layout
-        self._speed = max(speed, 0.1)
-        self._title = title
-
-        self._block_mobs: dict[str, VGroup] = {}
-        self._edge_groups: dict[tuple[str, str], VGroup] = {}
-        self._visited: set[str] = set()
-        self._traversed: set[tuple[str, str]] = set()
-
-        # Build node-id → SceneNode lookup
-        self._node_lookup: dict[str, SceneNode] = {}
-        for node in graph.nodes:
-            self._node_lookup[node.id] = node
-            self._node_lookup[node.label] = node
-
-    def construct(self) -> None:
-        mapper = _CoordMapper(self._layout.bounding_box)
-
-        self._draw_title()
-        self._draw_graph(mapper)
-        self.wait(0.5 / self._speed)
-
-        overlay = self._graph.overlay
-        if overlay and overlay.entry_order:
-            self._animate_traversal(overlay)
-
-        self.wait(2.0 / self._speed)
-
-    def _draw_title(self) -> None:
-        title = Text(self._title, font_size=28, weight=BOLD)
-        title.to_edge(UP, buff=0.3)
-        self.play(FadeIn(title, shift=DOWN * 0.2), run_time=0.5 / self._speed)
-
-    def _draw_graph(self, mapper: _CoordMapper) -> None:
-        """Build and fade in all block nodes and edge curves."""
-        for node in self._graph.nodes:
-            block_name = node.label
-            node_layout = self._layout.nodes.get(block_name)
-            if node_layout is None:
-                continue
-            mob = _build_block_mob(node, node_layout, mapper)
-            self._block_mobs[block_name] = mob
-
-        for edge_layout in self._layout.edges:
-            group = _build_edge_mob(edge_layout, mapper)
-            self._edge_groups[(edge_layout.source, edge_layout.target)] = group
-
-        self.play(
-            *[FadeIn(mob, scale=0.9) for mob in self._block_mobs.values()],
-            run_time=0.8 / self._speed,
-        )
-        self.play(
-            *[FadeIn(g) for g in self._edge_groups.values()],
-            run_time=0.6 / self._speed,
-        )
-
-    def _activate_block(self, block_name: str) -> None:
-        """Highlight a block as currently executing."""
-        mob = self._block_mobs.get(block_name)
-        if mob is None:
-            return
-        rect = mob[0]
-        text_mobs = list(mob[1:])
-
-        anims = [
-            rect.animate.set_fill(color=_ACTIVE_FILL, opacity=0.95)
-            .set_stroke(color=WHITE, width=3),
-        ]
-        for t in text_mobs:
-            anims.append(t.animate.set_color(WHITE))
-        self.play(*anims, run_time=0.35 / self._speed)
-
-    def _settle_block(self, block_name: str) -> None:
-        """Transition from active to visited styling."""
-        mob = self._block_mobs.get(block_name)
-        if mob is None:
-            return
-        rect = mob[0]
-        text_mobs = list(mob[1:])
-
-        anims = [
-            rect.animate.set_fill(color=_VISITED_FILL, opacity=0.9)
-            .set_stroke(color=GREY_D, width=2),
-        ]
-        for t in text_mobs:
-            anims.append(t.animate.set_color(_VISITED_TEXT))
-        self.play(*anims, run_time=0.25 / self._speed)
-
-    def _traverse_edge(self, src: str, dst: str) -> None:
-        """Flash an edge yellow then settle it to bold blue."""
-        key = (src, dst)
-        group = self._edge_groups.get(key)
-        if group is None:
-            return
-
-        if getattr(group, "is_dashed", False) and key not in self._traversed:
-            dashed_mob = group[0]
-            solid: CubicBezier = group.solid_curve  # type: ignore[attr-defined]
-            solid.set_color(_EDGE_ACTIVE).set_stroke(width=3.5)
-            tip: Triangle = group.arrow_tip  # type: ignore[attr-defined]
-            tip.set_fill(color=_EDGE_ACTIVE)
-
-            self.remove(dashed_mob)
-            group.submobjects[0] = solid  # type: ignore[index]
-            self.add(solid)
-            group.is_dashed = False  # type: ignore[attr-defined]
-
-            self.play(
-                solid.animate.set_color(_EDGE_ACTIVE).set_stroke(width=3.5),
-                run_time=0.2 / self._speed,
-            )
-        else:
-            curve = group[0]
-            tip_mob: Triangle = group.arrow_tip  # type: ignore[attr-defined]
-            self.play(
-                curve.animate.set_color(_EDGE_ACTIVE).set_stroke(width=3.5),
-                tip_mob.animate.set_fill(color=_EDGE_ACTIVE),
-                run_time=0.2 / self._speed,
-            )
-
-        curve = group[0]
-        settle_tip: Triangle = group.arrow_tip  # type: ignore[attr-defined]
-        self.play(
-            curve.animate.set_color(_EDGE_TRAVERSED).set_stroke(width=3),
-            settle_tip.animate.set_fill(color=_EDGE_TRAVERSED),
-            run_time=0.15 / self._speed,
-        )
-
-        if hasattr(group, "edge_label"):
-            group.edge_label.set_color(_EDGE_TRAVERSED)  # type: ignore[attr-defined]
-        self._traversed.add(key)
-
-    def _resolve_block_name(self, entry: str) -> str:
-        """Resolve an entry_order entry to a block name.
-
-        entry_order may use bare names like ``entry`` or qualified IDs like
-        ``main::entry``.  We normalize to the bare block name for mobject lookup.
-        """
-        if "::" in entry:
-            return entry.split("::", 1)[1]
-        return entry
-
-    def _animate_traversal(self, overlay: TraceOverlay) -> None:
-        """Step through the entry_order, highlighting blocks and edges."""
-        prev_block: str | None = None
-
-        for i, raw_entry in enumerate(overlay.entry_order):
-            block_name = self._resolve_block_name(raw_entry)
-
-            if prev_block is not None:
-                self._traverse_edge(prev_block, block_name)
-
-            if prev_block is not None and prev_block != block_name:
-                self._settle_block(prev_block)
-
-            self._activate_block(block_name)
-            self._visited.add(block_name)
-
-            if i == 0:
-                self.wait(0.6 / self._speed)
-            else:
-                self.wait(0.3 / self._speed)
-
-            prev_block = block_name
-
-        if prev_block:
-            self._settle_block(prev_block)

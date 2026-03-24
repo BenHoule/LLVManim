@@ -11,7 +11,7 @@ The CLI provides two animation pipelines, both using the `CommandDrivenScene` ba
 Rendered through `stack_renderer.py`:
 
 1. Parse `.ll` file into `ProgramEventStream`.
-2. Build a `SceneGraph` via `build_stack_scene_graph()`.
+2. Build a `SceneGraph` via `build_scene_graph(stream, mode="stack")`.
 3. Create a `StackRenderer` with one of three `ir_mode` settings:
    - `"basic"` (`--ir-mode basic`) — stack-only layout with yellow badge flash
    - `"rich"` (`--ir-mode rich`) — two-column: IR source with spotlight cursor + stack

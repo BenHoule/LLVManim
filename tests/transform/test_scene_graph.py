@@ -5,7 +5,6 @@ from llvmanim.transform.models import BlockMetadata, CFGBlock, ProgramEventStrea
 from llvmanim.transform.scene import (
   _animation_hint_for_block,
   build_scene_graph,
-  build_stack_scene_graph,
 )
 
 
@@ -371,7 +370,7 @@ def test_scene_graph_preserves_edge_labels() -> None:
     assert labels == {"T", "F"}
 
 
-# ── build_stack_scene_graph ──────────────────────────────────────
+# ── stack mode (mode="stack") ──────────────────────────────────
 
 
 def _stack_event(fn, kind, text, idx, *, opcode=None, operands=None):
@@ -391,7 +390,7 @@ def _stack_event(fn, kind, text, idx, *, opcode=None, operands=None):
 def test_stack_scene_graph_empty_stream() -> None:
     """An empty stream produces an empty scene graph."""
     stream = ProgramEventStream(source_path="<test>")
-    graph = build_stack_scene_graph(stream, entry="main")
+    graph = build_scene_graph(stream, mode="stack", entry="main")
     assert graph.nodes == []
     assert graph.edges == []
     assert graph.commands == []
@@ -406,7 +405,7 @@ def test_stack_scene_graph_single_function() -> None:
             _stack_event("main", "ret", "ret i32 0", 1),
         ],
     )
-    graph = build_stack_scene_graph(stream, entry="main")
+    graph = build_scene_graph(stream, mode="stack", entry="main")
 
     frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
     slot_nodes = [n for n in graph.nodes if n.kind == "stack_slot"]
@@ -431,7 +430,7 @@ def test_stack_scene_graph_callee_descent() -> None:
             _stack_event("foo", "ret", "ret void", 1),
         ],
     )
-    graph = build_stack_scene_graph(stream, entry="main")
+    graph = build_scene_graph(stream, mode="stack", entry="main")
 
     frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
     assert len(frame_nodes) == 2
@@ -462,7 +461,7 @@ def test_stack_scene_graph_skips_external_functions() -> None:
             _stack_event("main", "ret", "ret i32 0", 1),
         ],
     )
-    graph = build_stack_scene_graph(stream, entry="main")
+    graph = build_scene_graph(stream, mode="stack", entry="main")
 
     frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
     assert len(frame_nodes) == 1
@@ -479,7 +478,7 @@ def test_stack_scene_graph_skips_llvm_intrinsics() -> None:
             _stack_event("main", "ret", "ret i32 0", 1),
         ],
     )
-    graph = build_stack_scene_graph(stream, entry="main")
+    graph = build_scene_graph(stream, mode="stack", entry="main")
 
     frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
     assert len(frame_nodes) == 1
@@ -495,7 +494,7 @@ def test_stack_scene_graph_max_depth_honored() -> None:
             _stack_event("foo", "ret", "ret void", 0),
         ],
     )
-    graph = build_stack_scene_graph(stream, entry="main", max_depth=0)
+    graph = build_scene_graph(stream, mode="stack", entry="main", max_depth=0)
 
     frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
     assert len(frame_nodes) == 1
@@ -514,7 +513,7 @@ def test_stack_scene_graph_include_ssa_emits_binop_compare_load() -> None:
             _stack_event("main", "ret", "ret i32 %mul", 4),
         ],
     )
-    graph = build_stack_scene_graph(stream, entry="main", include_ssa=True)
+    graph = build_scene_graph(stream, mode="stack", entry="main", include_ssa=True)
 
     actions = [c.action for c in graph.commands]
     assert "animate_memory_read" in actions
@@ -535,7 +534,7 @@ def test_stack_scene_graph_without_ssa_skips_binop() -> None:
             _stack_event("main", "ret", "ret i32 0", 1),
         ],
     )
-    graph = build_stack_scene_graph(stream, entry="main", include_ssa=False)
+    graph = build_scene_graph(stream, mode="stack", entry="main", include_ssa=False)
 
     actions = [c.action for c in graph.commands]
     assert "animate_binop" not in actions
@@ -550,7 +549,7 @@ def test_stack_scene_graph_branch_events() -> None:
             _stack_event("main", "ret", "ret i32 0", 1),
         ],
     )
-    graph = build_stack_scene_graph(stream, entry="main")
+    graph = build_scene_graph(stream, mode="stack", entry="main")
 
     actions = [c.action for c in graph.commands]
     assert "highlight_branch" in actions
@@ -565,7 +564,7 @@ def test_stack_scene_graph_command_targets_reference_node_ids() -> None:
             _stack_event("main", "ret", "ret i32 0", 1),
         ],
     )
-    graph = build_stack_scene_graph(stream, entry="main")
+    graph = build_scene_graph(stream, mode="stack", entry="main")
 
     node_ids = {n.id for n in graph.nodes}
     for cmd in graph.commands:
@@ -581,7 +580,7 @@ def test_stack_scene_graph_slot_properties() -> None:
             _stack_event("main", "ret", "ret i32 0", 1),
         ],
     )
-    graph = build_stack_scene_graph(stream, entry="main")
+    graph = build_scene_graph(stream, mode="stack", entry="main")
 
     slot = next(n for n in graph.nodes if n.kind == "stack_slot")
     assert slot.properties["function_name"] == "main"

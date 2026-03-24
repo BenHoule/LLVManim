@@ -188,7 +188,7 @@ class StackRenderer(CommandDrivenScene):
     Parameters
     ----------
     graph:
-        A SceneGraph produced by ``build_stack_scene_graph()``.
+        A SceneGraph produced by ``build_scene_graph(stream, mode="stack")``.
     speed:
         Animation speed multiplier.
     title:

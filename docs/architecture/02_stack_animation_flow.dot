@@ -1,0 +1,93 @@
+// LLVManim: Stack Animation Pipeline
+// Shows how an LLVM-IR file travels through the stack animation path,
+// including the three ir_mode branches and optional GIF export.
+digraph stack_flow {
+    graph [
+        fontname = "Helvetica"
+        fontsize = 13
+        label    = "LLVManim: Stack Animation Pipeline"
+        labelloc = "t"
+        rankdir  = LR
+        splines  = true
+        nodesep  = 0.5
+        ranksep  = 0.9
+        bgcolor  = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10]
+
+    // ── Inputs ─────────────────────────────────────────────────────
+    input_ll [label="input.ll"
+              fillcolor="#e74c3c" fontcolor="white" shape=note]
+
+    // ── Ingest ─────────────────────────────────────────────────────
+    parse [label="parse_module_to_events()\ningest/llvm_events.py"
+           fillcolor="#2980b9" fontcolor="white"]
+
+    subgraph cluster_mode {
+        label     = "ir_mode branch"
+        style     = filled
+        fillcolor = "#f5f6fa"
+        color     = "#636e72"
+        fontname  = "Helvetica"
+        fontsize  = 11
+
+        mode_basic [label="basic\n(raw opcodes)"
+                    fillcolor="#ecf0f1" fontcolor="#2c3e50"]
+        mode_rich  [label="rich\n(formatted operands)"
+                    fillcolor="#ecf0f1" fontcolor="#2c3e50"]
+        mode_ssa   [label="rich-ssa\n(SSA register colours)"
+                    fillcolor="#ecf0f1" fontcolor="#2c3e50"]
+
+        display_lines [label="build_display_lines()\ningest/display_lines.py"
+                       fillcolor="#2980b9" fontcolor="white"]
+
+        mode_rich -> display_lines [label=" annotates"]
+        mode_ssa  -> display_lines [label=" annotates"]
+    }
+
+    pest [label="ProgramEventStream"
+          fillcolor="#8e44ad" fontcolor="white"]
+
+    // ── Transform ──────────────────────────────────────────────────
+    build_stack [label="build_scene_graph(mode=\"stack\")\ntransform/scene_graph.py"
+                 fillcolor="#2980b9" fontcolor="white"]
+
+    scene_graph [label="SceneGraph\n(AnimationCommand[])"
+                 fillcolor="#8e44ad" fontcolor="white"]
+
+    // ── Render ─────────────────────────────────────────────────────
+    stack_renderer [label="StackRenderer\nrender/stack_renderer.py"
+                    fillcolor="#8e44ad" fontcolor="white"]
+
+    manim [label="Manim Community Edition"
+           fillcolor="#636e72" fontcolor="white" style="filled"]
+
+    // ── Outputs ────────────────────────────────────────────────────
+    out_mp4 [label="animation.mp4"
+             fillcolor="#27ae60" fontcolor="white" shape=note]
+    out_gif [label="animation.gif\n(--export-gif)"
+             fillcolor="#27ae60" fontcolor="white" shape=note]
+
+    convert [label="_convert_mp4_to_gif()\nrender/exports.py"
+             fillcolor="#2980b9" fontcolor="white"]
+
+    // ── Edges ──────────────────────────────────────────────────────
+    input_ll   -> parse
+    parse      -> pest      [label=" events"]
+    pest       -> mode_basic
+    pest       -> mode_rich
+    pest       -> mode_ssa
+
+    mode_basic -> build_stack [label=" ProgramEventStream"]
+    mode_rich  -> build_stack [label=" ProgramEventStream"]
+    mode_ssa   -> build_stack [label=" ProgramEventStream"]
+    display_lines -> build_stack [label=" display_lines\n(rich modes only)" style=dashed]
+
+    build_stack    -> scene_graph
+    scene_graph    -> stack_renderer
+    stack_renderer -> manim
+    manim          -> out_mp4
+    out_mp4        -> convert     [label=" --export-gif"]
+    convert        -> out_gif
+}

@@ -1,0 +1,143 @@
+// LLVManim: Core Data Model
+// UML-style containment diagram using HTML-label record nodes.
+// Shows dataclasses/types across the ingest and transform layers.
+digraph data_model {
+    graph [
+        fontname = "Helvetica"
+        fontsize = 13
+        label    = "LLVManim: Core Data Model"
+        labelloc = "t"
+        splines  = true
+        nodesep  = 0.8
+        ranksep  = 1.0
+        bgcolor  = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 shape=none margin=0]
+    edge [fontname="Helvetica" fontsize=10 arrowhead=open]
+
+    // ── Enumerations ───────────────────────────────────────────────
+    EventKind [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#8e44ad">
+          <TR><TD BGCOLOR="#8e44ad"><FONT COLOR="white"><B>&lt;&lt;enum&gt;&gt; EventKind</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">CALL</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">RETURN</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">STORE</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">LOAD</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">ALLOCA</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">... (other IR ops)</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    ActionKind [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#8e44ad"><FONT COLOR="white"><B>&lt;&lt;enum&gt;&gt; ActionKind</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">PUSH</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">POP</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">ASSIGN</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">HIGHLIGHT</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">ENTER_BLOCK</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">TRAVERSE_EDGE</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    BlockRole [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#8e44ad"><FONT COLOR="white"><B>&lt;&lt;enum&gt;&gt; BlockRole</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">ENTRY</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">EXIT</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">NORMAL</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    // ── Ingest types ───────────────────────────────────────────────
+    IREvent [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>IREvent</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">kind: EventKind</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">operands: list[str]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">function: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">line_no: int | None</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    CFGEdge [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>CFGEdge</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">src: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">dst: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">function: str</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    ProgramEventStream [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>ProgramEventStream</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">events: list[IREvent]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">cfg_edges: list[CFGEdge]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">display_lines: dict | None</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">functions: list[str]</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    // ── Transform types ────────────────────────────────────────────
+    AnimationCommand [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>AnimationCommand</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">action: ActionKind</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">event: IREvent | None</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">target: str | None</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    SceneNode [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>SceneNode</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">id: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">label: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">role: BlockRole</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    SceneEdge [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>SceneEdge</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">src: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">dst: str</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    TraceOverlay [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>TraceOverlay</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">entry_order: list[str]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">visited_nodes: set[str]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">traversed_edges: list[tuple]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">termination_reason: str</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    SceneGraph [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>SceneGraph</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">nodes: list[SceneNode]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">edges: list[SceneEdge]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">commands: list[AnimationCommand]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">overlay: TraceOverlay | None</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">function: str</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    // ── Containment / reference edges ──────────────────────────────
+    ProgramEventStream -> IREvent   [label=" contains []" style=dashed]
+    ProgramEventStream -> CFGEdge   [label=" contains []" style=dashed]
+
+    SceneGraph -> SceneNode         [label=" contains []" style=dashed]
+    SceneGraph -> SceneEdge         [label=" contains []" style=dashed]
+    SceneGraph -> AnimationCommand  [label=" contains []" style=dashed]
+    SceneGraph -> TraceOverlay      [label=" overlay?" style=dashed arrowhead=odiamond]
+
+    AnimationCommand -> IREvent     [label=" event?" style=dashed arrowhead=odiamond]
+    AnimationCommand -> ActionKind  [label=" action"]
+    IREvent          -> EventKind   [label=" kind"]
+    SceneNode        -> BlockRole   [label=" role"]
+}

@@ -23,7 +23,6 @@ from llvmanim.transform.models import BlockMetadata, SceneGraph
 from llvmanim.transform.scene import (
     _build_overlay_commands,
     build_scene_graph,
-    build_stack_scene_graph,
 )
 
 try:
@@ -435,7 +434,7 @@ def main(argv: list[str] | None = None) -> int:
             manim_config.format = render_format
             manim_config.output_file = base_name
         include_ssa = args.ir_mode == "rich-ssa"
-        stack_graph = build_stack_scene_graph(stream, include_ssa=include_ssa)
+        stack_graph = build_scene_graph(stream, mode="stack", include_ssa=include_ssa)
         animation_scene = StackRenderer(
             stack_graph,
             speed=args.speed,

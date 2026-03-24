@@ -1,0 +1,135 @@
+// LLVManim Layer Architecture
+// Shows the four processing layers and the data types that flow between them.
+digraph architecture_overview {
+    graph [
+        fontname  = "Helvetica"
+        fontsize  = 13
+        label     = "LLVManim: Layer Architecture"
+        labelloc  = "t"
+        splines   = true
+        nodesep   = 0.6
+        ranksep   = 0.8
+        bgcolor   = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10]
+
+    // ── External inputs ────────────────────────────────────────────
+    input_ll  [label="input.ll\n(LLVM-IR file)"
+               fillcolor="#e74c3c" fontcolor="white" shape=note]
+    input_dot [label="layout.dot\n(optional pre-computed)"
+               fillcolor="#e74c3c" fontcolor="white" shape=note]
+
+    // ── Layer 1: CLI ───────────────────────────────────────────────
+    subgraph cluster_cli {
+        label     = "CLI  (llvmanim/cli/)"
+        style     = filled
+        fillcolor = "#dfe6e9"
+        color     = "#2c3e50"
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#2c3e50"
+
+        cli_main [label="main.py\nargparse dispatch"
+                  fillcolor="#2c3e50" fontcolor="white"]
+    }
+
+    // ── Layer 2: Ingest ────────────────────────────────────────────
+    subgraph cluster_ingest {
+        label     = "Ingest  (llvmanim/ingest/)"
+        style     = filled
+        fillcolor = "#dfe6e9"
+        color     = "#2c3e50"
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#2c3e50"
+
+        parse_events  [label="parse_module_to_events()\nllvm_events.py"
+                       fillcolor="#2980b9" fontcolor="white"]
+        display_lines [label="build_display_lines()\ndisplay_lines.py"
+                       fillcolor="#2980b9" fontcolor="white"]
+        dot_layout    [label="compute_dot_layout()\ndot_layout.py"
+                       fillcolor="#2980b9" fontcolor="white"]
+        trace_io      [label="load_trace()\ntrace_io.py"
+                       fillcolor="#2980b9" fontcolor="white"]
+        meta_io       [label="load_analysis_metadata()\nanalysis_metadata_io.py"
+                       fillcolor="#2980b9" fontcolor="white"]
+    }
+
+    // ── Layer 3: Transform ─────────────────────────────────────────
+    subgraph cluster_transform {
+        label     = "Transform  (llvmanim/transform/)"
+        style     = filled
+        fillcolor = "#dfe6e9"
+        color     = "#2c3e50"
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#2c3e50"
+
+        build_scene   [label="build_scene_graph(mode=\"cfg\")\nscene_graph.py"
+                       fillcolor="#2980b9" fontcolor="white"]
+        build_stack   [label="build_scene_graph(mode=\"stack\")\nscene_graph.py"
+                       fillcolor="#2980b9" fontcolor="white"]
+        derive_trace  [label="derive_cfg_trace()\ntrace.py"
+                       fillcolor="#2980b9" fontcolor="white"]
+    }
+
+    // ── Layer 4: Render ────────────────────────────────────────────
+    subgraph cluster_render {
+        label     = "Render  (llvmanim/render/)"
+        style     = filled
+        fillcolor = "#dfe6e9"
+        color     = "#2c3e50"
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#2c3e50"
+
+        stack_renderer [label="StackRenderer\nstack_renderer.py"
+                        fillcolor="#8e44ad" fontcolor="white"]
+        cfg_renderer   [label="CFGRenderer\ncfg_renderer.py"
+                        fillcolor="#8e44ad" fontcolor="white"]
+        manim_ce       [label="Manim Community Edition\n(third-party)"
+                        fillcolor="#636e72" fontcolor="white" style="filled"]
+    }
+
+    // ── Outputs ────────────────────────────────────────────────────
+    out_json  [label="*_scene_graph.json"   fillcolor="#27ae60" fontcolor="white" shape=note]
+    out_dot   [label="cfg_*.dot / cfg_*.png" fillcolor="#27ae60" fontcolor="white" shape=note]
+    out_stack [label="stack animation\n(MP4 / GIF)"  fillcolor="#27ae60" fontcolor="white" shape=note]
+    out_cfg   [label="CFG animation\n(MP4 / GIF)"    fillcolor="#27ae60" fontcolor="white" shape=note]
+
+    // ── Edges ──────────────────────────────────────────────────────
+    input_ll  -> cli_main
+    input_dot -> cli_main
+
+    cli_main -> parse_events  [label="  .ll path"]
+    cli_main -> dot_layout    [label="  .dot path"]
+    cli_main -> trace_io      [label="  --import-trace"]
+    cli_main -> meta_io       [label="  --analysis-metadata"]
+
+    parse_events -> display_lines [label="  ProgramEventStream"]
+    parse_events -> build_scene   [label="  ProgramEventStream"]
+    parse_events -> build_stack   [label="  ProgramEventStream"]
+
+    display_lines -> build_stack  [label="  display_lines"]
+
+    trace_io     -> derive_trace  [style=dashed label="  or auto-derive"]
+    derive_trace -> build_scene   [label="  TraceOverlay"]
+    trace_io     -> build_scene   [label="  TraceOverlay"]
+    meta_io      -> build_scene   [label="  BlockMetadata"]
+
+    dot_layout   -> cfg_renderer  [label="  DotLayout"]
+
+    build_scene  -> cli_main      [label="  SceneGraph" style=dashed]
+    build_stack  -> stack_renderer [label="  SceneGraph"]
+    build_scene  -> cfg_renderer   [label="  SceneGraph"]
+
+    build_scene  -> out_json  [label="  --json"]
+    dot_layout   -> out_dot   [label="  --draw"]
+
+    stack_renderer -> manim_ce
+    cfg_renderer   -> manim_ce
+
+    manim_ce -> out_stack
+    manim_ce -> out_cfg
+}

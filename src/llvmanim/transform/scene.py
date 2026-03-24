@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
+from typing import Literal
 
 from llvmanim.transform.models import (
     ActionKind,
@@ -165,9 +166,17 @@ def _build_overlay_commands(graph: SceneGraph) -> list[AnimationCommand]:
 def build_scene_graph(
     event_stream: ProgramEventStream,
     *,
+    mode: Literal["cfg", "stack"] = "cfg",
     analysis_metadata: dict[str, BlockMetadata] | None = None,
+    entry: str = "main",
+    max_depth: int = 20,
+    include_ssa: bool = False,
 ) -> SceneGraph:
     """Construct a scene graph from a stream of IREvents.
+
+    Pass ``mode="stack"`` to build a stack-frame visualization instead of a
+    CFG graph.  The *entry*, *max_depth*, and *include_ssa* keyword arguments
+    are forwarded to the stack builder and ignored when ``mode="cfg"``.
 
     Edges are taken from *event_stream.cfg_edges*, which the ingest layer
     populates for all terminator types via llvmlite.
@@ -177,6 +186,10 @@ def build_scene_graph(
     ``commands`` list; ``build_scene_graph`` itself leaves ``commands``
     empty because the overlay is typically loaded separately.
     """
+    if mode == "stack":
+        return _build_stack_scene_graph(
+            event_stream, entry=entry, max_depth=max_depth, include_ssa=include_ssa
+        )
     blocks = _group_blocks(event_stream)
     scene_edges = [
         SceneEdge(
@@ -214,7 +227,7 @@ def _slot_name_from_alloca(text: str) -> str:
     return text.split("=")[0].strip()
 
 
-def build_stack_scene_graph(
+def _build_stack_scene_graph(
     stream: ProgramEventStream,
     entry: str = "main",
     max_depth: int = 20,

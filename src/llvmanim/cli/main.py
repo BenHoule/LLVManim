@@ -16,10 +16,9 @@ from llvmanim.ingest.analysis_metadata_io import (
 from llvmanim.ingest.cfg_edge_io import CFGEdgeIOError, load_cfg_edges, save_cfg_edges
 from llvmanim.ingest.dot_layout import DotLayoutError, compute_dot_layout
 from llvmanim.ingest.trace_io import TraceIOError, load_trace, save_trace
-from llvmanim.present import export_cfg_dot, export_cfg_png, export_scene_graph_json
-from llvmanim.present.cfg_renderer import CFGRenderer
-from llvmanim.present.rich_stack_scene import RichStackSceneSpotlight
-from llvmanim.present.stack_renderer import StackRenderer
+from llvmanim.render import export_cfg_dot, export_cfg_png, export_scene_graph_json
+from llvmanim.render.cfg_renderer import CFGRenderer
+from llvmanim.render.stack_renderer import StackRenderer
 from llvmanim.transform.models import BlockMetadata, SceneGraph
 from llvmanim.transform.scene import (
     _build_overlay_commands,
@@ -193,7 +192,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--cfg-animate",
         action="store_true",
-        help="Render a CFG traversal animation (requires --dot-cfg and --import-trace)",
+        help="Render a CFG traversal animation (requires --dot-cfg; auto-derives trace if --import-trace is not given)",
     )
 
     parser.add_argument(
@@ -238,10 +237,25 @@ def main(argv: list[str] | None = None) -> int:
         help="Export the trace overlay to a JSON file",
     )
 
+    parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Skip confirmation prompts (e.g. auto-derive trace)",
+    )
+
+    parser.add_argument(
+        "-n",
+        "--name",
+        metavar="NAME",
+        help="Base name for output artifacts (default: stem of input file)",
+    )
+
     args = parser.parse_args(argv)
 
     input_path = Path(args.input)
     outdir = Path(args.outdir)
+    base_name = args.name if args.name else input_path.stem
 
     if not input_path.exists():
         print(f"Error: input file not found: {input_path}")
@@ -309,13 +323,13 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Scene edges: {len(graph.edges)}")
 
     if args.json:
-        json_path = outdir / "scene_graph.json"
+        json_path = outdir / f"{base_name}_scene_graph.json"
         export_scene_graph_json(graph, json_path)
         print(f"Wrote JSON: {json_path}")
 
     if args.draw:
-        dot_path = outdir / "cfg_main.dot"
-        png_prefix = outdir / "cfg_main"
+        dot_path = outdir / f"cfg_{base_name}.dot"
+        png_prefix = outdir / f"cfg_{base_name}"
 
         export_cfg_dot(graph, dot_path)
         print(f"Wrote DOT: {dot_path}")
@@ -330,9 +344,44 @@ def main(argv: list[str] | None = None) -> int:
         if not args.dot_cfg:
             print("Error: --cfg-animate requires --dot-cfg <path-to-.dot-file>")
             return 1
+
         if graph.overlay is None or not graph.overlay.entry_order:
-            print("Error: --cfg-animate requires --import-trace with a non-empty entry_order")
-            return 1
+            # Auto-derive a trace from the CFG edges.
+            from llvmanim.transform.trace import derive_cfg_trace
+
+            # Infer function name from the DOT filename (e.g. ".main.dot" → "main").
+            dot_stem = Path(args.dot_cfg).stem.lstrip(".")
+            func_name = dot_stem if dot_stem else "main"
+
+            # Confirm with the user.
+            node_ids = [n.id for n in graph.nodes if n.id.startswith(f"{func_name}::")]
+            edge_count = sum(
+                1 for e in graph.edges if e.source.startswith(f"{func_name}::")
+            )
+            print(
+                f"No --import-trace provided.  Deriving a static trace for "
+                f"@{func_name} ({len(node_ids)} blocks, {edge_count} edges)."
+            )
+            if not args.yes:
+                answer = input("Proceed? [Y/n] ").strip().lower()
+                if answer not in ("", "y", "yes"):
+                    print("Aborted.")
+                    return 0
+
+            overlay = derive_cfg_trace(graph, function=func_name)
+            if not overlay.entry_order:
+                print(f"Error: could not derive a trace for @{func_name} (no entry block found)")
+                return 1
+            graph.overlay = overlay
+            print(
+                f"Derived trace: {len(overlay.entry_order)} steps, "
+                f"{len(overlay.visited_nodes)} blocks visited."
+            )
+
+            if args.export_trace and not Path(args.export_trace).exists():
+                save_trace(overlay, args.export_trace, source=stream.source_path)
+                print(f"Wrote trace: {args.export_trace}")
+
         dot_path = Path(args.dot_cfg)
         if not dot_path.exists():
             print(f"Error: DOT file not found: {dot_path}")
@@ -347,6 +396,7 @@ def main(argv: list[str] | None = None) -> int:
         if manim_config is not None:
             manim_config.media_dir = str(outdir)
             manim_config.format = render_format
+            manim_config.output_file = f"cfg_{base_name}"
 
         source_name = Path(stream.source_path).name
         cfg_title = f"CFG Traversal  ·  {source_name}"
@@ -383,15 +433,15 @@ def main(argv: list[str] | None = None) -> int:
         if manim_config is not None:
             manim_config.media_dir = str(outdir)
             manim_config.format = render_format
-        if args.ir_mode == "rich":
-            # Rich IR panel mode: use legacy scene (not yet ported to CommandDrivenScene)
-            animation_scene = RichStackSceneSpotlight(stream, speed=args.speed)
-        elif args.ir_mode == "rich-ssa":
-            animation_scene = RichStackSceneSpotlight(stream, speed=args.speed, enable_ssa=True)
-        else:
-            # Basic stack mode: use unified pipeline
-            stack_graph = build_stack_scene_graph(stream)
-            animation_scene = StackRenderer(stack_graph, speed=args.speed)
+            manim_config.output_file = base_name
+        include_ssa = args.ir_mode == "rich-ssa"
+        stack_graph = build_stack_scene_graph(stream, include_ssa=include_ssa)
+        animation_scene = StackRenderer(
+            stack_graph,
+            speed=args.speed,
+            ir_mode=args.ir_mode,
+            display_lines=stream.display_lines,
+        )
         animation_scene.render(preview=args.preview)
 
         if args.format == "gif":

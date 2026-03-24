@@ -130,7 +130,11 @@ def _extract_block_summary(label: str) -> str:
     Shows the terminator and any calls.
     """
     lines = label.replace("\\l", "\n").replace("{", "").replace("}", "").strip().split("\n")
-    lines = [l.strip() for l in lines if l.strip() and not l.strip().startswith(("<", "T", "F"))]
+    lines = [
+        line.strip()
+        for line in lines
+        if line.strip() and not line.strip().startswith(("<", "T", "F"))
+    ]
 
     calls = []
     terminator = ""

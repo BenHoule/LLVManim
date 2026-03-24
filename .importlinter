@@ -2,21 +2,21 @@
 root_package = llvmanim
 include_external_packages = True
 
-[importlinter:contract:ingest_does_not_depend_on_present]
-name = Ingest layer must not depend on presentation layer
+[importlinter:contract:ingest_does_not_depend_on_render]
+name = Ingest layer must not depend on render layer
 type = forbidden
 source_modules =
     llvmanim.ingest
 forbidden_modules =
-    llvmanim.present
+    llvmanim.render
 
-[importlinter:contract:transform_does_not_depend_on_present]
-name = Transform layer must not depend on presentation layer
+[importlinter:contract:transform_does_not_depend_on_render]
+name = Transform layer must not depend on render layer
 type = forbidden
 source_modules =
     llvmanim.transform
 forbidden_modules =
-    llvmanim.present
+    llvmanim.render
 
 [importlinter:contract:core_does_not_depend_on_cli]
 name = Core packages must not import CLI
@@ -24,6 +24,6 @@ type = forbidden
 source_modules =
     llvmanim.ingest
     llvmanim.transform
-    llvmanim.present
+    llvmanim.render
 forbidden_modules =
     llvmanim.cli

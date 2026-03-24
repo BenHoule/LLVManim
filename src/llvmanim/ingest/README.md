@@ -36,7 +36,7 @@ ProgramEventStream
   terminator types (br, switch, invoke, etc.) via llvmlite.  These typed
   edges are consumed directly by the transform layer's `build_scene_graph`.
 - `display_lines: dict[str, list[str]]` — per-function cleaned IR source
-  lines built at ingest time by `build_display_lines`.  The presentation
+  lines built at ingest time by `build_display_lines`.  The render
   layer reads these directly for IR source panels, avoiding a second file
   read.
 

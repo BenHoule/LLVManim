@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from llvmanim.present.cfg_renderer import CFGRenderer
-from llvmanim.present.command_driven_scene import CommandDrivenScene
-from llvmanim.present.stack_renderer import StackRenderer
+from llvmanim.render.cfg_renderer import CFGRenderer
+from llvmanim.render.command_driven_scene import CommandDrivenScene
+from llvmanim.render.stack_renderer import StackRenderer
 from llvmanim.transform.models import AnimationCommand, SceneGraph, SceneNode
 
 # ── CommandDrivenScene ───────────────────────────────────────────
@@ -58,10 +58,42 @@ def test_stack_renderer_is_command_driven_scene() -> None:
     assert isinstance(renderer, CommandDrivenScene)
 
 
+def test_setup_chrome_adds_title_and_rule() -> None:
+    graph = SceneGraph()
+    scene = CommandDrivenScene(graph, title="Test Title")
+    scene._setup_chrome()
+    # Title and rule should be added as mobjects
+    assert len(scene.mobjects) == 2
+
+
+def test_setup_chrome_noop_without_title() -> None:
+    graph = SceneGraph()
+    scene = CommandDrivenScene(graph, title="")
+    scene._setup_chrome()
+    assert len(scene.mobjects) == 0
+
+
 def test_stack_renderer_registers_expected_handlers() -> None:
     graph = SceneGraph()
     renderer = StackRenderer(graph)
     expected = {"push_stack_frame", "pop_stack_frame", "create_stack_slot", "highlight_branch"}
+    assert expected.issubset(set(renderer._handlers.keys()))
+
+
+def test_stack_renderer_rich_mode_registers_stack_handlers() -> None:
+    graph = SceneGraph()
+    renderer = StackRenderer(graph, ir_mode="rich")
+    expected = {"push_stack_frame", "pop_stack_frame", "create_stack_slot", "highlight_branch"}
+    assert expected.issubset(set(renderer._handlers.keys()))
+
+
+def test_stack_renderer_rich_ssa_registers_all_handlers() -> None:
+    graph = SceneGraph()
+    renderer = StackRenderer(graph, ir_mode="rich-ssa")
+    expected = {
+        "push_stack_frame", "pop_stack_frame", "create_stack_slot",
+        "highlight_branch", "animate_binop", "animate_compare", "animate_memory_read",
+    }
     assert expected.issubset(set(renderer._handlers.keys()))
 
 

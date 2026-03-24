@@ -21,6 +21,7 @@ LLVManim parses LLVM IR (`.ll`) into a typed event stream, derives a CFG-style s
 - `ssa_formatting.py`: shared SSA display formatting with a single swap-point for future numeric runtime values
 - `RichTraceStep` and `build_execution_trace(include_ssa=True)` for binop/compare/load trace steps
 - Render CFG traversal animations (`--cfg-animate`) using DOT-derived layout from `opt -passes=dot-cfg`
+- Auto-derive a static CFG trace when `--import-trace` is not provided (with interactive confirmation, skippable via `-y`)
 
 ## Requirements
 
@@ -99,7 +100,7 @@ Markers are applied automatically by directory path convention in `tests/conftes
 | Path prefix | Marker(s) applied |
 |---|---|
 | `tests/ingest/`, `tests/transform/` | `unit` |
-| `tests/present/` | `integration` (+ `contract` for `test_exports.py`) |
+| `tests/render/` | `integration` (+ `contract` for `test_exports.py`) |
 | `tests/cli/`, `tests/test_pipeline.py` | `integration` |
 | `tests/test_entrypoints.py` | `e2e` |
 
@@ -146,7 +147,9 @@ Default input is `tests/ingest/testdata/double.ll` when no positional argument i
 - `--gif-fps <int>`: GIF conversion FPS when `--format gif` (default: `12`)
 - `--gif-width <int>`: GIF conversion width in px when `--format gif` (default: `960`)
 - `--outdir <path>`: output directory (default: current directory)
-- `--cfg-animate`: render a CFG traversal animation (requires `--dot-cfg` and `--import-trace`)
+- `-n` / `--name <name>`: base name for output artifacts (default: stem of input file)
+- `--cfg-animate`: render a CFG traversal animation (requires `--dot-cfg`; auto-derives trace if `--import-trace` is not given)
+- `-y` / `--yes`: skip confirmation prompts (e.g. auto-derive trace)
 - `--dot-cfg <path>`: path to a `.dot` file from `opt -passes=dot-cfg` for CFG layout
 - `--import-cfg-edges <path>`: load CFG edges from a JSON file instead of extracting them from IR
 - `--export-cfg-edges <path>`: write extracted CFG edges to a JSON file
@@ -193,6 +196,12 @@ Render rich IR+stack animation and preview:
 uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed 1.5 --outdir llvmanim_out
 ```
 
+Render CFG traversal animation with auto-derived trace:
+
+```bash
+uv run llvmanim tests/ingest/testdata/double.ll --cfg-animate --dot-cfg .main.dot -y --outdir llvmanim_out
+```
+
 ## Pipeline (Current Implementation)
 
 ```
@@ -202,8 +211,8 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │                     [--preview] [--ir-mode basic|rich|rich-ssa]│
 │                           [--speed N] [--format mp4|gif]       │
 │                           [--cfg-animate] [--dot-cfg PATH]     │
-│                           [--import-trace PATH]                │
-│                           [--import-cfg-edges PATH]            │
+│                           [--import-trace PATH] [-y]           │
+│                           [-n NAME] [--import-cfg-edges PATH]  │
 │                           [--import-analysis-metadata PATH]    │
 │                           [--outdir PATH]                      │
 │                                                                │
@@ -241,6 +250,7 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 │  build_execution_trace(stream, include_ssa=...) →               │
 │      list[TraceStep] | list[RichTraceStep]                      │
 │  build_animation_commands(stream) → list[AnimationCommand]      │
+│  derive_cfg_trace(graph, function) → TraceOverlay               │
 │                                                                 │
 │  • Groups events by (function, block) → CFGBlock                │
 │  • Uses typed CFG edges from ingest (or imported JSON)          │
@@ -252,16 +262,16 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
        │ SceneGraph                              │ ProgramEventStream
        ▼                                        ▼
 ┌──────────────────────┐ ┌─────────────────────────────────────────┐
-│  Export (present/)   │ │  Animation (present/)                   │
+│  Export (render/)    │ │  Animation (render/)                    │
 │                      │ │                                         │
 │  --json →            │ │  --animate / --preview                  │
-│    scene_graph.json  │ │    --ir-mode basic → RichStackSceneBadge│
+│    scene_graph.json  │ │    --ir-mode basic → StackRenderer      │
 │                      │ │    --ir-mode rich →                     │
-│  --draw →            │ │      RichStackSceneSpotlight (2-col)    │
+│  --draw →            │ │      StackRenderer (2-col IR+stack)     │
 │    cfg_main.dot      │ │    --ir-mode rich-ssa →                 │
-│    cfg_main.png      │ │      RichStackSceneSpotlight (3-col SSA)│
+│    cfg_main.png      │ │      StackRenderer (3-col IR+SSA+stack) │
 │    (needs graphviz)  │ │  --cfg-animate →                        │
-│    (needs graphviz)  │ │    CFGAnimationScene (DOT layout +      │
+│    (needs graphviz)  │ │    CFGRenderer (DOT layout +            │
 │                      │ │    trace overlay traversal)             │
 └──────────────────────┘ └─────────────────────────────────────────┘
 ```
@@ -270,6 +280,6 @@ uv run llvmanim tests/ingest/testdata/double.ll --preview --ir-mode rich --speed
 
 - DOT export does not require system Graphviz binaries; PNG export does.
 - GIF output renders MP4 first and then converts via `ffmpeg` palette workflow to reduce peak memory usage.
-- `--cfg-animate` renders a CFG traversal animation using Graphviz layout from an `opt -passes=dot-cfg` DOT file (`--dot-cfg`) and a runtime trace (`--import-trace`).
-- `pyproject.toml` includes both `manim` and `manimgl` dependencies, but the current CLI animation path uses Manim Community Edition scenes in `src/llvmanim/present/`.
+- `--cfg-animate` renders a CFG traversal animation using Graphviz layout from an `opt -passes=dot-cfg` DOT file (`--dot-cfg`). If `--import-trace` is not provided, a static trace is auto-derived from the CFG edges (with an interactive confirmation prompt, skippable via `-y`).
+- `pyproject.toml` includes both `manim` and `manimgl` dependencies, but the current CLI animation path uses Manim Community Edition scenes in `src/llvmanim/render/`.
 - Sandbox directories contain experimental scripts and examples and are not used by the package entrypoint.

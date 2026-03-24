@@ -1,9 +1,9 @@
-"""Unit tests for pure helper functions in rich_stack_scene.py."""
+"""Unit tests for pure helper functions ported to stack_renderer.py."""
 
 from __future__ import annotations
 
 from llvmanim.ingest.display_lines import build_display_lines, clean_ir_line
-from llvmanim.present.rich_stack_scene import (
+from llvmanim.render.stack_renderer import (
     _call_site_idx,
     _find_line_idx,
 )

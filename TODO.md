@@ -40,10 +40,14 @@
 	Note: temporary pop guard exists in `render_stack_model.py`
 - [x] Architecture: move execution-trace builder from presentation to transform layer
 - [x] Architecture: remove `.ll` reparsing in `rich_stack_scene` via pipeline display lines
+- [x] Architecture: merge rendering pipelines into `CommandDrivenScene` with `StackRenderer` and `CFGRenderer`
+- [x] Architecture: rename `present/` → `render/`
 
 ### Milestone 4 — CFG animation productization ✅
 - [x] Presentation: add CFG animation scenes from `SceneGraph` nodes/edges
 - [x] CLI: expose CFG animation mode and output controls
+- [x] Auto-derive static CFG trace from CFG edges (`derive_cfg_trace`)
+- [x] CLI `-y`/`--yes` flag to skip confirmation prompts
 
 ### Recommended PR Order
 - [x] PR1: Ingest `binop`/`compare` kinds
@@ -76,14 +80,14 @@
 
 ---
 
-# Presentation Layer
+# Presentation Layer → Render Layer
 - [x] Export scene graph JSON (`scene_graph.json`)
 - [x] Export Graphviz DOT (and PNG when Graphviz is available)
 - [x] Support stack animation modes (`basic` badge + `rich` spotlight)
-- [x] SSA bridge panel: opt-in 3-column layout via `RichStackSceneSpotlight(enable_ssa=True)`
+- [x] SSA bridge panel: opt-in 3-column layout via `StackRenderer(ir_mode="rich-ssa")`
 - [x] `ssa_formatting.py` — shared SSA display formatting (single swap-point for future numeric values)
 - [x] Generate `rich_stack_scene.py` from actual pipeline output instead of reparsing `.ll`
-- [x] CFG animations (via `cfg_animation_scene.py` + `dot_layout.py`)
+- [x] CFG animations (via `cfg_renderer.py` + `dot_layout.py`)
 - [x] Add T/F branch labels to semantic DOT export
 - [ ] Improve sandbox CFG animation prototype (see TODOs in `sandbox/manim_CE/cfg_traversal.py`)
 
@@ -94,11 +98,12 @@
 - [x] Support `--json`, `--draw`, `--animate`, `--preview`, `--ir-mode`, `--speed`, `--outdir`
 - [x] Support animation output format selection (`mp4` / `gif`) with ffmpeg conversion
 - [x] Add dedicated CLI flag(s) for CFG animation mode (`--cfg-animate`, `--dot-cfg`)
+- [x] Auto-derive static CFG trace when `--import-trace` is not provided (`-y` to skip prompt)
 
 ---
 
 # Other
-- [x] Add broad unit test coverage across ingest / transform / present / cli modules (302 tests, 84% coverage)
+- [x] Add broad unit test coverage across ingest / transform / render / cli modules (313 tests, 80%+ coverage)
 - [x] Add focused tests for `binop`/`compare` classification + command mapping + rendering behavior
 - [x] SSA panel integration tests (trace dispatch, 3-column layout, pop cleanup)
 - [x] Open/track issue(s) for remaining architectural TODOs (rich-scene parser dependency, call-trace ownership)

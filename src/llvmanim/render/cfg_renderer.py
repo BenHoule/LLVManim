@@ -17,7 +17,7 @@ from manim import (
 )
 
 from llvmanim.ingest.dot_layout import DotLayout
-from llvmanim.present.cfg_animation_scene import (
+from llvmanim.render.cfg_animation_scene import (
     _ACTIVE_FILL,
     _EDGE_ACTIVE,
     _EDGE_TRAVERSED,
@@ -27,7 +27,7 @@ from llvmanim.present.cfg_animation_scene import (
     _build_edge_mob,
     _CoordMapper,
 )
-from llvmanim.present.command_driven_scene import CommandDrivenScene
+from llvmanim.render.command_driven_scene import CommandDrivenScene
 from llvmanim.transform.models import AnimationCommand, SceneGraph, SceneNode
 
 

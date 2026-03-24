@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from llvmanim.present.ssa_formatting import (
+from llvmanim.render.ssa_formatting import (
     extract_opcode,
     extract_ssa_name,
     format_binop,

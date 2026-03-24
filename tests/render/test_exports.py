@@ -6,8 +6,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from llvmanim.ingest import parse_ir_to_events
-from llvmanim.present import export_cfg_dot, export_scene_graph_json
-from llvmanim.present.graphviz_export import _gv_id, export_cfg_png
+from llvmanim.render import export_cfg_dot, export_scene_graph_json
+from llvmanim.render.graphviz_export import _gv_id, export_cfg_png
 from llvmanim.transform.models import SceneGraph, TraceOverlay
 from llvmanim.transform.scene import build_scene_graph
 

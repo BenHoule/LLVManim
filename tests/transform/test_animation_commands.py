@@ -61,6 +61,7 @@ def test_build_animation_commands_translates_events() -> None:
         strict=True,
     ):
         assert cmd.action == expected_kind, f"Expected action {expected_kind}, got {cmd.action}"
+        assert cmd.event is not None
         assert cmd.event.kind != "other", "Commands should not be created for 'other' events"
 
 

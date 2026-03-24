@@ -5,11 +5,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from llvmanim.transform.models import SceneGraph
+from llvmanim.transform.models import IREvent, SceneGraph
 
 
 def _scene_graph_to_dict(graph: SceneGraph) -> dict:
-    def _event_to_dict(event: object) -> dict:
+    def _event_to_dict(event: IREvent) -> dict:
         return {
             "function_name": event.function_name,
             "block_name": event.block_name,

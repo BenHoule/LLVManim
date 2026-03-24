@@ -5,7 +5,7 @@ from __future__ import annotations
 from manim import Scene
 
 from llvmanim.ingest.dot_layout import DotEdgeLayout, DotLayout, DotNodeLayout
-from llvmanim.present.cfg_animation_scene import (
+from llvmanim.render.cfg_animation_scene import (
     CFGAnimationScene,
     _block_summary,
     _build_block_mob,

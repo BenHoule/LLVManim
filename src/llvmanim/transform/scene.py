@@ -6,6 +6,7 @@ import re
 from collections import defaultdict
 
 from llvmanim.transform.models import (
+    ActionKind,
     AnimationCommand,
     BlockMetadata,
     CFGBlock,
@@ -302,7 +303,7 @@ def build_stack_scene_graph(
                     _walk(callee_name, depth + 1, frame_id)
 
             elif include_ssa and event.kind in ("binop", "compare", "load"):
-                action_map = {
+                action_map: dict[str, ActionKind] = {
                     "binop": "animate_binop",
                     "compare": "animate_compare",
                     "load": "animate_memory_read",

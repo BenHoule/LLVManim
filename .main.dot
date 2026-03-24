@@ -1,0 +1,12 @@
+digraph "CFG for 'main' function" {
+	label="CFG for 'main' function";
+
+	Node0x5e0c539b3fa0 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#d6524470" fontname="Courier",label="{entry:\l|  %retval = alloca i32, align 4\l  %r = alloca i32, align 4\l  %p = alloca ptr, align 8\l  store i32 0, ptr %retval, align 4\l  call void @llvm.dbg.declare(metadata ptr %r, metadata !41, metadata\l... !DIExpression()), !dbg !42\l  store i32 0, ptr %r, align 4, !dbg !18\l  call void @llvm.dbg.declare(metadata ptr %p, metadata !43, metadata\l... !DIExpression()), !dbg !44\l  %call = call noalias ptr @malloc(i64 noundef 4) #3, !dbg !21\l  store ptr %call, ptr %p, align 8, !dbg !20\l  %0 = load ptr, ptr %p, align 8, !dbg !22\l  call void @init(ptr noundef %0), !dbg !23\l  br label %while.cond, !dbg !24\l}"];
+	Node0x5e0c539b3fa0 -> Node0x5e0c539b65d0[tooltip="entry -> while.cond\nProbability 100.00%" ];
+	Node0x5e0c539b65d0 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870" fontname="Courier",label="{while.cond:\l|  %1 = load ptr, ptr %p, align 8, !dbg !25\l  %2 = load i32, ptr %1, align 4, !dbg !26\l  %cmp = icmp slt i32 %2, 100, !dbg !27\l  br i1 %cmp, label %while.body, label %while.end, !dbg !24\l|{<s0>T|<s1>F}}"];
+	Node0x5e0c539b65d0:s0 -> Node0x5e0c539b6d50[tooltip="while.cond -> while.body\nProbability 96.88%" ];
+	Node0x5e0c539b65d0:s1 -> Node0x5e0c539b6dd0[tooltip="while.cond -> while.end\nProbability 3.12%" ];
+	Node0x5e0c539b6d50 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870" fontname="Courier",label="{while.body:\l|  %3 = load ptr, ptr %p, align 8, !dbg !28\l  %call1 = call i32 @double_1(ptr noundef %3), !dbg !30\l  store i32 %call1, ptr %r, align 4, !dbg !31\l  br label %while.cond, !dbg !24, !llvm.loop !32\l}"];
+	Node0x5e0c539b6d50 -> Node0x5e0c539b65d0[tooltip="while.body -> while.cond\nProbability 100.00%" ];
+	Node0x5e0c539b6dd0 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#d6524470" fontname="Courier",label="{while.end:\l|  %4 = load i32, ptr %r, align 4, !dbg !35\l  ret i32 %4, !dbg !36\l}"];
+}

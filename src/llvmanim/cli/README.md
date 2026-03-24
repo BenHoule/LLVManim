@@ -32,7 +32,8 @@ Default input when none is supplied: `tests/ingest/testdata/double.ll`.
 | `--gif-fps FPS` | `12` | GIF conversion frame rate when `--format gif` |
 | `--gif-width PX` | `960` | GIF conversion width when `--format gif` |
 | `--outdir PATH` | `.` | Output directory (created if absent) |
-| `--cfg-animate` | off | Render a CFG traversal animation (requires `--dot-cfg` and `--import-trace`) |
+| `-n` / `--name NAME` | *(stem of input file)* | Base name for output artifacts |
+| `--cfg-animate` | off | Render a CFG traversal animation (requires `--dot-cfg`; auto-derives trace if `--import-trace` is not given) |
 | `--dot-cfg PATH` | — | Path to a `.dot` file from `opt -passes=dot-cfg` for CFG layout |
 | `--import-cfg-edges PATH` | — | Import CFG edges from a JSON file instead of extracting from IR |
 | `--export-cfg-edges PATH` | — | Export extracted CFG edges to a JSON file |
@@ -40,12 +41,13 @@ Default input when none is supplied: `tests/ingest/testdata/double.ll`.
 | `--export-analysis-metadata PATH` | — | Export analysis metadata to a JSON file |
 | `--import-trace PATH` | — | Import a runtime path trace from a JSON file for overlay visualization |
 | `--export-trace PATH` | — | Export the trace overlay to a JSON file |
+| `-y` / `--yes` | off | Skip confirmation prompts (e.g. auto-derive trace) |
 
 ## Animation Modes
 
-- `basic` — stack-only layout; arriving cells flash yellow then settle to white (`RichStackSceneBadge`)
-- `rich` — two-column layout with full IR source on the left and a moving yellow cursor; stack on the right (`RichStackSceneSpotlight`)
-- `rich-ssa` — three-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results alongside the rich spotlight view (`RichStackSceneSpotlight` with `enable_ssa=True`)
+- `basic` — stack-only layout; arriving cells flash yellow then settle to white (`StackRenderer` basic mode)
+- `rich` — two-column layout with full IR source on the left and a moving yellow cursor; stack on the right (`StackRenderer` rich mode)
+- `rich-ssa` — three-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results alongside the rich spotlight view (`StackRenderer` rich-ssa mode)
 
 ## GIF Output Notes
 

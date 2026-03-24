@@ -47,11 +47,11 @@ def test_main_json_flag_writes_scene_graph_json(tmp_path) -> None:
     outdir = tmp_path / "out"
     code = main(argv=[str(ll_file), "--json", "--outdir", str(outdir)])
     assert code == 0
-    assert (outdir / "scene_graph.json").exists()
+    assert (outdir / "test_scene_graph.json").exists()
 
 
 def test_main_draw_flag_writes_dot_file(tmp_path) -> None:
-    """--draw flag writes a cfg_main.dot file to the output directory."""
+    """--draw flag writes a cfg_<name>.dot file to the output directory."""
     ll_file = tmp_path / "test.ll"
     ll_file.write_text("""
         define i32 @f() {
@@ -62,7 +62,23 @@ def test_main_draw_flag_writes_dot_file(tmp_path) -> None:
     outdir = tmp_path / "out"
     code = main(argv=[str(ll_file), "--draw", "--outdir", str(outdir)])
     assert code == 0
-    assert (outdir / "cfg_main.dot").exists()
+    assert (outdir / "cfg_test.dot").exists()
+
+
+def test_name_flag_overrides_output_basenames(tmp_path) -> None:
+    """--name flag overrides the base name used for output artifacts."""
+    ll_file = tmp_path / "test.ll"
+    ll_file.write_text("""
+        define i32 @f() {
+        entry:
+            ret i32 0
+        }
+    """)
+    outdir = tmp_path / "out"
+    code = main(argv=[str(ll_file), "--json", "--draw", "--outdir", str(outdir), "--name", "myproject"])
+    assert code == 0
+    assert (outdir / "myproject_scene_graph.json").exists()
+    assert (outdir / "cfg_myproject.dot").exists()
 
 
 def test_main_draw_flag_prints_skipped_when_png_unavailable(tmp_path, capsys) -> None:
@@ -173,8 +189,8 @@ def test_main_animate_sets_manim_media_dir(tmp_path) -> None:
     assert mock_cfg.media_dir == str(outdir)
 
 
-def test_main_ir_mode_rich_uses_spotlight_scene(tmp_path) -> None:
-    """--ir-mode rich instantiates RichStackSceneSpotlight instead of StackRenderer."""
+def test_main_ir_mode_rich_uses_stack_renderer_with_ir_mode(tmp_path) -> None:
+    """--ir-mode rich instantiates StackRenderer with ir_mode='rich'."""
     from unittest.mock import patch
 
     ll_file = tmp_path / "test.ll"
@@ -184,17 +200,18 @@ def test_main_ir_mode_rich_uses_spotlight_scene(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.RichStackSceneSpotlight") as MockSpotlight, \
-         patch("llvmanim.cli.main.StackRenderer") as MockStack:
+    with patch("llvmanim.cli.main.StackRenderer") as MockStack:
         code = main(argv=[str(ll_file), "--animate", "--ir-mode", "rich"])
     assert code == 0
-    MockSpotlight.assert_called_once()
-    MockStack.assert_not_called()
-    MockSpotlight.return_value.render.assert_called_once_with(preview=False)
+    MockStack.assert_called_once()
+    _, kwargs = MockStack.call_args
+    assert kwargs.get("ir_mode") == "rich"
+    assert "display_lines" in kwargs
+    MockStack.return_value.render.assert_called_once_with(preview=False)
 
 
-def test_main_ir_mode_rich_ssa_uses_spotlight_with_enable_ssa(tmp_path) -> None:
-    """--ir-mode rich-ssa instantiates RichStackSceneSpotlight with enable_ssa=True."""
+def test_main_ir_mode_rich_ssa_uses_stack_renderer_with_ir_mode(tmp_path) -> None:
+    """--ir-mode rich-ssa instantiates StackRenderer with ir_mode='rich-ssa'."""
     from unittest.mock import patch
 
     ll_file = tmp_path / "test.ll"
@@ -204,20 +221,18 @@ def test_main_ir_mode_rich_ssa_uses_spotlight_with_enable_ssa(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.RichStackSceneSpotlight") as MockSpotlight, \
-         patch("llvmanim.cli.main.StackRenderer") as MockStack:
+    with patch("llvmanim.cli.main.StackRenderer") as MockStack:
         code = main(argv=[str(ll_file), "--animate", "--ir-mode", "rich-ssa"])
     assert code == 0
-    MockSpotlight.assert_called_once()
-    # Verify enable_ssa=True was passed
-    _, kwargs = MockSpotlight.call_args
-    assert kwargs.get("enable_ssa") is True
-    MockStack.assert_not_called()
-    MockSpotlight.return_value.render.assert_called_once_with(preview=False)
+    MockStack.assert_called_once()
+    _, kwargs = MockStack.call_args
+    assert kwargs.get("ir_mode") == "rich-ssa"
+    assert "display_lines" in kwargs
+    MockStack.return_value.render.assert_called_once_with(preview=False)
 
 
 def test_main_ir_mode_basic_uses_stack_renderer(tmp_path) -> None:
-    """--ir-mode basic (default) instantiates StackRenderer."""
+    """--ir-mode basic (default) instantiates StackRenderer with ir_mode='basic'."""
     from unittest.mock import patch
 
     ll_file = tmp_path / "test.ll"
@@ -227,12 +242,12 @@ def test_main_ir_mode_basic_uses_stack_renderer(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.StackRenderer") as MockStack, \
-         patch("llvmanim.cli.main.RichStackSceneSpotlight") as MockSpotlight:
+    with patch("llvmanim.cli.main.StackRenderer") as MockStack:
         code = main(argv=[str(ll_file), "--animate", "--ir-mode", "basic"])
     assert code == 0
     MockStack.assert_called_once()
-    MockSpotlight.assert_not_called()
+    _, kwargs = MockStack.call_args
+    assert kwargs.get("ir_mode") == "basic"
 
 
 def test_main_speed_flag_passes_multiplier_to_scene(tmp_path) -> None:
@@ -535,7 +550,7 @@ def test_import_analysis_metadata_applies_to_graph(tmp_path, capsys) -> None:
     code = main(argv=[str(ll_file), "--json", "--outdir", str(tmp_path), "--import-analysis-metadata", str(meta_path)])
     assert code == 0
 
-    scene = json.loads((tmp_path / "scene_graph.json").read_text())
+    scene = json.loads((tmp_path / "test_scene_graph.json").read_text())
     loop_nodes = [n for n in scene["nodes"] if n["label"] == "loop"]
     assert len(loop_nodes) == 1
     assert loop_nodes[0]["animation_hint"] == "pulse_loop_header"
@@ -622,7 +637,7 @@ def test_import_trace_populates_overlay(tmp_path, capsys) -> None:
     assert code == 0
 
     # DOT output should contain overlay styling
-    dot_text = (outdir / "cfg_main.dot").read_text()
+    dot_text = (outdir / "cfg_test.dot").read_text()
     assert "#d4edda" in dot_text  # visited node fill
 
 
@@ -668,7 +683,7 @@ def test_no_trace_flag_produces_no_overlay(tmp_path) -> None:
     code = main(argv=[str(ll_file), "--draw", "--outdir", str(outdir)])
     assert code == 0
 
-    dot_text = (outdir / "cfg_main.dot").read_text()
+    dot_text = (outdir / "cfg_test.dot").read_text()
     assert "fillcolor" not in dot_text
     assert "penwidth" not in dot_text
 
@@ -687,15 +702,19 @@ def test_cfg_animate_requires_dot_cfg(tmp_path, capsys) -> None:
     assert "--dot-cfg" in capsys.readouterr().out
 
 
-def test_cfg_animate_requires_trace(tmp_path, capsys) -> None:
-    """--cfg-animate without --import-trace returns error."""
+def test_cfg_animate_auto_derives_trace(tmp_path, capsys) -> None:
+    """--cfg-animate without --import-trace auto-derives a trace with --yes."""
     ll_file = tmp_path / "test.ll"
     ll_file.write_text(_LOOP_IR)
-    dot_file = tmp_path / "cfg.dot"
+    dot_file = tmp_path / ".main.dot"
     dot_file.write_text("digraph { a -> b }")
-    code = main(argv=[str(ll_file), "--cfg-animate", "--dot-cfg", str(dot_file)])
-    assert code == 1
-    assert "--import-trace" in capsys.readouterr().out
+    # --yes skips the prompt; the DOT will fail at layout parse, but the
+    # auto-derive message should appear in stdout first.
+    main(argv=[
+        str(ll_file), "--cfg-animate", "--dot-cfg", str(dot_file), "--yes",
+    ])
+    out = capsys.readouterr().out
+    assert "Deriving a static trace for @main" in out
 
 
 def test_cfg_animate_dot_file_not_found(tmp_path, capsys) -> None:

@@ -45,4 +45,5 @@ def test_stack_animation_pipeline_from_ir_to_commands(all_kinds_ir: str) -> None
         strict=True,
     ):
         assert cmd.action == expected_kind, f"Expected action {expected_kind}, got {cmd.action}"
+        assert cmd.event is not None
         assert cmd.event.kind != "other", "Commands should not be created for 'other' events"

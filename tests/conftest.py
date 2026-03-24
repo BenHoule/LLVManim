@@ -95,11 +95,11 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
         if nodeid.startswith("tests/ingest/") or nodeid.startswith("tests/transform/"):
             item.add_marker(pytest.mark.unit)
 
-        if nodeid.startswith("tests/present/"):
+        if nodeid.startswith("tests/render/"):
             item.add_marker(pytest.mark.integration)
 
-        if nodeid == "tests/present/test_exports.py" or nodeid.startswith(
-            "tests/present/test_exports.py::"
+        if nodeid == "tests/render/test_exports.py" or nodeid.startswith(
+            "tests/render/test_exports.py::"
         ):
             item.add_marker(pytest.mark.contract)
 

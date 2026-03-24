@@ -41,7 +41,7 @@ Steps performed by `build_scene_graph`:
 
 ### `commands.py`
 
-Flat event-to-action translation used by the `present` layer's
+Flat event-to-action translation used by the `render` layer's
 command/render-step path.
 
 ```python
@@ -76,3 +76,23 @@ trace: list[TraceStep] = build_execution_trace(stream, entry="main")
 
 Each `TraceStep` is a `(action, func_name, ir_text)` triple where action is
 `"push"`, `"alloca"`, or `"pop"`.
+
+#### `derive_cfg_trace`
+
+Derives a static CFG trace by walking edges from the entry block:
+
+```python
+from llvmanim.transform.trace import derive_cfg_trace
+
+overlay: TraceOverlay = derive_cfg_trace(graph, function="main")
+```
+
+- Prefers `T`-labelled (true-branch) edges at conditional branches.
+- Unrolls loops up to `max_loop_iterations` times (default: 7).
+- Returns a `TraceOverlay` with `entry_order`, `visited_nodes`, `traversed_edges`, and `termination_reason`.
+- Used by the CLI when `--cfg-animate` is given without `--import-trace`.
+
+### `scene.py`
+
+`build_scene_graph` is complemented by `build_stack_scene_graph`, which wraps
+the call for the stack-animation path (always passes `include_cfg_edges=True`).

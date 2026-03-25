@@ -1,0 +1,44 @@
+// Extracted subgraph: Layout computation path from 01b_ingest_layer
+// compute_dot_layout() invokes the graphviz Python package to assign
+// node positions, which CFGRenderer and graphviz_export then consume.
+digraph dot_layout_path {
+    graph [
+        fontname = "Helvetica" fontsize = 13
+        label    = "Ingest: DOT Layout Path"
+        labelloc = "t" rankdir = LR splines = ortho nodesep = 0.85 ranksep = 1.15
+        pad = 0.4 bgcolor = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    // ── Internal ───────────────────────────────────────────────────
+    subgraph cluster_ingest {
+
+        label     = "Ingest  (llvmanim/ingest/)"
+        style     = filled
+        fillcolor = "#d5f5e3"
+        color     = "#1e8449"
+        penwidth  = 1.5
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#1e8449"
+
+        dot_layout [label="compute_dot_layout()\ndot_layout.py"
+                    fillcolor="#27ae60" fontcolor="white"]
+    }
+
+    // ── Third-party ────────────────────────────────────────────────
+    graphviz [label="graphviz\n(3rd party)" fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+
+    // ── External stubs ─────────────────────────────────────────────
+    cli_main     [label="cli/main.py\n← CLI"                   fillcolor="#f4b8d4" fontcolor="#7a1545"]
+    cfg_renderer [label="CFGRenderer\n→ Render"                fillcolor="#a9cce3" fontcolor="#1a5276"]
+    gviz_export  [label="graphviz_export\n→ Render"            fillcolor="#a9cce3" fontcolor="#1a5276"]
+
+    // ── Edges ──────────────────────────────────────────────────────
+    cli_main   -> dot_layout   [minlen=2 xlabel="  .dot path" fontcolor="#1e8449"]
+    dot_layout -> cfg_renderer [minlen=2 xlabel="  DotLayout" fontcolor="#1a5276"]
+    dot_layout -> gviz_export  [minlen=2 xlabel="  --draw" fontcolor="#1a5276"]
+
+    dot_layout -> graphviz [style=dashed minlen=2 xlabel="  import" fontcolor="#2c3e50" color="#999999"]
+}

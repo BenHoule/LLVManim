@@ -1,0 +1,43 @@
+// Extracted subgraph: CFGRenderer path from 01d1_animation_renderers
+digraph cfg_renderer_path {
+    graph [
+        fontname = "Helvetica" fontsize = 13
+        label    = "Render: CFG Renderer Path"
+        labelloc = "t" splines = ortho nodesep = 0.85 ranksep = 1.15
+        pad = 0.4 bgcolor = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    subgraph cluster_render {
+
+        label     = "Render  (llvmanim/render/)"
+        style     = filled
+        fillcolor = "#d4e6f1"
+        color     = "#1a5276"
+        penwidth  = 1.5
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#1a5276"
+
+        cfg_renderer   [label="CFGRenderer\ncfg_renderer.py"
+                        fillcolor="#2980b9" fontcolor="white"]
+        cfg_anim_scene [label="cfg_animation_scene.py\n(_CoordMapper, helpers)"
+                        fillcolor="#2980b9" fontcolor="white"]
+        cmd_scene      [label="CommandDrivenScene\ncommand_driven_scene.py"
+                        fillcolor="#2980b9" fontcolor="white"]
+        manim_ce       [label="Manim Community Edition\n(3rd party)"
+                        fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+    }
+
+    build_sg   [label="build_scene_graph()\n← Transform" fillcolor="#f5cba7" fontcolor="#ca6f1e"]
+    dot_layout [label="compute_dot_layout()\n← Ingest"   fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    out_anim   [label="CFG animation\n(MP4 / GIF)" fillcolor="#e74c3c" fontcolor="white" shape=note]
+
+    build_sg      -> cfg_renderer   [minlen=2 xlabel="SceneGraph"]
+    dot_layout    -> cfg_renderer   [minlen=2 xlabel="DotLayout"]
+    cfg_renderer  -> cfg_anim_scene [style=dashed minlen=2 xlabel="import" color="#999999"]
+    cfg_renderer  -> cmd_scene      [arrowhead=empty minlen=2 xlabel="extends"]
+    cmd_scene     -> manim_ce
+    manim_ce      -> out_anim
+}

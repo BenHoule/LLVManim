@@ -1,0 +1,54 @@
+// Extracted subgraph: Export paths from 01d_render_layer
+// Two distinct export paths: JSON serialisation of SceneGraph, and
+// Graphviz DOT/PNG export of computed CFG layout.
+digraph export_paths {
+    graph [
+        rankdir  = LR
+        fontname = "Helvetica" fontsize = 11
+        label    = "Render Detail: Export Paths"
+        labelloc = "t"
+        splines  = ortho
+        nodesep  = 0.75
+        ranksep  = 1.25
+        pad      = 0.3
+        bgcolor  = "white"
+        size     = "10.5,7.0"
+        ratio    = compress
+    ]
+    node [fontname="Helvetica" fontsize=9 style=filled shape=box margin="0.12,0.06"]
+    edge [fontname="Helvetica" fontsize=8 arrowhead=open color="#555555"]
+
+    subgraph cluster_render {
+
+        label     = "Render  (llvmanim/render/)"
+        style     = filled
+        fillcolor = "#d4e6f1"
+        color     = "#1a5276"
+        margin    = 10
+        labeljust = l
+
+        json_export [label="json_export.py\n(export_scene_graph_json)"
+                     fillcolor="#2980b9" fontcolor="white"]
+        gviz_export [label="graphviz_export.py\n(export_cfg_dot/png)"
+                     fillcolor="#2980b9" fontcolor="white"]
+    }
+
+    graphviz [label="graphviz\n(3rd party)" fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+
+    build_sg    [label="build_scene_graph()\n← Transform" fillcolor="#f5cba7" fontcolor="#ca6f1e"]
+    dot_layout  [label="compute_dot_layout()\n← Ingest"   fillcolor="#a9dfbf" fontcolor="#1e8449"]
+
+    out_json [label="*_scene_graph.json"    fillcolor="#e74c3c" fontcolor="white" shape=note]
+    out_dot  [label="cfg_*.dot / cfg_*.png" fillcolor="#e74c3c" fontcolor="white" shape=note]
+
+    { rank=same; build_sg; dot_layout }
+    { rank=same; json_export; gviz_export }
+    { rank=same; out_json; out_dot }
+
+    build_sg    -> json_export [minlen=2 xlabel="--json"]
+    json_export -> out_json
+
+    dot_layout  -> gviz_export [minlen=2 xlabel="--draw"]
+    gviz_export -> out_dot
+    gviz_export -> graphviz [style=dashed minlen=2 xlabel="import" color="#999999"]
+}

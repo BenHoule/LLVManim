@@ -1,0 +1,35 @@
+// Extracted subgraph: Trace source from 03_cfg_animation_flow
+digraph trace_source {
+    graph [
+        fontname = "Helvetica" fontsize = 13
+        label    = "Trace Source (mutually exclusive)"
+        labelloc = "t" splines = ortho nodesep = 0.8 ranksep = 1.15
+        pad = 0.4 bgcolor = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    // ── Internal ───────────────────────────────────────────────────
+    subgraph cluster_trace {
+
+        label = "Trace source (mutually exclusive)"
+        style = filled fillcolor = "#f5f6fa" color = "#636e72"
+        penwidth = 1.5 fontname = "Helvetica" fontsize = 11
+
+        load_trace   [label="load_trace()\ningest/trace_io.py\n(--import-trace)"
+                      fillcolor="#27ae60" fontcolor="white"]
+        derive_trace [label="derive_cfg_trace()\ntransform/trace.py\n(auto-derived)"
+                      fillcolor="#e67e22" fontcolor="white"]
+    }
+
+    // ── External stubs ─────────────────────────────────────────────
+    input_trace [label="trace.json\n(--import-trace)" fillcolor="#fef0bc" fontcolor="#9a6f00" shape=note]
+    scene_graph [label="SceneGraph\n← build_scene_graph" fillcolor="#f5cba7" fontcolor="#ca6f1e"]
+    overlay     [label="TraceOverlay\n→ scene_graph.overlay" fillcolor="#f5cba7" fontcolor="#ca6f1e"]
+
+    // ── Edges ──────────────────────────────────────────────────────
+    input_trace -> load_trace   [minlen=2 xlabel=" --import-trace"]
+    scene_graph -> derive_trace [minlen=2 xlabel=" auto-derive"]
+    load_trace  -> overlay      [minlen=2 xlabel=" loaded"]
+    derive_trace -> overlay     [minlen=2 xlabel=" computed"]
+}

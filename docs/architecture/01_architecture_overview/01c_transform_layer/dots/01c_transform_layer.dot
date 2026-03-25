@@ -1,0 +1,89 @@
+/**
+ * 01c_transform_layer.dot  (composed)
+ *
+ * Full Transform layer detail.  Composed from the two subgraphs:
+ *
+ *   01c1_stack_build.dot  — scene-graph build
+ *   01c2_cfg_build.dot    — CFG trace derivation
+ *
+ * Key source files:
+ *   src/llvmanim/transform/scene.py — build_scene_graph()
+ *   src/llvmanim/transform/trace.py — derive_cfg_trace()
+ *
+ * Render:
+ *   dot -Tpdf 01c_transform_layer.dot -o ../01c_transform_layer.pdf
+ */
+digraph transform_layer {
+    graph [
+        rankdir  = LR
+        fontname = "Helvetica" fontsize = 11
+        label    = "Transform Layer  (llvmanim/transform/,  composed)"
+        labelloc = t
+        splines  = ortho
+        nodesep  = 0.35
+        ranksep  = 0.75
+        pad      = 0.3
+        bgcolor  = "white"
+        size     = "10.5,7.0"
+        ratio    = compress
+    ]
+    node [fontname="Helvetica" fontsize=9 style=filled shape=box margin="0.12,0.06"]
+    edge [fontname="Helvetica" fontsize=8 arrowhead=open color="#555555"]
+
+    /* ── Shared ingest / render stubs ───────────────────────────── */
+    parse_events  [label="parse_module_to_events()\n← Ingest" fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    display_lines [label="build_display_lines()\n← Ingest"    fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    trace_io      [label="load_trace()\n← Ingest"             fillcolor="#a9dfbf" fontcolor="#1e8449"]
+
+    renderer    [label="→ Render"              fillcolor="#a9cce3" fontcolor="#1a5276"]
+    json_export [label="json_export\n→ Render" fillcolor="#a9cce3" fontcolor="#1a5276"]
+
+    /* ══════════════════════════════════════════════════════════════
+       SCENE-GRAPH BUILD
+       source: 01c1_stack_build.dot
+    ══════════════════════════════════════════════════════════════ */
+    subgraph cluster_scene_build {
+
+        label     = "Scene-Graph Build  ·  scene.py"
+        style     = filled
+        fillcolor = "#fdebd0"
+        color     = "#ca6f1e"
+        margin    = 10
+        labeljust = l
+
+        build_scene [label="build_scene_graph()\nscene.py"
+                     fillcolor="#e67e22" fontcolor="white"]
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       TRACE DERIVATION
+       source: 01c2_cfg_build.dot
+    ══════════════════════════════════════════════════════════════ */
+    subgraph cluster_trace_derivation {
+
+        label     = "Trace Derivation  ·  trace.py"
+        style     = filled
+        fillcolor = "#fdebd0"
+        color     = "#ca6f1e"
+        margin    = 10
+        labeljust = l
+
+        derive_trace [label="derive_cfg_trace()\ntrace.py"
+                      fillcolor="#e67e22" fontcolor="white"]
+    }
+
+    /* ── Cross: ingest → scene build ────────────────────────────── */
+    parse_events  -> build_scene [xlabel="ProgramEventStream"]
+    display_lines -> build_scene [xlabel="display_lines\n(rich modes)" style=dashed]
+
+    /* ── Cross: ingest → trace derivation ───────────────────────── */
+    parse_events -> derive_trace [xlabel="ProgramEventStream"]
+    trace_io     -> derive_trace [xlabel="TraceOverlay\n(override)" style=dashed]
+
+    /* ── Cross: trace derivation → scene build ──────────────────── */
+    derive_trace -> build_scene [xlabel="TraceOverlay"]
+
+    /* ── Cross: scene build → render ────────────────────────────── */
+    build_scene -> renderer    [xlabel="SceneGraph"]
+    build_scene -> json_export [xlabel="--json"]
+}

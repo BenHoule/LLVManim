@@ -1,0 +1,112 @@
+// LLVManim: Stack Animation Pipeline
+// Shows how an LLVM-IR file travels through the stack animation path,
+// including the three ir_mode branches and optional GIF export.
+digraph stack_flow {
+    graph [
+        fontname    = "Helvetica"
+        fontsize    = 13
+        label       = "LLVManim: Stack Animation Pipeline"
+        labelloc    = "t"
+        rankdir     = LR
+        splines     = ortho
+        concentrate = true
+        nodesep     = 0.55
+        ranksep     = 1.1
+        pad         = 0.4
+        bgcolor     = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    // ── Inputs ─────────────────────────────────────────────────────
+    input_ll [label="input.ll"
+              fillcolor="#f1c40f" fontcolor="#2c3e50" shape=note]
+
+    // ── Ingest ─────────────────────────────────────────────────────
+    parse [label="parse_module_to_events()\ningest/llvm_events.py"
+           fillcolor="#27ae60" fontcolor="white"]
+
+    subgraph cluster_mode {
+
+        label     = "ir_mode branch"
+        style     = filled
+        fillcolor = "#f5f6fa"
+        color     = "#636e72"
+        penwidth  = 1.5
+        fontname  = "Helvetica"
+        fontsize  = 11
+
+        mode_basic [label="basic\n(raw opcodes)"
+                    fillcolor="#ecf0f1" fontcolor="#2c3e50"]
+        mode_rich  [label="rich\n(formatted operands)"
+                    fillcolor="#ecf0f1" fontcolor="#2c3e50"]
+        mode_ssa   [label="rich-ssa\n(SSA register colours)"
+                    fillcolor="#ecf0f1" fontcolor="#2c3e50"]
+        {rank=same; mode_basic; mode_rich; mode_ssa}
+
+        display_lines [label="build_display_lines()\ningest/display_lines.py"
+                       fillcolor="#27ae60" fontcolor="white"]
+
+        mode_rich -> display_lines [xlabel=" annotates"]
+        mode_ssa  -> display_lines [xlabel=" annotates"]
+    }
+
+    pest [label="ProgramEventStream"
+          fillcolor="#8e44ad" fontcolor="white"]
+
+    // ── Transform ──────────────────────────────────────────────────
+    build_stack [label="build_scene_graph(mode=\"stack\")\ntransform/scene.py"
+                 fillcolor="#e67e22" fontcolor="white"]
+
+    scene_graph [label="SceneGraph\n(AnimationCommand[])"
+                 fillcolor="#8e44ad" fontcolor="white"]
+
+    // ── Render ─────────────────────────────────────────────────────
+    ssa_fmt [label="ssa_formatting.py\n(SSA register colours)"
+            fillcolor="#2980b9" fontcolor="white"]
+
+    stack_renderer [label="StackRenderer\nrender/stack_renderer.py"
+                    fillcolor="#2980b9" fontcolor="white"]
+
+    manim [label="Manim Community Edition\n(3rd party)"
+           fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+
+    // ── Outputs ────────────────────────────────────────────────────
+    out_mp4 [label="animation.mp4"
+             fillcolor="#e74c3c" fontcolor="white" shape=note]
+    out_gif [label="animation.gif\n(--export-gif)"
+             fillcolor="#e74c3c" fontcolor="white" shape=note]
+
+    convert [label="_convert_mp4_to_gif()\ncli/main.py"
+             fillcolor="#c0397e" fontcolor="white"]
+
+    // ── Third-party libraries ─────────────────────────────────────
+    llvmlite [label="llvmlite\n(3rd party)" fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+
+    // ── Edges ──────────────────────────────────────────────────────
+    input_ll   -> parse
+    parse      -> pest      [xlabel=" events"]
+    pest       -> mode_basic
+    pest       -> mode_rich
+    pest       -> mode_ssa
+
+    mode_basic -> build_stack [xlabel=" PES"]
+    mode_rich  -> build_stack [xlabel=" PES"]
+    mode_ssa   -> build_stack [xlabel=" PES"]
+    display_lines -> build_stack [xlabel=" display_lines\n(rich modes only)" style=dashed]
+
+    build_stack    -> scene_graph
+    scene_graph    -> stack_renderer
+    stack_renderer -> manim
+
+    // Cross-layer render dependencies (UML dependency: dashed)
+    stack_renderer -> display_lines [style=dashed xlabel=" import" color="#999999"]
+    stack_renderer -> ssa_fmt       [style=dashed xlabel=" import\n(rich-ssa)" color="#999999"]
+
+    manim          -> out_mp4
+    out_mp4        -> convert     [xlabel=" --export-gif"]
+    convert        -> out_gif
+
+    // 3rd-party import edge
+    parse -> llvmlite [style=dashed xlabel="  import" color="#999999"]
+}

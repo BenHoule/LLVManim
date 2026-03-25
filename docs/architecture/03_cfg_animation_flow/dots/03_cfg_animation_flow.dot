@@ -1,0 +1,122 @@
+// LLVManim: CFG Animation Pipeline
+// Shows the two input paths (.ll and .dot), the dual trace routes,
+// and how they merge at CFGRenderer.
+digraph cfg_flow {
+    graph [
+        fontname    = "Helvetica"
+        fontsize    = 13
+        label       = "LLVManim: CFG Animation Pipeline"
+        labelloc    = "t"
+        splines     = ortho
+        concentrate = true
+        nodesep     = 0.65
+        ranksep     = 1.0
+        pad         = 0.4
+        bgcolor     = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    // ── Inputs ─────────────────────────────────────────────────────
+    input_ll  [label="input.ll\n(LLVM-IR)"
+               fillcolor="#f1c40f" fontcolor="#2c3e50" shape=note]
+    input_dot [label="layout.dot\n(pre-computed Graphviz,\noptional)"
+               fillcolor="#f1c40f" fontcolor="#2c3e50" shape=note]
+    input_trace [label="trace.json\n(--import-trace, optional)"
+                 fillcolor="#f1c40f" fontcolor="#2c3e50" shape=note]
+    {rank=same; input_ll; input_dot; input_trace}
+
+    // ── Ingest: IR path ────────────────────────────────────────────
+    parse_events [label="parse_module_to_events()\ningest/llvm_events.py"
+                  fillcolor="#27ae60" fontcolor="white"]
+    meta_io      [label="load_analysis_metadata()\ningest/analysis_metadata_io.py\n(optional, --import-analysis-metadata)"
+                  fillcolor="#27ae60" fontcolor="white"]
+    cfg_edge_io  [label="load_cfg_edges()\ningest/cfg_edge_io.py\n(optional, --import-cfg-edges)"
+                  fillcolor="#27ae60" fontcolor="white"]
+
+    // ── Ingest: layout path ────────────────────────────────────
+    dot_layout [label="compute_dot_layout()\ningest/dot_layout.py"
+                fillcolor="#27ae60" fontcolor="white"]
+
+    // ── Transform: scene graph ─────────────────────────────────────
+    build_scene [label="build_scene_graph(mode=\"cfg\")\ntransform/scene.py"
+                 fillcolor="#e67e22" fontcolor="white"]
+
+    scene_graph [label="SceneGraph\n(nodes, edges, TraceOverlay)"
+                 fillcolor="#8e44ad" fontcolor="white"]
+
+    // ── Trace routes ───────────────────────────────────────────────
+    subgraph cluster_trace {
+
+        label     = "Trace source (mutually exclusive)"
+        style     = filled
+        fillcolor = "#f5f6fa"
+        color     = "#636e72"
+        penwidth  = 1.5
+        fontname  = "Helvetica"
+        fontsize  = 11
+
+        load_trace   [label="load_trace()\ningest/trace_io.py\n(--import-trace)"
+                      fillcolor="#27ae60" fontcolor="white"]
+        derive_trace [label="derive_cfg_trace()\ntransform/trace.py\n(auto-derived)"
+                      fillcolor="#e67e22" fontcolor="white"]
+    }
+
+    overlay [label="TraceOverlay\n(entry_order, visited_nodes,\ntraversed_edges, reason)"
+             fillcolor="#8e44ad" fontcolor="white"]
+
+    build_overlay_cmds [label="_build_overlay_commands()\ntransform/scene.py"
+                        fillcolor="#e67e22" fontcolor="white"]
+
+    // ── Render ─────────────────────────────────────────────
+    cfg_anim_scene [label="cfg_animation_scene.py\n(_CoordMapper, build helpers)"
+                    fillcolor="#2980b9" fontcolor="white"]
+
+    cfg_renderer [label="CFGRenderer\nrender/cfg_renderer.py"
+                  fillcolor="#2980b9" fontcolor="white"]
+
+    manim [label="Manim Community Edition\n(3rd party)"
+           fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+
+    // ── Outputs ────────────────────────────────────────────────────
+    out_dot [label="cfg_*.dot\ncfg_*.png\n(--draw)"
+             fillcolor="#e74c3c" fontcolor="white" shape=note]
+    out_mp4 [label="cfg animation\n(MP4 / GIF)"
+             fillcolor="#e74c3c" fontcolor="white" shape=note]
+
+    // ── Third-party libraries ─────────────────────────────────────
+    llvmlite    [label="llvmlite\n(3rd party)" fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+    graphviz    [label="graphviz\n(3rd party)" fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+
+    // ── Edges ──────────────────────────────────────────────────────
+    input_ll    -> parse_events  [xlabel=" .ll path"]
+    input_dot   -> dot_layout    [xlabel=" .dot path"]
+    input_trace -> load_trace    [xlabel=" --import-trace"]
+    meta_io     -> build_scene   [xlabel=" BlockMetadata\n(optional)" style=dashed]
+    cfg_edge_io -> build_scene   [xlabel=" cfg_edges\n(override)" style=dashed]
+
+    parse_events -> build_scene  [xlabel=" ProgramEventStream"]
+    dot_layout   -> out_dot      [xlabel=" --draw"]
+    dot_layout   -> cfg_renderer [xlabel=" DotLayout\n(node positions)"]
+
+    build_scene -> scene_graph
+    scene_graph  -> derive_trace [xlabel=" auto-derive"]
+    load_trace   -> overlay      [xlabel=" loaded"]
+    derive_trace -> overlay      [xlabel=" computed"]
+
+    overlay     -> scene_graph   [xlabel=" sets .overlay" style=dashed arrowhead=odiamond constraint=false]
+    scene_graph  -> build_overlay_cmds [xlabel=" --cfg-animate"]
+    build_overlay_cmds -> cfg_renderer [xlabel=" SceneGraph\n(+commands)"]
+
+    // UML dependency: cfg_renderer imports cfg_animation_scene
+    cfg_renderer -> cfg_anim_scene [style=dashed xlabel=" import" color="#999999"]
+    // UML dependency: cfg_animation_scene imports dot_layout types
+    cfg_anim_scene -> dot_layout   [style=dashed xlabel=" import" color="#999999"]
+
+    cfg_renderer -> manim
+    manim        -> out_mp4
+
+    // 3rd-party import edges
+    parse_events -> llvmlite [style=dashed xlabel="  import" color="#999999"]
+    dot_layout   -> graphviz [style=dashed xlabel="  import" color="#999999"]
+}

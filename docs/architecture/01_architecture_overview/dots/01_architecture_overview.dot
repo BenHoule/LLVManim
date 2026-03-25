@@ -1,0 +1,157 @@
+/**
+ * 01_architecture_overview.dot  (composed)
+ *
+ * Top-level architecture composed from layer subgraphs:
+ *
+ *   01a_cli_layer.dot
+ *   01b_ingest_layer/01b_ingest_layer.dot
+ *   01c_transform_layer/01c_transform_layer.dot
+ *   01d_render_layer/01d_render_layer.dot
+ */
+digraph architecture_overview {
+    graph [
+        rankdir    = LR
+        fontname   = "Helvetica"
+        fontsize   = 11
+        label      = "LLVManim: Layer Architecture  (composed)"
+        labelloc   = "t"
+        splines    = ortho
+        nodesep    = 0.48
+        ranksep    = 0.95
+        pad        = 0.3
+        bgcolor    = "white"
+        newrank    = true
+        compound   = true
+        size       = "10.5,7.0"
+        ratio      = compress
+    ]
+    node [fontname="Helvetica" fontsize=9 style=filled shape=box margin="0.12,0.06"]
+    edge [fontname="Helvetica" fontsize=8 arrowhead=open color="#555555"]
+
+    input_ll  [label="input.ll\n(LLVM-IR file)"             fillcolor="#f1c40f" fontcolor="#2c3e50" shape=note]
+    input_dot [label="layout.dot\n(optional pre-computed)" fillcolor="#f1c40f" fontcolor="#2c3e50" shape=note]
+
+    out_json [label="*_scene_graph.json"    fillcolor="#e74c3c" fontcolor="white" shape=note]
+    out_dot  [label="cfg_*.dot / cfg_*.png" fillcolor="#e74c3c" fontcolor="white" shape=note]
+    out_anim [label="animations\n(MP4 / GIF)" fillcolor="#e74c3c" fontcolor="white" shape=note]
+
+    /* ══════════════════════════════════════════════════════════════
+       CLI LAYER
+       source: 01a_cli_layer.dot
+    ══════════════════════════════════════════════════════════════ */
+    subgraph cluster_cli {
+
+        label     = "CLI Layer  ·  llvmanim/cli/"
+        style     = filled
+        fillcolor = "#fce4ec"
+        color     = "#c0397e"
+        margin    = 10
+        labeljust = l
+
+        cli_main [label="main.py\nargparse dispatch"
+                  fillcolor="#c0397e" fontcolor="white"]
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       INGEST LAYER
+       source: 01b_ingest_layer/01b_ingest_layer.dot
+    ══════════════════════════════════════════════════════════════ */
+    subgraph cluster_ingest {
+
+        label     = "Ingest Layer  ·  llvmanim/ingest/"
+        style     = filled
+        fillcolor = "#d5f5e3"
+        color     = "#1e8449"
+        margin    = 10
+        labeljust = l
+
+        parse_events  [label="parse_module_to_events()\nllvm_events.py"
+                       fillcolor="#27ae60" fontcolor="white"]
+        dot_layout    [label="compute_dot_layout()\ndot_layout.py"
+                       fillcolor="#27ae60" fontcolor="white"]
+        trace_io      [label="load_trace()\ntrace_io.py"
+                       fillcolor="#27ae60" fontcolor="white"]
+        meta_io       [label="load_analysis_metadata()\nanalysis_metadata_io.py"
+                       fillcolor="#27ae60" fontcolor="white"]
+        cfg_edge_io   [label="load_cfg_edges()\ncfg_edge_io.py"
+                       fillcolor="#27ae60" fontcolor="white"]
+        display_lines [label="build_display_lines()\ndisplay_lines.py"
+                       fillcolor="#27ae60" fontcolor="white"]
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       TRANSFORM LAYER
+       source: 01c_transform_layer/01c_transform_layer.dot
+    ══════════════════════════════════════════════════════════════ */
+    subgraph cluster_transform {
+
+        label     = "Transform Layer  ·  llvmanim/transform/"
+        style     = filled
+        fillcolor = "#fdebd0"
+        color     = "#ca6f1e"
+        margin    = 10
+        labeljust = l
+
+        build_scene  [label="build_scene_graph()\nscene.py"
+                      fillcolor="#e67e22" fontcolor="white"]
+        derive_trace [label="derive_cfg_trace()\ntrace.py"
+                      fillcolor="#e67e22" fontcolor="white"]
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       RENDER LAYER
+       source: 01d_render_layer/01d_render_layer.dot
+    ══════════════════════════════════════════════════════════════ */
+    subgraph cluster_render {
+
+        label     = "Render Layer  ·  llvmanim/render/"
+        style     = filled
+        fillcolor = "#d4e6f1"
+        color     = "#1a5276"
+        margin    = 10
+        labeljust = l
+
+        renderer    [label="animation renderers\n(stack + cfg + runtime)"
+                     fillcolor="#2980b9" fontcolor="white"]
+        json_export [label="json_export.py\n(export_scene_graph_json)"
+                     fillcolor="#2980b9" fontcolor="white"]
+        gviz_export [label="graphviz_export.py\n(export_cfg_dot/png)"
+                     fillcolor="#2980b9" fontcolor="white"]
+    }
+
+    llvmlite [label="llvmlite\n(3rd party)" fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+    graphviz [label="graphviz\n(3rd party)" fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+
+    { rank=same; input_ll; input_dot }
+    { rank=same; out_json; out_dot; out_anim }
+
+    input_ll  -> cli_main
+    input_dot -> cli_main
+
+    cli_main -> parse_events [xlabel=".ll path"]
+    cli_main -> dot_layout   [xlabel=".dot path"]
+    cli_main -> trace_io     [xlabel="--import-trace"]
+    cli_main -> meta_io      [xlabel="--import-analysis-\nmetadata"]
+    cli_main -> cfg_edge_io  [xlabel="--import-cfg-edges"]
+
+    parse_events  -> display_lines [xlabel="ProgramEventStream"]
+    parse_events  -> build_scene   [xlabel="ProgramEventStream"]
+    parse_events  -> derive_trace  [style=dashed xlabel="ProgramEventStream\n(default trace)"]
+    trace_io      -> derive_trace  [style=dashed xlabel="TraceOverlay\n(override)"]
+    derive_trace  -> build_scene   [xlabel="TraceOverlay"]
+    meta_io       -> build_scene   [style=dashed xlabel="BlockMetadata"]
+    cfg_edge_io   -> build_scene   [style=dashed xlabel="cfg_edges\n(override)"]
+
+    build_scene   -> renderer    [xlabel="SceneGraph"]
+    build_scene   -> json_export [xlabel="--json"]
+    dot_layout    -> renderer    [xlabel="DotLayout"]
+    dot_layout    -> gviz_export [xlabel="--draw"]
+
+    renderer      -> out_anim
+    json_export   -> out_json
+    gviz_export   -> out_dot
+
+    parse_events  -> llvmlite [style=dashed xlabel="import" color="#999999"]
+    dot_layout    -> graphviz [style=dashed xlabel="import" color="#999999"]
+    gviz_export   -> graphviz [style=dashed xlabel="import" color="#999999"]
+}

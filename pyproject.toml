@@ -14,7 +14,9 @@ dependencies = [
 [dependency-groups]
 dev = [
     {include-group="lint"},
-    {include-group="test"}
+    {include-group="test"},
+    "pydeps>=3.0.2",
+    "pylint>=4.0.5",
 ]
 lint = [
     "import-linter>=2.11",

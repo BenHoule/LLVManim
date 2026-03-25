@@ -1,0 +1,41 @@
+// Extracted subgraph: CFG trace derivation from 01c_transform_layer
+// derive_cfg_trace() analyses a ProgramEventStream to infer which basic
+// blocks were executed, producing a TraceOverlay.  An imported trace
+// (from load_trace()) can override auto-derivation entirely.
+digraph trace_derivation {
+    graph [
+        fontname = "Helvetica" fontsize = 13
+        label    = "Transform: Trace Derivation"
+        labelloc = "t" splines = ortho nodesep = 0.85 ranksep = 1.15
+        pad = 0.4 bgcolor = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    // ── Internal ───────────────────────────────────────────────────
+    subgraph cluster_transform {
+
+        label     = "Transform  (llvmanim/transform/)"
+        style     = filled
+        fillcolor = "#fdebd0"
+        color     = "#ca6f1e"
+        penwidth  = 1.5
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#ca6f1e"
+
+        derive_trace [label="derive_cfg_trace()\ntrace.py"
+                      fillcolor="#e67e22" fontcolor="white"]
+        build_scene  [label="build_scene_graph()\nscene.py"
+                      fillcolor="#e67e22" fontcolor="white"]
+    }
+
+    // ── Ingest stubs ───────────────────────────────────────────────
+    parse_events [label="parse_module_to_events()\n← Ingest" fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    trace_io     [label="load_trace()\n← Ingest"             fillcolor="#a9dfbf" fontcolor="#1e8449"]
+
+    // ── Edges ──────────────────────────────────────────────────────
+    parse_events -> derive_trace [minlen=2 xlabel="  ProgramEventStream"]
+    trace_io     -> derive_trace [style=dashed minlen=2 xlabel="  TraceOverlay\n(overrides auto-derive)"]
+    derive_trace -> build_scene  [minlen=2 xlabel="  TraceOverlay"]
+}

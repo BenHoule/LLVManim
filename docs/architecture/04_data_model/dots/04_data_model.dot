@@ -1,0 +1,264 @@
+// LLVManim: Core Data Model
+// UML class diagram using HTML-label record nodes.
+// Shows dataclasses/types across the ingest, transform, and render layers.
+// UML notation key:
+//   ──▷  generalisation (inheritance)   arrowhead="empty"
+//   ──◆  composition (owns lifetime)    arrowhead="diamond"
+//   ──◇  aggregation (optional ref)     arrowhead="odiamond"
+//   ──▸  dependency (uses)              arrowhead="open" style="dashed"
+digraph data_model {
+    graph [
+        fontname    = "Helvetica"
+        fontsize    = 13
+        label       = "LLVManim: Core Data Model (UML Class Diagram)"
+        labelloc    = "t"
+        splines     = ortho
+        concentrate = true
+        nodesep     = 0.9
+        ranksep     = 1.2
+        pad         = 0.5
+        bgcolor     = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 shape=none margin=0]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    // ── Literal type aliases (stereotyped) ─────────────────────────
+    EventKind [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#8e44ad">
+          <TR><TD BGCOLOR="#8e44ad"><FONT COLOR="white"><B>&lt;&lt;Literal&gt;&gt; EventKind</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"alloca"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"load"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"store"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"binop" | "compare"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"call" | "ret" | "br" | "other"</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    ActionKind [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#8e44ad"><FONT COLOR="white"><B>&lt;&lt;Literal&gt;&gt; ActionKind</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"create_stack_slot"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"animate_memory_read" | "animate_memory_write"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"animate_binop" | "animate_compare"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"push_stack_frame" | "pop_stack_frame"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"highlight_branch" | "signal_stack_underflow"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"enter_block" | "exit_block" | "traverse_edge"</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    BlockRole [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#8e44ad"><FONT COLOR="white"><B>&lt;&lt;Literal&gt;&gt; BlockRole</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"entry"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"linear"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"branch" | "merge"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"exit"</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    // ── Ingest-layer types ─────────────────────────────────────────
+    IREvent [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#27ae60"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; IREvent</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">function_name: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">block_name: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">opcode: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">text: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">kind: EventKind</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">index_in_function: int</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">debug_line: int | None</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">operands: list[str]</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    CFGEdge [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#27ae60"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; CFGEdge</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">source: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">target: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">kind: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">label: str</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    ProgramEventStream [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#27ae60"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; ProgramEventStream</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">source_path: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">events: list[IREvent]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">cfg_edges: list[CFGEdge]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">display_lines: dict[str, list[str]]</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    DotNodeLayout [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#27ae60"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; DotNodeLayout</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">name: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">label: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">center_x: float</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">center_y: float</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">width: float</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">height: float</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    DotEdgeLayout [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#27ae60"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; DotEdgeLayout</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">source: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">target: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">label: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">tailport: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">spline_points: list[tuple[float, float]]</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    DotLayout [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#27ae60"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; DotLayout</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">nodes: dict[str, DotNodeLayout]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">edges: list[DotEdgeLayout]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#eafaf1"><FONT COLOR="#2c3e50">bounding_box: tuple[float, float, float, float]</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    // ── Transform-layer types ──────────────────────────────────────
+    CFGBlock [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#e67e22"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; CFGBlock</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">id: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">name: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">function_name: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">role: BlockRole</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">events: list[IREvent]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">memory_ops: list[IREvent]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">terminator_opcode: str | None</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">indegree: int</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">outdegree: int</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">idom: str | None</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">dom_depth: int</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">is_loop_header: bool</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">loop_depth: int</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">loop_id: str | None</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">is_backedge_target: bool</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    AnimationCommand [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#e67e22"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; AnimationCommand</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">action: ActionKind</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">target: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">event: IREvent | None</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">params: dict[str, Any]</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    SceneNode [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#e67e22"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; SceneNode</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">id: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">label: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">kind: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">properties: dict[str, Any]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">animation_hint: str</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    SceneEdge [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#e67e22"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; SceneEdge</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">source: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">target: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">label: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">kind: str</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">properties: dict[str, Any]</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    TraceOverlay [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#e67e22"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; TraceOverlay</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">entry_order: list[str]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">visited_nodes: list[str]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">traversed_edges: list[tuple[str, str]]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">termination_reason: str</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    SceneGraph [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#e67e22"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; SceneGraph</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">nodes: list[SceneNode]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">edges: list[SceneEdge]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">commands: list[AnimationCommand]</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">overlay: TraceOverlay | None</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    BlockMetadata [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#e67e22"><FONT COLOR="white"><B>&lt;&lt;dataclass&gt;&gt; BlockMetadata</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">idom: str | None</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">dom_depth: int</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">is_loop_header: bool</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">loop_depth: int</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">loop_id: str | None</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#fef9e7"><FONT COLOR="#2c3e50">is_backedge_target: bool</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    // ── Render-layer types ─────────────────────────────────────────
+    CommandDrivenScene [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>&lt;&lt;abstract&gt;&gt; CommandDrivenScene</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">+construct(): None</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    CFGRenderer [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>CFGRenderer</B></FONT></TD></TR>
+        </TABLE>
+    >]
+
+    StackRenderer [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>StackRenderer</B></FONT></TD></TR>
+        </TABLE>
+    >]
+
+    // ── Rank groupings ─────────────────────────────────────────────
+    {rank=same; EventKind; ActionKind; BlockRole}
+    {rank=same; IREvent; CFGEdge; ProgramEventStream; DotNodeLayout; DotEdgeLayout}
+    {rank=same; CFGBlock; DotLayout}
+    {rank=same; AnimationCommand; SceneNode; SceneEdge; TraceOverlay; SceneGraph; BlockMetadata}
+    {rank=same; CommandDrivenScene; CFGRenderer; StackRenderer}
+
+    // ── UML Generalisation (inheritance) ▷ ─────────────────────────
+    CFGRenderer   -> CommandDrivenScene [arrowhead=empty arrowtail=none xlabel=" extends"]
+    StackRenderer -> CommandDrivenScene [arrowhead=empty arrowtail=none xlabel=" extends"]
+
+    // ── UML Composition (owns lifetime) ◆ ──────────────────────────
+    ProgramEventStream -> IREvent   [arrowhead=diamond arrowtail=none xlabel=" events [*]"]
+    ProgramEventStream -> CFGEdge   [arrowhead=diamond arrowtail=none xlabel=" cfg_edges [*]"]
+
+    SceneGraph -> SceneNode         [arrowhead=diamond arrowtail=none xlabel=" nodes [*]"]
+    SceneGraph -> SceneEdge         [arrowhead=diamond arrowtail=none xlabel=" edges [*]"]
+    SceneGraph -> AnimationCommand  [arrowhead=diamond arrowtail=none xlabel=" commands [*]"]
+
+    DotLayout -> DotNodeLayout      [arrowhead=diamond arrowtail=none xlabel=" nodes [*]"]
+    DotLayout -> DotEdgeLayout      [arrowhead=diamond arrowtail=none xlabel=" edges [*]"]
+
+    CFGBlock -> IREvent             [arrowhead=diamond arrowtail=none xlabel=" events [*]\nmemory_ops [*]"]
+
+    // ── UML Aggregation (optional reference) ◇ ─────────────────────
+    SceneGraph -> TraceOverlay      [arrowhead=odiamond arrowtail=none xlabel=" overlay [0..1]"]
+    AnimationCommand -> IREvent     [arrowhead=odiamond arrowtail=none xlabel=" event [0..1]" style=dashed]
+
+    // ── UML Dependency (uses type) ─▸ ──────────────────────────────
+    AnimationCommand -> ActionKind  [arrowhead=open style=dashed xlabel=" action"]
+    IREvent          -> EventKind   [arrowhead=open style=dashed xlabel=" kind"]
+    CFGBlock         -> BlockRole   [arrowhead=open style=dashed xlabel=" role"]
+}

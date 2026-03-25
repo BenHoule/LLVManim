@@ -1,0 +1,43 @@
+// Extracted subgraph: IR parsing path from 01b_ingest_layer
+// Covers parse_module_to_events → ProgramEventStream,
+// the step that turns raw LLVM-IR bytes into structured event data.
+digraph ir_parsing {
+    graph [
+        fontname = "Helvetica" fontsize = 13
+        label    = "Ingest: IR Parsing Path"
+        labelloc = "t" rankdir = LR splines = ortho
+        nodesep = 0.9 ranksep = 1.1 pad = 0.4 bgcolor = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    // ── External stub (incoming) ───────────────────────────────────
+    cli_main [label="cli/main.py\n← CLI" fillcolor="#f4b8d4" fontcolor="#7a1545"]
+
+    // ── Internal ───────────────────────────────────────────────────
+    subgraph cluster_ingest {
+
+        label     = "Ingest  (llvmanim/ingest/)"
+        style     = filled
+        fillcolor = "#d5f5e3"
+        color     = "#1e8449"
+        penwidth  = 1.5
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#1e8449"
+
+        parse_events [label="parse_module_to_events()\nllvm_events.py"
+                      fillcolor="#27ae60" fontcolor="white"]
+    }
+
+    // ── Third-party ────────────────────────────────────────────────
+    llvmlite [label="llvmlite\n(3rd party)" fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+
+    // ── External stub (outgoing) ───────────────────────────────────
+    build_sg [label="build_scene_graph()\n→ Transform" fillcolor="#f5cba7" fontcolor="#ca6f1e"]
+
+    // ── Edges ──────────────────────────────────────────────────────
+    cli_main     -> parse_events [minlen=2 xlabel=".ll path" fontcolor="#1e8449"]
+    parse_events -> build_sg     [minlen=3 xlabel="ProgramEventStream" fontcolor="#ca6f1e"]
+    parse_events -> llvmlite     [style=dashed minlen=2 color="#999999" constraint=false]
+}

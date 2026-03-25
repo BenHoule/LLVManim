@@ -1,0 +1,50 @@
+// Merged subgraph: scene-graph build from 01c_transform_layer
+// build_scene_graph() converts a ProgramEventStream into a SceneGraph of
+// AnimationCommands.  For CFG animation, derive_cfg_trace() may also run
+// to produce a TraceOverlay (auto-derived or fused from a loaded trace file).
+digraph scene_build {
+    graph [
+        fontname = "Helvetica" fontsize = 13
+        label    = "Transform: Scene-Graph Build"
+        labelloc = "t" splines = ortho nodesep = 0.85 ranksep = 1.15
+        pad = 0.4 bgcolor = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    // ── Internal ───────────────────────────────────────────────────
+    subgraph cluster_transform {
+
+        label     = "Transform  (llvmanim/transform/)"
+        style     = filled
+        fillcolor = "#fdebd0"
+        color     = "#ca6f1e"
+        penwidth  = 1.5
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#ca6f1e"
+
+        build_scene  [label="build_scene_graph()\nscene.py"
+                      fillcolor="#e67e22" fontcolor="white"]
+        derive_trace [label="derive_cfg_trace()\ntrace.py"
+                      fillcolor="#e67e22" fontcolor="white"]
+    }
+
+    // ── Ingest stubs ───────────────────────────────────────────────
+    parse_events  [label="parse_module_to_events()\n← Ingest" fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    display_lines [label="build_display_lines()\n← Ingest"    fillcolor="#a9dfbf" fontcolor="#1e8449"]
+
+    // ── Render stubs ───────────────────────────────────────────────
+    renderer    [label="→ Render"              fillcolor="#a9cce3" fontcolor="#1a5276"]
+    json_export [label="json_export\n→ Render" fillcolor="#a9cce3" fontcolor="#1a5276"]
+
+    // ── Edges ──────────────────────────────────────────────────────
+    parse_events  -> build_scene  [minlen=2 xlabel="  ProgramEventStream"]
+    display_lines -> build_scene  [style=dashed minlen=2 xlabel="  display_lines"]
+
+    parse_events  -> derive_trace [style=dashed minlen=2 xlabel="  ProgramEventStream\n  (auto-derive trace)"]
+    derive_trace  -> build_scene  [minlen=2 xlabel="  TraceOverlay"]
+
+    build_scene -> renderer    [minlen=2 xlabel="  SceneGraph"]
+    build_scene -> json_export [minlen=2 xlabel="  --json"]
+}

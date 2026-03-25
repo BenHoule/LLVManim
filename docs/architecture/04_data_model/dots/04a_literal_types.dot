@@ -1,0 +1,46 @@
+// Extracted subgraph: Literal type aliases from 04_data_model
+digraph literal_types {
+    graph [
+        fontname = "Helvetica" fontsize = 13
+        label    = "Literal Type Aliases"
+        labelloc = "t" splines = ortho nodesep = 0.9 ranksep = 1.0
+        pad = 0.5 bgcolor = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 shape=none margin=0]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    {rank=same; EventKind; ActionKind; BlockRole}
+
+    EventKind [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#8e44ad">
+          <TR><TD BGCOLOR="#8e44ad"><FONT COLOR="white"><B>&lt;&lt;Literal&gt;&gt; EventKind</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"alloca"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"load"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"store"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"binop" | "compare"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"call" | "ret" | "br" | "other"</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    ActionKind [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#8e44ad"><FONT COLOR="white"><B>&lt;&lt;Literal&gt;&gt; ActionKind</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"create_stack_slot"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"animate_memory_read" | "animate_memory_write"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"animate_binop" | "animate_compare"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"push_stack_frame" | "pop_stack_frame"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"highlight_branch" | "signal_stack_underflow"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"enter_block" | "exit_block" | "traverse_edge"</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    BlockRole [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#8e44ad"><FONT COLOR="white"><B>&lt;&lt;Literal&gt;&gt; BlockRole</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"entry"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"linear"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"branch" | "merge"</FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#f3e5f5"><FONT COLOR="#2c3e50">"exit"</FONT></TD></TR>
+        </TABLE>
+    >]
+}

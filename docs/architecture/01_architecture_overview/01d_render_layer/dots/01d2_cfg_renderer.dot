@@ -1,0 +1,46 @@
+// Extracted subgraph: cfg_animation_scene.py from 01d_render_layer
+// cfg_animation_scene.py is the CFG-specific geometry helper: _CoordMapper
+// converts DotLayout node positions to Manim coordinates, and helper
+// builders construct the rendered block/edge mobjects consumed by CFGRenderer.
+digraph cfg_anim_scene {
+    graph [
+        rankdir  = LR
+        fontname = "Helvetica" fontsize = 11
+        label    = "Render Detail: cfg_animation_scene.py"
+        labelloc = "t"
+        splines  = ortho
+        nodesep  = 0.75
+        ranksep  = 1.25
+        pad      = 0.3
+        bgcolor  = "white"
+        size     = "10.5,7.0"
+        ratio    = compress
+    ]
+    node [fontname="Helvetica" fontsize=9 style=filled shape=box margin="0.12,0.06"]
+    edge [fontname="Helvetica" fontsize=8 arrowhead=open color="#555555"]
+
+    subgraph cluster_render {
+
+        label     = "Render  (llvmanim/render/)"
+        style     = filled
+        fillcolor = "#d4e6f1"
+        color     = "#1a5276"
+        margin    = 10
+        labeljust = l
+
+        cfg_renderer   [label="CFGRenderer\ncfg_renderer.py"
+                        fillcolor="#2980b9" fontcolor="white"]
+        cfg_anim_scene [label="cfg_animation_scene.py\n(_CoordMapper, build helpers)"
+                        fillcolor="#2980b9" fontcolor="white"]
+    }
+
+    dot_layout [label="compute_dot_layout()\n← Ingest"       fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    manim_ce   [label="Manim Community Edition\n(3rd party)" fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+
+    { rank=same; cfg_renderer; cfg_anim_scene }
+    { rank=same; dot_layout; manim_ce }
+
+    cfg_renderer   -> cfg_anim_scene [style=dashed minlen=2 xlabel="import" color="#999999"]
+    cfg_anim_scene -> dot_layout     [style=dashed minlen=2 xlabel="import\n(DotLayout types)" color="#999999"]
+    cfg_anim_scene -> manim_ce       [style=dashed minlen=2 xlabel="import\n(Mobject API)" color="#999999"]
+}

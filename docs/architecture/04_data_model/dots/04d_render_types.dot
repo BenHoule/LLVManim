@@ -1,0 +1,36 @@
+// Extracted subgraph: Render-layer types from 04_data_model
+digraph render_types {
+    graph [
+        fontname = "Helvetica" fontsize = 13
+        label    = "Render-Layer Types (Inheritance Hierarchy)"
+        labelloc = "t" splines = ortho nodesep = 0.9 ranksep = 1.0
+        pad = 0.5 bgcolor = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 shape=none margin=0]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    CommandDrivenScene [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>&lt;&lt;abstract&gt;&gt; CommandDrivenScene</B></FONT></TD></TR>
+          <TR><TD ALIGN="LEFT" BGCOLOR="#ebf5fb"><FONT COLOR="#2c3e50">+construct(): None</FONT></TD></TR>
+        </TABLE>
+    >]
+
+    CFGRenderer [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>CFGRenderer</B></FONT></TD></TR>
+        </TABLE>
+    >]
+
+    StackRenderer [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">
+          <TR><TD BGCOLOR="#2980b9"><FONT COLOR="white"><B>StackRenderer</B></FONT></TD></TR>
+        </TABLE>
+    >]
+
+    {rank=same; CFGRenderer; StackRenderer}
+
+    // ── UML Generalisation ▷ ───────────────────────────────────────
+    CFGRenderer   -> CommandDrivenScene [arrowhead=empty arrowtail=none xlabel=" extends"]
+    StackRenderer -> CommandDrivenScene [arrowhead=empty arrowtail=none xlabel=" extends"]
+}

@@ -1,5 +1,6 @@
 digraph "CFG for 'main' function" {
 	label="CFG for 'main' function";
+	splines=ortho;
 
 	Node0x5e0c539b3fa0 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#d6524470" fontname="Courier",label="{entry:\l|  %retval = alloca i32, align 4\l  %r = alloca i32, align 4\l  %p = alloca ptr, align 8\l  store i32 0, ptr %retval, align 4\l  call void @llvm.dbg.declare(metadata ptr %r, metadata !41, metadata\l... !DIExpression()), !dbg !42\l  store i32 0, ptr %r, align 4, !dbg !18\l  call void @llvm.dbg.declare(metadata ptr %p, metadata !43, metadata\l... !DIExpression()), !dbg !44\l  %call = call noalias ptr @malloc(i64 noundef 4) #3, !dbg !21\l  store ptr %call, ptr %p, align 8, !dbg !20\l  %0 = load ptr, ptr %p, align 8, !dbg !22\l  call void @init(ptr noundef %0), !dbg !23\l  br label %while.cond, !dbg !24\l}"];
 	Node0x5e0c539b3fa0 -> Node0x5e0c539b65d0[tooltip="entry -> while.cond\nProbability 100.00%" ];

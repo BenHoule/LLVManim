@@ -1,0 +1,79 @@
+// Extracted subgraph: Transform→Render pipeline from 02_stack_animation_flow
+// Covers everything downstream of the ir_mode branch (02a):
+//   build_scene_graph → SceneGraph → StackRenderer → Manim → outputs
+digraph stack_render {
+    graph [
+        fontname = "Helvetica" fontsize = 13
+        label    = "Stack Transform + Render Pipeline"
+        labelloc = "t" rankdir = LR splines = ortho
+        nodesep = 0.7 ranksep = 1.2 pad = 0.4 bgcolor = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    // ── External stubs ─────────────────────────────────────────────
+    ir_mode       [label="ir_mode branch\n← 02a" fillcolor="#f4b8d4" fontcolor="#7a1545"]
+    display_lines [label="build_display_lines()\n← Ingest" fillcolor="#a9dfbf" fontcolor="#1e8449"]
+
+    // ── Transform ──────────────────────────────────────────────────
+    subgraph cluster_transform {
+
+        label     = "Transform  (llvmanim/transform/)"
+        style     = filled
+        fillcolor = "#fdebd0"
+        color     = "#ca6f1e"
+        penwidth  = 1.5
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#ca6f1e"
+
+        build_stack [label="build_scene_graph(mode=\"stack\")\ntransform/scene.py"
+                     fillcolor="#e67e22" fontcolor="white"]
+        scene_graph [label="SceneGraph\n(AnimationCommand[])"
+                     fillcolor="#8e44ad" fontcolor="white"]
+    }
+
+    // ── Render ─────────────────────────────────────────────────────
+    subgraph cluster_render {
+
+        label     = "Render  (llvmanim/render/)"
+        style     = filled
+        fillcolor = "#d4e6f1"
+        color     = "#1a5276"
+        penwidth  = 1.5
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#1a5276"
+
+        ssa_fmt        [label="ssa_formatting.py\n(SSA register colours)"
+                        fillcolor="#2980b9" fontcolor="white"]
+        stack_renderer [label="StackRenderer\nrender/stack_renderer.py"
+                        fillcolor="#2980b9" fontcolor="white"]
+        manim          [label="Manim Community Edition\n(3rd party)"
+                        fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+    }
+
+    // ── Outputs ────────────────────────────────────────────────────
+    out_mp4 [label="animation.mp4"
+             fillcolor="#e74c3c" fontcolor="white" shape=note]
+    out_gif [label="animation.gif\n(--export-gif)"
+             fillcolor="#e74c3c" fontcolor="white" shape=note]
+    convert [label="_convert_mp4_to_gif()\ncli/main.py"
+             fillcolor="#c0397e" fontcolor="white"]
+
+    // ── Edges ──────────────────────────────────────────────────────
+    ir_mode       -> build_stack  [minlen=2 xlabel=" ProgramEventStream"]
+    display_lines -> build_stack  [style=dashed minlen=2 xlabel=" display_lines\n(rich modes only)"]
+
+    build_stack    -> scene_graph
+    scene_graph    -> stack_renderer
+
+    // Cross-layer render dependencies (UML dependency: dashed)
+    stack_renderer -> display_lines [style=dashed minlen=2 xlabel=" import" color="#999999"]
+    stack_renderer -> ssa_fmt       [style=dashed minlen=2 xlabel=" import\n(rich-ssa)" color="#999999"]
+
+    stack_renderer -> manim
+    manim          -> out_mp4
+    out_mp4        -> convert [minlen=2 xlabel=" --export-gif"]
+    convert        -> out_gif
+}

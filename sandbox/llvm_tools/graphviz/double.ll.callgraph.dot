@@ -1,5 +1,6 @@
 digraph "Call graph: double.ll" {
 	label="Call graph: double.ll";
+	splines=ortho;
 
 	Node0x64a5d66f5290 [shape=record,label="{init}"];
 	Node0x64a5d66f5340 [shape=record,label="{double_1}"];

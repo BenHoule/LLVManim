@@ -1,0 +1,56 @@
+/**
+ * 01a_cli_layer.dot  (composed-style)
+ *
+ * CLI entry and dispatch into ingest loaders/parsers.
+ */
+digraph cli_layer {
+    graph [
+        rankdir  = LR
+        fontname = "Helvetica" fontsize = 11
+        label    = "CLI Layer  (llvmanim/cli/)"
+        labelloc = "t"
+        splines  = ortho
+        nodesep  = 0.45
+        ranksep  = 0.9
+        pad      = 0.3
+        bgcolor  = "white"
+        size     = "10.5,7.0"
+        ratio    = compress
+    ]
+    node [fontname="Helvetica" fontsize=9 style=filled shape=box margin="0.12,0.06"]
+    edge [fontname="Helvetica" fontsize=8 arrowhead=open color="#555555"]
+
+    subgraph cluster_cli {
+
+        label     = "CLI  (llvmanim/cli/)"
+        style     = filled
+        fillcolor = "#fce4ec"
+        color     = "#c0397e"
+        margin    = 10
+        labeljust = l
+
+        cli_main [label="main.py\nargparse dispatch"
+                  fillcolor="#c0397e" fontcolor="white"]
+    }
+
+    input_ll  [label="input.ll\n(LLVM-IR file)"             fillcolor="#fef0bc" fontcolor="#9a6f00" shape=note]
+    input_dot [label="layout.dot\n(optional pre-computed)" fillcolor="#fef0bc" fontcolor="#9a6f00" shape=note]
+
+    parse_events [label="parse_module_to_events()\n→ Ingest" fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    dot_layout   [label="compute_dot_layout()\n→ Ingest"     fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    trace_io     [label="load_trace()\n→ Ingest"             fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    meta_io      [label="load_analysis_metadata()\n→ Ingest" fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    cfg_edge_io  [label="load_cfg_edges()\n→ Ingest"         fillcolor="#a9dfbf" fontcolor="#1e8449"]
+
+    { rank=same; input_ll; input_dot }
+    { rank=same; parse_events; dot_layout; trace_io; meta_io; cfg_edge_io }
+
+    input_ll  -> cli_main
+    input_dot -> cli_main
+
+    cli_main -> parse_events [xlabel=".ll path"]
+    cli_main -> dot_layout   [xlabel=".dot path"]
+    cli_main -> trace_io     [xlabel="--import-trace"]
+    cli_main -> meta_io      [xlabel="--import-analysis-\nmetadata"]
+    cli_main -> cfg_edge_io  [xlabel="--import-cfg-edges"]
+}

@@ -1,0 +1,37 @@
+// Extracted subgraph: shared render runtime from 01d1_animation_renderers
+digraph shared_runtime {
+    graph [
+        fontname = "Helvetica" fontsize = 13
+        label    = "Render: Shared Runtime"
+        labelloc = "t" splines = ortho nodesep = 0.85 ranksep = 1.15
+        pad = 0.4 bgcolor = "white"
+    ]
+    node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box]
+    edge [fontname="Helvetica" fontsize=10 color="#555555" arrowsize=0.85]
+
+    subgraph cluster_render {
+
+        label     = "Render  (llvmanim/render/)"
+        style     = filled
+        fillcolor = "#d4e6f1"
+        color     = "#1a5276"
+        penwidth  = 1.5
+        fontname  = "Helvetica"
+        fontsize  = 12
+        fontcolor = "#1a5276"
+
+        cmd_scene [label="CommandDrivenScene\ncommand_driven_scene.py"
+                   fillcolor="#2980b9" fontcolor="white"]
+        manim_ce  [label="Manim Community Edition\n(3rd party)"
+                   fillcolor="#bdc3c7" fontcolor="#2c3e50"]
+    }
+
+    stack_renderer [label="StackRenderer\n← stack_renderer.py" fillcolor="#a9cce3" fontcolor="#1a5276"]
+    cfg_renderer   [label="CFGRenderer\n← cfg_renderer.py"     fillcolor="#a9cce3" fontcolor="#1a5276"]
+    out_anim       [label="animation\n(MP4 / GIF)" fillcolor="#e74c3c" fontcolor="white" shape=note]
+
+    stack_renderer -> cmd_scene [arrowhead=empty minlen=2 xlabel="extends"]
+    cfg_renderer   -> cmd_scene [arrowhead=empty minlen=2 xlabel="extends"]
+    cmd_scene      -> manim_ce  [minlen=2 xlabel="frame updates"]
+    manim_ce       -> out_anim
+}

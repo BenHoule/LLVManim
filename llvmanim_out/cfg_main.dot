@@ -1,5 +1,6 @@
 digraph {
     rankdir=TB
+    splines=ortho
     "init::entry" [label="init::entry\nrole: entry\nterm: ret\nmem: alloca, store, load, store"]
     "double_1::entry" [label="double_1::entry\nrole: entry\nterm: ret\nmem: alloca, alloca, store, load, load, store, load, load, store, load, load"]
     "main::entry" [label="main::entry\nrole: entry\nterm: br\nmem: alloca, alloca, alloca, store, store, store, load"]

@@ -16,25 +16,23 @@
 digraph transform_layer {
     graph [
         rankdir  = LR
-        fontname = "Helvetica" fontsize = 11
+        fontname = "Helvetica" fontsize = 10
         label    = "Transform Layer  (llvmanim/transform/,  composed)"
         labelloc = t
         splines  = ortho
-        nodesep  = 0.35
-        ranksep  = 0.75
-        pad      = 0.3
+        nodesep  = 0.5
+        ranksep  = 0.6
+        pad      = 0.2
         bgcolor  = "white"
-        size     = "10.5,7.0"
-        ratio    = compress
     ]
-    node [fontname="Helvetica" fontsize=9 style=filled shape=box margin="0.12,0.06"]
-    edge [fontname="Helvetica" fontsize=8 arrowhead=open color="#555555"]
+    node [fontname="Helvetica" fontsize=8 style=filled shape=box margin="0.08,0.04"]
+    edge [fontname="Helvetica" fontsize=7 arrowhead=normal color="#555555"]
 
-    /* ── Shared ingest / render stubs ───────────────────────────── */
-    parse_events  [label="parse_module_to_events()\n← Ingest" fillcolor="#a9dfbf" fontcolor="#1e8449"]
-    display_lines [label="build_display_lines()\n← Ingest"    fillcolor="#a9dfbf" fontcolor="#1e8449"]
-    trace_io      [label="load_trace()\n← Ingest"             fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    /* ── Ingest stubs ───────────────────────────────────────────── */
+    parse_events [label="parse_module_to_events()\n← Ingest" fillcolor="#a9dfbf" fontcolor="#1e8449"]
+    trace_io     [label="load_trace()\n← Ingest"             fillcolor="#a9dfbf" fontcolor="#1e8449"]
 
+    /* ── Render stubs ───────────────────────────────────────────── */
     renderer    [label="→ Render"              fillcolor="#a9cce3" fontcolor="#1a5276"]
     json_export [label="json_export\n→ Render" fillcolor="#a9cce3" fontcolor="#1a5276"]
 
@@ -48,7 +46,7 @@ digraph transform_layer {
         style     = filled
         fillcolor = "#fdebd0"
         color     = "#ca6f1e"
-        margin    = 10
+        margin    = 8
         labeljust = l
 
         build_scene [label="build_scene_graph()\nscene.py"
@@ -65,25 +63,32 @@ digraph transform_layer {
         style     = filled
         fillcolor = "#fdebd0"
         color     = "#ca6f1e"
-        margin    = 10
+        margin    = 8
         labeljust = l
 
         derive_trace [label="derive_cfg_trace()\ntrace.py"
                       fillcolor="#e67e22" fontcolor="white"]
     }
 
-    /* ── Cross: ingest → scene build ────────────────────────────── */
-    parse_events  -> build_scene [xlabel="ProgramEventStream"]
-    display_lines -> build_scene [xlabel="display_lines\n(rich modes)" style=dashed]
+    /* ── Data nodes ─────────────────────────────────────────────── */
+    pes            [label="ProgramEventStream"        fillcolor="#f5cba7" fontcolor="#ca6f1e" shape=note]
+    trace_override [label="TraceOverlay\n(override)"  fillcolor="#f5cba7" fontcolor="#ca6f1e" shape=note]
+    trace_overlay  [label="TraceOverlay"              fillcolor="#f5cba7" fontcolor="#ca6f1e" shape=note]
+    scene_graph    [label="SceneGraph"                fillcolor="#a9cce3" fontcolor="#1a5276" shape=note]
+    json_flag      [label="--json"                    fillcolor="#a9cce3" fontcolor="#1a5276" shape=note]
 
-    /* ── Cross: ingest → trace derivation ───────────────────────── */
-    parse_events -> derive_trace [xlabel="ProgramEventStream"]
-    trace_io     -> derive_trace [xlabel="TraceOverlay\n(override)" style=dashed]
+    /* ── Main path (top row): ingest → PES → build → render ────── */
+    parse_events -> pes          [weight=10]
+    pes          -> build_scene  [weight=10 minlen=3]
+    build_scene  -> scene_graph  [weight=10]
+    scene_graph  -> renderer     [weight=10]
+    build_scene  -> json_flag
+    json_flag    -> json_export
 
-    /* ── Cross: trace derivation → scene build ──────────────────── */
-    derive_trace -> build_scene [xlabel="TraceOverlay"]
-
-    /* ── Cross: scene build → render ────────────────────────────── */
-    build_scene -> renderer    [xlabel="SceneGraph"]
-    build_scene -> json_export [xlabel="--json"]
+    /* ── CFG path (bottom row): PES → derive → overlay → build ── */
+    pes            -> derive_trace
+    trace_io       -> trace_override [style=dashed arrowhead=open]
+    trace_override -> derive_trace   [style=dashed arrowhead=open]
+    derive_trace   -> trace_overlay
+    trace_overlay  -> build_scene
 }

@@ -6,7 +6,7 @@ while also allowing the user to override paths
 import os
 import platform
 import shutil
-from functools import cache, cached_property, lru_cache
+from functools import cache, lru_cache
 from glob import glob
 from pathlib import Path
 
@@ -61,7 +61,7 @@ def llvm_tool(name: str) -> Path | None:
     """
     Gets the path to an LLVM binary tool by name based on explicit overrides.
     """
-    env_value = os.environ.get(name.capitalize())
+    env_value = os.environ.get(name.capitalize().replace(" ", "_"))
     if env_value is not None:
         return Path(env_value)
     bin_dir = llvm_bin_dir()

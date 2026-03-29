@@ -24,6 +24,7 @@ from llvmanim.transform.scene import (
     _build_overlay_commands,
     build_scene_graph,
 )
+from llvmanim.util import tools
 
 try:
     from manim import config as manim_config
@@ -46,7 +47,7 @@ def _convert_mp4_to_gif(mp4_path: Path, gif_path: Path, fps: int, width: int) ->
     high memory usage when combining frames into a GIF, (enough to crash my WSL process).
     By rendering to MP4 first and then converting to GIF with ffmpeg using a palette, we
     keep memory usage much lower."""
-    ffmpeg = shutil.which("ffmpeg")
+    ffmpeg = tools.ffmpeg()
     if ffmpeg is None:
         print("Warning: ffmpeg not found; skipping GIF conversion.")
         return False

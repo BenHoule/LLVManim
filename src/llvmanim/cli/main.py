@@ -354,9 +354,7 @@ def main(argv: list[str] | None = None) -> int:
 
             # Confirm with the user.
             node_ids = [n.id for n in graph.nodes if n.id.startswith(f"{func_name}::")]
-            edge_count = sum(
-                1 for e in graph.edges if e.source.startswith(f"{func_name}::")
-            )
+            edge_count = sum(1 for e in graph.edges if e.source.startswith(f"{func_name}::"))
             print(
                 f"No --import-trace provided.  Deriving a static trace for "
                 f"@{func_name} ({len(node_ids)} blocks, {edge_count} edges)."

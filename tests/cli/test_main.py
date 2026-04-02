@@ -75,7 +75,9 @@ def test_name_flag_overrides_output_basenames(tmp_path) -> None:
         }
     """)
     outdir = tmp_path / "out"
-    code = main(argv=[str(ll_file), "--json", "--draw", "--outdir", str(outdir), "--name", "myproject"])
+    code = main(
+        argv=[str(ll_file), "--json", "--draw", "--outdir", str(outdir), "--name", "myproject"]
+    )
     assert code == 0
     assert (outdir / "myproject_scene_graph.json").exists()
     assert (outdir / "cfg_myproject.dot").exists()
@@ -183,8 +185,10 @@ def test_main_animate_sets_manim_media_dir(tmp_path) -> None:
         }
     """)
     outdir = tmp_path / "out"
-    with patch("llvmanim.cli.main.StackRenderer"), \
-         patch("llvmanim.cli.main.manim_config") as mock_cfg:
+    with (
+        patch("llvmanim.cli.main.StackRenderer"),
+        patch("llvmanim.cli.main.manim_config") as mock_cfg,
+    ):
         main(argv=[str(ll_file), "--animate", "--outdir", str(outdir)])
     assert mock_cfg.media_dir == str(outdir)
 
@@ -295,9 +299,11 @@ def test_main_gif_renders_manim_as_mp4(tmp_path) -> None:
             ret i32 0
         }
     """)
-    with patch("llvmanim.cli.main.StackRenderer"), \
-         patch("llvmanim.cli.main.manim_config") as mock_cfg, \
-         patch("llvmanim.cli.main._find_latest_file", return_value=None):
+    with (
+        patch("llvmanim.cli.main.StackRenderer"),
+        patch("llvmanim.cli.main.manim_config") as mock_cfg,
+        patch("llvmanim.cli.main._find_latest_file", return_value=None),
+    ):
         code = main(argv=[str(ll_file), "--animate", "--format", "gif"])
 
     assert code == 0
@@ -317,10 +323,23 @@ def test_main_gif_calls_conversion_when_mp4_found(tmp_path) -> None:
     """)
     fake_mp4 = tmp_path / "media" / "videos" / "scene.mp4"
 
-    with patch("llvmanim.cli.main.StackRenderer"), \
-         patch("llvmanim.cli.main._find_latest_file", return_value=fake_mp4), \
-         patch("llvmanim.cli.main._convert_mp4_to_gif", return_value=True) as mock_convert:
-        code = main(argv=[str(ll_file), "--animate", "--format", "gif", "--gif-fps", "10", "--gif-width", "720"])
+    with (
+        patch("llvmanim.cli.main.StackRenderer"),
+        patch("llvmanim.cli.main._find_latest_file", return_value=fake_mp4),
+        patch("llvmanim.cli.main._convert_mp4_to_gif", return_value=True) as mock_convert,
+    ):
+        code = main(
+            argv=[
+                str(ll_file),
+                "--animate",
+                "--format",
+                "gif",
+                "--gif-fps",
+                "10",
+                "--gif-width",
+                "720",
+            ]
+        )
 
     assert code == 0
     mock_convert.assert_called_once_with(
@@ -439,7 +458,7 @@ def test_convert_mp4_to_gif_returns_false_without_ffmpeg(tmp_path, capsys) -> No
 
     from llvmanim.cli.main import _convert_mp4_to_gif
 
-    with patch("llvmanim.cli.main.shutil.which", return_value=None):
+    with patch("llvmanim.util.tools.ffmpeg", return_value=None):
         ok = _convert_mp4_to_gif(
             tmp_path / "in.mp4",
             tmp_path / "out.gif",
@@ -457,8 +476,13 @@ def test_convert_mp4_to_gif_returns_false_on_ffmpeg_error(tmp_path, capsys) -> N
 
     from llvmanim.cli.main import _convert_mp4_to_gif
 
-    with patch("llvmanim.cli.main.shutil.which", return_value="/usr/bin/ffmpeg"), \
-         patch("llvmanim.cli.main.subprocess.run", side_effect=subprocess.CalledProcessError(2, ["ffmpeg"])):
+    with (
+        patch("llvmanim.util.tools.ffmpeg", return_value="/usr/bin/ffmpeg"),
+        patch(
+            "llvmanim.cli.main.subprocess.run",
+            side_effect=subprocess.CalledProcessError(2, ["ffmpeg"]),
+        ),
+    ):
         ok = _convert_mp4_to_gif(
             tmp_path / "in.mp4",
             tmp_path / "out.gif",
@@ -476,8 +500,10 @@ def test_convert_mp4_to_gif_returns_true_when_commands_succeed(tmp_path) -> None
 
     from llvmanim.cli.main import _convert_mp4_to_gif
 
-    with patch("llvmanim.cli.main.shutil.which", return_value="/usr/bin/ffmpeg"), \
-         patch("llvmanim.cli.main.subprocess.run") as mock_run:
+    with (
+        patch("llvmanim.util.tools.ffmpeg", return_value="/usr/bin/ffmpeg"),
+        patch("llvmanim.cli.main.subprocess.run") as mock_run,
+    ):
         ok = _convert_mp4_to_gif(
             tmp_path / "in.mp4",
             tmp_path / "out.gif",
@@ -547,7 +573,16 @@ def test_import_analysis_metadata_applies_to_graph(tmp_path, capsys) -> None:
     meta_path = tmp_path / "meta.json"
     meta_path.write_text(json.dumps(meta))
 
-    code = main(argv=[str(ll_file), "--json", "--outdir", str(tmp_path), "--import-analysis-metadata", str(meta_path)])
+    code = main(
+        argv=[
+            str(ll_file),
+            "--json",
+            "--outdir",
+            str(tmp_path),
+            "--import-analysis-metadata",
+            str(meta_path),
+        ]
+    )
     assert code == 0
 
     scene = json.loads((tmp_path / "test_scene_graph.json").read_text())
@@ -633,7 +668,9 @@ def test_import_trace_populates_overlay(tmp_path, capsys) -> None:
     _write_trace_json(trace_file)
 
     outdir = tmp_path / "out"
-    code = main(argv=[str(ll_file), "--import-trace", str(trace_file), "--draw", "--outdir", str(outdir)])
+    code = main(
+        argv=[str(ll_file), "--import-trace", str(trace_file), "--draw", "--outdir", str(outdir)]
+    )
     assert code == 0
 
     # DOT output should contain overlay styling
@@ -649,11 +686,15 @@ def test_export_trace_writes_file(tmp_path, capsys) -> None:
     _write_trace_json(trace_in)
     trace_out = tmp_path / "trace_out.json"
 
-    code = main(argv=[
-        str(ll_file),
-        "--import-trace", str(trace_in),
-        "--export-trace", str(trace_out),
-    ])
+    code = main(
+        argv=[
+            str(ll_file),
+            "--import-trace",
+            str(trace_in),
+            "--export-trace",
+            str(trace_out),
+        ]
+    )
     assert code == 0
     assert trace_out.exists()
 
@@ -710,9 +751,15 @@ def test_cfg_animate_auto_derives_trace(tmp_path, capsys) -> None:
     dot_file.write_text("digraph { a -> b }")
     # --yes skips the prompt; the DOT will fail at layout parse, but the
     # auto-derive message should appear in stdout first.
-    main(argv=[
-        str(ll_file), "--cfg-animate", "--dot-cfg", str(dot_file), "--yes",
-    ])
+    main(
+        argv=[
+            str(ll_file),
+            "--cfg-animate",
+            "--dot-cfg",
+            str(dot_file),
+            "--yes",
+        ]
+    )
     out = capsys.readouterr().out
     assert "Deriving a static trace for @main" in out
 
@@ -723,11 +770,16 @@ def test_cfg_animate_dot_file_not_found(tmp_path, capsys) -> None:
     ll_file.write_text(_LOOP_IR)
     trace_file = tmp_path / "trace.json"
     _write_trace_json(trace_file)
-    code = main(argv=[
-        str(ll_file), "--cfg-animate",
-        "--dot-cfg", str(tmp_path / "nope.dot"),
-        "--import-trace", str(trace_file),
-    ])
+    code = main(
+        argv=[
+            str(ll_file),
+            "--cfg-animate",
+            "--dot-cfg",
+            str(tmp_path / "nope.dot"),
+            "--import-trace",
+            str(trace_file),
+        ]
+    )
     assert code == 1
     assert "not found" in capsys.readouterr().out.lower()
 
@@ -746,11 +798,16 @@ def test_cfg_animate_dot_layout_error(tmp_path, capsys) -> None:
     _write_trace_json(trace_file)
 
     with patch("llvmanim.cli.main.compute_dot_layout", side_effect=DotLayoutError("test error")):
-        code = main(argv=[
-            str(ll_file), "--cfg-animate",
-            "--dot-cfg", str(dot_file),
-            "--import-trace", str(trace_file),
-        ])
+        code = main(
+            argv=[
+                str(ll_file),
+                "--cfg-animate",
+                "--dot-cfg",
+                str(dot_file),
+                "--import-trace",
+                str(trace_file),
+            ]
+        )
     assert code == 1
     assert "test error" in capsys.readouterr().out
 
@@ -778,15 +835,23 @@ def test_cfg_animate_renders_scene(tmp_path, capsys) -> None:
         bounding_box=(0, 0, 200, 300),
     )
 
-    with patch("llvmanim.cli.main.compute_dot_layout", return_value=mock_layout), \
-         patch("llvmanim.cli.main.CFGRenderer") as mock_scene_cls:
+    with (
+        patch("llvmanim.cli.main.compute_dot_layout", return_value=mock_layout),
+        patch("llvmanim.cli.main.CFGRenderer") as mock_scene_cls,
+    ):
         mock_instance = mock_scene_cls.return_value
-        code = main(argv=[
-            str(ll_file), "--cfg-animate",
-            "--dot-cfg", str(dot_file),
-            "--import-trace", str(trace_file),
-            "--outdir", str(tmp_path / "out"),
-        ])
+        code = main(
+            argv=[
+                str(ll_file),
+                "--cfg-animate",
+                "--dot-cfg",
+                str(dot_file),
+                "--import-trace",
+                str(trace_file),
+                "--outdir",
+                str(tmp_path / "out"),
+            ]
+        )
     assert code == 0
     mock_scene_cls.assert_called_once()
     mock_instance.render.assert_called_once()

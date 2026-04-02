@@ -125,6 +125,48 @@ Common deterministic inputs are defined in `tests/conftest.py` and available to 
 | `branch_stream` | `ProgramEventStream` | Parsed stream from a two-branch `entry → yes/no` function |
 | `branch_graph` | `SceneGraph` | Scene graph from `branch_stream` (3 nodes, 2 edges) |
 
+## Generating Charts and Images
+
+All charts are written to `docs/metrics/`. Running `uv sync --dev` (see [Setup And Validation](#setup-and-validation)) installs every required library — `matplotlib` is pulled in as a transitive dependency of `manimgl`.
+
+### Static metrics charts (01–04)
+
+Coverage, test count, lines-of-code, and size-vs-coverage charts. Data is hard-coded in the script and requires no live pipeline execution.
+
+```bash
+uv run python docs/metrics/generate_metrics.py
+```
+
+| File | Description |
+|---|---|
+| `docs/metrics/01_coverage_by_module.png` | Statement coverage percentage per module |
+| `docs/metrics/02_tests_per_module.png` | Test count breakdown by module |
+| `docs/metrics/03_lines_of_code.png` | Lines of code per module |
+| `docs/metrics/04_size_vs_coverage.png` | LOC vs. coverage scatter |
+
+### Performance scaling charts (05–10)
+
+Benchmarks the live pipeline against synthetically generated IR. Runs the actual `llvmanim` ingest and transform functions — no Manim rendering required.
+
+```bash
+uv run python docs/metrics/generate_perf_metrics.py
+```
+
+| File | Description |
+|---|---|
+| `docs/metrics/05_parse_scaling.png` | `parse_module_to_events` time vs. instruction count |
+| `docs/metrics/06_scene_graph_cfg_scaling.png` | `build_scene_graph` (CFG mode) time vs. block count |
+| `docs/metrics/07_trace_scaling.png` | `derive_cfg_trace` time vs. block count |
+| `docs/metrics/08_scene_graph_stack_scaling.png` | `build_scene_graph` (stack mode) time vs. call depth |
+| `docs/metrics/09_memory_scaling.png` | Peak memory (ingest + build) vs. IR size |
+| `docs/metrics/10_pipeline_stage_latency.png` | Per-stage latency breakdown |
+
+### Regenerate all charts at once
+
+```bash
+uv run python docs/metrics/generate_metrics.py && uv run python docs/metrics/generate_perf_metrics.py
+```
+
 ## CLI Usage
 
 Entry point:

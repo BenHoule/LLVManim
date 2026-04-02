@@ -26,16 +26,79 @@ BG = "#f8f9fa"
 # ── Colour palette ─────────────────────────────────────────────────────────────
 C_INGEST = "#27AE60"
 C_TRANSFORM = "#E67E22"
-C_TRACE = "#E67E22"       # derive_cfg_trace is also in the transform layer
-C_STACK = "#CA6F1E"       # darker transform amber — pairs with C_TRANSFORM on the memory chart
+C_TRACE = "#E67E22"  # derive_cfg_trace is also in the transform layer
+C_STACK = "#CA6F1E"  # darker transform amber — pairs with C_TRANSFORM on the memory chart
 C_MEMORY = "#c0392b"
 
 REPEATS = 5  # median over N runs
 
+_CROWD_BASE_Y = 10  # points above marker for the first crowded label
+_CROWD_STEP_Y = 22  # additional points per successive crowded label in a run
 
-# ══════════════════════════════════════════════════════════════════════════════
+
+def _annotate_points(ax, xs, ys, fmt_fn, crowd_threshold_frac: float = 0.12) -> None:
+    """Annotate each (x, y) point.
+
+    Crowded points (x-gap to a neighbour < crowd_threshold_frac of the x-range)
+    receive strictly-vertical leader lines with each successive label placed
+    higher than the previous.  Non-crowded points get a plain (+0, +6) offset.
+    """
+    x_range = (max(xs) - min(xs)) or 1
+    y_range = (max(ys) - min(ys)) or 1
+    threshold = x_range * crowd_threshold_frac
+
+    # Mark which points are crowded.
+    is_crowded = []
+    for i in range(len(xs)):
+        left_gap = (xs[i] - xs[i - 1]) if i > 0 else float("inf")
+        right_gap = (xs[i + 1] - xs[i]) if i < len(xs) - 1 else float("inf")
+        is_crowded.append(min(left_gap, right_gap) < threshold)
+
+    # Assign a stagger level (0, 1, 2, …) that resets after each non-crowded gap.
+    stagger_levels = []
+    level = 0
+    for crowded in is_crowded:
+        if crowded:
+            stagger_levels.append(level)
+            level = (level + 1) % 3  # cycle through 3 stagger levels for crowded points
+        else:
+            stagger_levels.append(None)
+            level = 0
+
+    for i, (x, y) in enumerate(zip(xs, ys)):
+        if is_crowded[i]:
+            offset_y = _CROWD_BASE_Y + stagger_levels[i] * _CROWD_STEP_Y
+            if (
+                y > y_range * 0.8
+            ):  # if the offset would be too high, flip it below the point instead
+                offset_y = -offset_y
+            ax.annotate(
+                fmt_fn(y),
+                (x, y),
+                textcoords="offset points",
+                xytext=(0, offset_y),
+                ha="center",
+                fontsize=11,
+                color="#333",
+                arrowprops=dict(arrowstyle="-", color="#aaa", lw=0.8, shrinkA=0, shrinkB=3),
+            )
+
+        else:
+            ax.annotate(
+                fmt_fn(y),
+                (x, y),
+                textcoords="offset points",
+                xytext=(0, 6),
+                ha="center",
+                fontsize=11,
+                color="#333",
+                arrowprops=dict(arrowstyle="-", color="#aaa", lw=0.8, shrinkA=0, shrinkB=3),
+            )
+
+
+# ==============================================================================
 # IR and stream generators
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 
 def _make_ir_linear(n_instrs: int) -> str:
@@ -121,9 +184,9 @@ def _make_stream_n_blocks(n_blocks: int):
     return parse_ir_to_events(ir)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Timing helpers
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 
 def _median_ms(fn, *args, **kwargs) -> float:
@@ -149,9 +212,9 @@ def _peak_kb(fn, *args, **kwargs) -> float:
     return peak / 1024
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Chart 5 — parse_module_to_events: time vs. instruction count
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 
 def chart_parse_scaling() -> None:
@@ -180,18 +243,10 @@ def chart_parse_scaling() -> None:
         markeredgewidth=2,
     )
 
-    for x, y in zip(sizes, times_ms, strict=False):
-        ax.annotate(
-            f"{y:.1f}",
-            (x, y),
-            textcoords="offset points",
-            xytext=(4, 6),
-            fontsize=8.5,
-            color="#333",
-        )
+    _annotate_points(ax, sizes, times_ms, lambda y: f"{y:.1f}")
 
-    ax.set_xlabel("Approximate instruction count", fontsize=11)
-    ax.set_ylabel("Median parse time (ms)", fontsize=11)
+    ax.set_xlabel("Approximate instruction count", fontsize=12)
+    ax.set_ylabel("Median parse time (ms)", fontsize=12)
     ax.set_title(
         f"parse_module_to_events  —  Scaling with IR Size\n(median of {REPEATS} runs per point)",
         fontsize=13,
@@ -203,7 +258,7 @@ def chart_parse_scaling() -> None:
         0.95,
         r"Complexity:  $\Theta(n)$" "\n" r"$n$ = instruction count",
         transform=ax.transAxes,
-        fontsize=10,
+        fontsize=11,
         verticalalignment="top",
         bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="#ccc", alpha=0.85),
     )
@@ -215,9 +270,9 @@ def chart_parse_scaling() -> None:
     print("Wrote 05_parse_scaling.png")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Chart 6 — build_scene_graph (cfg): time vs. block count
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 
 def chart_scene_graph_cfg_scaling() -> None:
@@ -246,18 +301,10 @@ def chart_scene_graph_cfg_scaling() -> None:
         markeredgewidth=2,
     )
 
-    for x, y in zip(block_counts, times_ms, strict=False):
-        ax.annotate(
-            f"{y:.2f}",
-            (x, y),
-            textcoords="offset points",
-            xytext=(4, 6),
-            fontsize=8.5,
-            color="#333",
-        )
+    _annotate_points(ax, block_counts, times_ms, lambda y: f"{y:.2f}")
 
-    ax.set_xlabel("CFG block count", fontsize=11)
-    ax.set_ylabel("Median build time (ms)", fontsize=11)
+    ax.set_xlabel("CFG block count", fontsize=12)
+    ax.set_ylabel("Median build time (ms)", fontsize=12)
     ax.set_title(
         "build_scene_graph(mode='cfg')  —  Scaling with Block Count\n"
         f"(median of {REPEATS} runs per point)",
@@ -270,7 +317,7 @@ def chart_scene_graph_cfg_scaling() -> None:
         0.95,
         r"Complexity:  $\Theta(n)$" "\n" r"$n$ = CFG block count",
         transform=ax.transAxes,
-        fontsize=10,
+        fontsize=11,
         verticalalignment="top",
         bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="#ccc", alpha=0.85),
     )
@@ -282,9 +329,9 @@ def chart_scene_graph_cfg_scaling() -> None:
     print("Wrote 06_scene_graph_cfg_scaling.png")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Chart 7 — derive_cfg_trace: time vs. block count
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 
 def chart_trace_scaling() -> None:
@@ -315,18 +362,10 @@ def chart_trace_scaling() -> None:
         markeredgewidth=2,
     )
 
-    for x, y in zip(block_counts, times_ms, strict=False):
-        ax.annotate(
-            f"{y:.3f}",
-            (x, y),
-            textcoords="offset points",
-            xytext=(4, 6),
-            fontsize=8.5,
-            color="#333",
-        )
+    _annotate_points(ax, block_counts, times_ms, lambda y: f"{y:.3f}")
 
-    ax.set_xlabel("CFG block count", fontsize=11)
-    ax.set_ylabel("Median trace time (ms)", fontsize=11)
+    ax.set_xlabel("CFG block count", fontsize=12)
+    ax.set_ylabel("Median trace time (ms)", fontsize=12)
     ax.set_title(
         "derive_cfg_trace  —  Scaling with Block Count\n"
         f"(median of {REPEATS} runs per point, linear chain CFG)",
@@ -343,7 +382,7 @@ def chart_trace_scaling() -> None:
         "\n"
         r"$n$ = CFG block count",
         transform=ax.transAxes,
-        fontsize=10,
+        fontsize=11,
         verticalalignment="top",
         bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="#ccc", alpha=0.85),
     )
@@ -355,9 +394,9 @@ def chart_trace_scaling() -> None:
     print("Wrote 07_trace_scaling.png")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Chart 8 — build_scene_graph (stack): time vs. call-tree depth
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 
 def chart_scene_graph_stack_scaling() -> None:
@@ -388,18 +427,10 @@ def chart_scene_graph_stack_scaling() -> None:
         markeredgewidth=2,
     )
 
-    for x, y in zip(depths, times_ms, strict=False):
-        ax.annotate(
-            f"{y:.2f}",
-            (x, y),
-            textcoords="offset points",
-            xytext=(4, 6),
-            fontsize=8.5,
-            color="#333",
-        )
+    _annotate_points(ax, depths, times_ms, lambda y: f"{y:.2f}")
 
-    ax.set_xlabel("Call-tree depth (number of nested functions)", fontsize=11)
-    ax.set_ylabel("Median build time (ms)", fontsize=11)
+    ax.set_xlabel("Call-tree depth (number of nested functions)", fontsize=12)
+    ax.set_ylabel("Median build time (ms)", fontsize=12)
     ax.set_title(
         "build_scene_graph(mode='stack')  —  Scaling with Call Depth\n"
         f"(median of {REPEATS} runs per point)",
@@ -416,7 +447,7 @@ def chart_scene_graph_stack_scaling() -> None:
         "\n"
         r"$d$ = call-tree depth",
         transform=ax.transAxes,
-        fontsize=10,
+        fontsize=11,
         verticalalignment="top",
         bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="#ccc", alpha=0.85),
     )
@@ -428,9 +459,9 @@ def chart_scene_graph_stack_scaling() -> None:
     print("Wrote 08_scene_graph_stack_scaling.png")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Chart 9 — Peak memory vs. IR size (full ingest + transform pipeline)
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 
 def chart_memory_scaling() -> None:
@@ -485,8 +516,8 @@ def chart_memory_scaling() -> None:
         label="Stack pipeline",
     )
 
-    ax.set_xlabel("CFG block count (proxy for IR size)", fontsize=11)
-    ax.set_ylabel("Peak memory allocation (KiB)", fontsize=11)
+    ax.set_xlabel("CFG block count (proxy for IR size)", fontsize=12)
+    ax.set_ylabel("Peak memory allocation (KiB)", fontsize=12)
     ax.set_title(
         "ingest + build_scene_graph  —  Peak Memory vs. IR Size\n"
         "(tracemalloc, single run per point)",
@@ -494,13 +525,13 @@ def chart_memory_scaling() -> None:
         fontweight="bold",
         pad=12,
     )
-    ax.legend(fontsize=10, framealpha=0.9)
+    ax.legend(fontsize=11, framealpha=0.5)
     ax.text(
         0.97,
         0.05,
         r"Complexity:  $\Theta(n)$  (both pipelines)" "\n" r"$n$ = CFG block count",
         transform=ax.transAxes,
-        fontsize=10,
+        fontsize=11,
         verticalalignment="bottom",
         horizontalalignment="right",
         bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="#ccc", alpha=0.85),
@@ -513,9 +544,9 @@ def chart_memory_scaling() -> None:
     print("Wrote 09_memory_scaling.png")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Chart 10 — Combined pipeline timing overview (bar chart, representative size)
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 
 def chart_pipeline_stage_times() -> None:
@@ -560,11 +591,11 @@ def chart_pipeline_stage_times() -> None:
             f"{v:.3f} ms",
             ha="center",
             va="bottom",
-            fontsize=10,
+            fontsize=11,
             color="#333",
         )
 
-    ax.set_ylabel("Median wall-clock time (ms)", fontsize=11)
+    ax.set_ylabel("Median wall-clock time (ms)", fontsize=12)
     ax.set_title(
         f"Pipeline Stage Latency  —  {N_BLOCKS} CFG blocks\n(median of {REPEATS} runs per stage)",
         fontsize=13,
@@ -583,14 +614,14 @@ def chart_pipeline_stage_times() -> None:
         "\n"
         r"stack build:  $O(d)$,  $d$ = call depth",
         transform=ax.transAxes,
-        fontsize=9,
+        fontsize=11,
         verticalalignment="top",
         horizontalalignment="right",
         bbox=dict(boxstyle="round,pad=0.45", facecolor="white", edgecolor="#ccc", alpha=0.9),
     )
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.tick_params(axis="x", labelsize=10)
+    ax.tick_params(axis="x", labelsize=11)
     fig.tight_layout()
     fig.savefig(OUT / "10_pipeline_stage_latency.png", dpi=150)
     plt.close(fig)

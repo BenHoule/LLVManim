@@ -13,6 +13,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 OUT = Path(__file__).parent
 
@@ -29,13 +30,6 @@ COVERAGE_COLORS = {
     "low": "#e74c3c",  # < 80 %
 }
 BG = "#f8f9fa"
-
-
-def _layer(path: str) -> str:
-    for layer in ("cli", "ingest", "transform", "render"):
-        if f"/{layer}/" in path or path.endswith(f"/{layer}"):
-            return layer
-    return "other"
 
 
 def _cov_color(pct: int) -> str:
@@ -115,9 +109,9 @@ LOC_DATA = [
 ]
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Chart 1 — Coverage per module (horizontal bar)
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def chart_coverage() -> None:
     data = sorted(COVERAGE_DATA, key=lambda r: r[2])  # sort by stmts
     names = [r[0] for r in data]
@@ -125,7 +119,7 @@ def chart_coverage() -> None:
     colors = [_cov_color(p) for p in pcts]
     lcolors = [LAYER_COLORS[r[1]] for r in data]
 
-    fig, ax = plt.subplots(figsize=(11, 8), facecolor=BG)
+    fig, ax = plt.subplots(figsize=(14, 10), facecolor=BG)
     ax.set_facecolor(BG)
 
     bars = ax.barh(names, pcts, color=colors, edgecolor="white", linewidth=0.6, height=0.65)
@@ -141,13 +135,13 @@ def chart_coverage() -> None:
             f"{pct}%",
             va="center",
             ha="left",
-            fontsize=9,
+            fontsize=12,
             color="#333",
         )
 
     ax.set_xlim(0, 105)
-    ax.set_xlabel("Coverage (%)", fontsize=11)
-    ax.set_title("LLVManim — Test Coverage by Module", fontsize=13, fontweight="bold", pad=12)
+    ax.set_xlabel("Coverage (%)", fontsize=13)
+    ax.set_title("LLVManim — Test Coverage by Module", fontsize=15, fontweight="bold", pad=12)
     ax.axvline(80, color="#c0392b", linewidth=1.2, linestyle="--", alpha=0.7, label="80% threshold")
     ax.axvline(95, color="#f39c12", linewidth=1.0, linestyle=":", alpha=0.7, label="95% threshold")
 
@@ -162,16 +156,16 @@ def chart_coverage() -> None:
     ]
     ax.legend(
         handles=patches,
-        loc="lower right",
-        fontsize=9,
-        framealpha=0.9,
+        loc="upper right",
+        fontsize=12,
+        framealpha=0.5,
         title="Layer / Coverage",
-        title_fontsize=9,
+        title_fontsize=12,
     )
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.tick_params(axis="y", labelsize=9)
+    ax.tick_params(axis="y", labelsize=11)
     ax.set_xlim(-2, 108)
     fig.tight_layout()
     fig.savefig(OUT / "01_coverage_by_module.png", dpi=150)
@@ -179,16 +173,16 @@ def chart_coverage() -> None:
     print("Wrote 01_coverage_by_module.png")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Chart 2 — Tests per file (horizontal bar, grouped by layer)
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def chart_tests() -> None:
     data = sorted(TEST_DATA, key=lambda r: r[2])
     names = [r[0] for r in data]
     counts = [r[2] for r in data]
     colors = [LAYER_COLORS[r[1]] for r in data]
 
-    fig, ax = plt.subplots(figsize=(11, 8), facecolor=BG)
+    fig, ax = plt.subplots(figsize=(14, 10), facecolor=BG)
     ax.set_facecolor(BG)
 
     bars = ax.barh(names, counts, color=colors, edgecolor="white", linewidth=0.6, height=0.65)
@@ -198,34 +192,34 @@ def chart_tests() -> None:
             bar.get_y() + bar.get_height() / 2,
             str(n),
             va="center",
-            fontsize=9,
+            fontsize=12,
             color="#333",
         )
 
     total = sum(counts)
     ax.set_title(
-        f"LLVManim — Tests per Module  (total: {total})", fontsize=13, fontweight="bold", pad=12
+        f"LLVManim — Tests per Module  (total: {total})", fontsize=15, fontweight="bold", pad=12
     )
-    ax.set_xlabel("Test count", fontsize=11)
+    ax.set_xlabel("Test count", fontsize=13)
 
     patches = [
         mpatches.Patch(color=LAYER_COLORS[label], label=label)
         for label in ("cli", "ingest", "transform", "render")
     ]
-    ax.legend(handles=patches, loc="lower right", fontsize=9, framealpha=0.9, title="Layer")
+    ax.legend(handles=patches, loc="lower right", fontsize=12, framealpha=0.5, title="Layer", title_fontsize=12)
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.tick_params(axis="y", labelsize=9)
+    ax.tick_params(axis="y", labelsize=11)
     fig.tight_layout()
     fig.savefig(OUT / "02_tests_per_module.png", dpi=150)
     plt.close(fig)
     print("Wrote 02_tests_per_module.png")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Chart 3 — Source lines of code distribution (pie + horizontal bar side-by-side)
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def chart_loc() -> None:
     # Layer aggregates for pie
     layer_totals: dict[str, int] = {}
@@ -239,7 +233,7 @@ def chart_loc() -> None:
     labels = list(layer_totals.keys())
     sizes = list(layer_totals.values())
     pie_colors = [LAYER_COLORS[label] for label in labels]
-    wedges, texts, autotexts = ax_pie.pie(
+    _, texts, autotexts = ax_pie.pie(
         sizes,
         labels=labels,
         colors=pie_colors,
@@ -279,7 +273,7 @@ def chart_loc() -> None:
             color="#333",
         )
 
-    ax_bar.set_xlabel("Lines of Code", fontsize=11)
+    ax_bar.set_xlabel("Lines of Code", fontsize=12)
     ax_bar.set_title("Source Lines per Module", fontsize=12, fontweight="bold", pad=10)
     ax_bar.spines["top"].set_visible(False)
     ax_bar.spines["right"].set_visible(False)
@@ -289,7 +283,7 @@ def chart_loc() -> None:
         mpatches.Patch(color=LAYER_COLORS[label], label=label)
         for label in ("cli", "ingest", "transform", "render")
     ]
-    ax_bar.legend(handles=patches, loc="lower right", fontsize=9, framealpha=0.9)
+    ax_bar.legend(handles=patches, loc="lower right", fontsize=9, framealpha=0.5)
 
     fig.tight_layout(pad=2)
     fig.savefig(OUT / "03_lines_of_code.png", dpi=150)
@@ -297,9 +291,9 @@ def chart_loc() -> None:
     print("Wrote 03_lines_of_code.png")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Chart 4 — Module size vs. coverage scatter
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def chart_size_vs_coverage() -> None:
     fig, ax = plt.subplots(figsize=(10, 7), facecolor=BG)
     ax.set_facecolor(BG)
@@ -330,8 +324,8 @@ def chart_size_vs_coverage() -> None:
     ax.axhline(80, color="#c0392b", linewidth=1.2, linestyle="--", alpha=0.7, label="80% threshold")
     ax.axhline(95, color="#f39c12", linewidth=1.0, linestyle=":", alpha=0.7, label="95% threshold")
 
-    ax.set_xlabel("Executable Statements", fontsize=11)
-    ax.set_ylabel("Coverage (%)", fontsize=11)
+    ax.set_xlabel("Executable Statements", fontsize=12)
+    ax.set_ylabel("Coverage (%)", fontsize=12)
     ax.set_title(
         "LLVManim — Module Size vs. Test Coverage\n(bubble area proportional to statement count)",
         fontsize=13,
@@ -346,13 +340,13 @@ def chart_size_vs_coverage() -> None:
         for label in ("cli", "ingest", "transform", "render")
     ]
     threshold_lines = [
-        plt.Line2D([0], [0], color="#c0392b", linestyle="--", label="80% threshold"),
-        plt.Line2D([0], [0], color="#f39c12", linestyle=":", label="95% threshold"),
+        Line2D([0], [0], color="#c0392b", linestyle="--", label="80% threshold"),
+        Line2D([0], [0], color="#f39c12", linestyle=":", label="95% threshold"),
     ]
     ax.legend(
         handles=layer_patches + threshold_lines,
         fontsize=9,
-        framealpha=0.9,
+        framealpha=0.5,
         title="Layer",
         title_fontsize=9,
         loc="lower right",

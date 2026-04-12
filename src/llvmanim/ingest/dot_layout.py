@@ -16,6 +16,8 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from llvmanim.util.tools import find_tool
+
 
 @dataclass(slots=True)
 class DotNodeLayout:
@@ -78,8 +80,12 @@ def compute_dot_layout(dot_path: str | Path) -> DotLayout:
         raise DotLayoutError(f"DOT file not found: {path}")
 
     try:
+        dot = find_tool("dot")
+        if dot is None:
+            raise FileNotFoundError("Could not find dot tool")
+
         result = subprocess.run(
-            ["dot", "-Tjson0", str(path)],
+            [str(dot), "-Tjson0", str(path)],
             capture_output=True,
             text=True,
             check=True,
@@ -90,7 +96,9 @@ def compute_dot_layout(dot_path: str | Path) -> DotLayout:
             "Graphviz 'dot' binary not found. Install Graphviz to enable CFG layout."
         ) from err
     except subprocess.CalledProcessError as exc:
-        raise DotLayoutError(f"dot exited with code {exc.returncode}: {exc.stderr.strip()}") from exc
+        raise DotLayoutError(
+            f"dot exited with code {exc.returncode}: {exc.stderr.strip()}"
+        ) from exc
     except subprocess.TimeoutExpired as err:
         raise DotLayoutError("dot layout computation timed out (30s)") from err
 
@@ -193,13 +201,15 @@ def _parse_json_layout(raw: dict) -> DotLayout:
         elif tailport == "s1":
             label = "F"
 
-        edges.append(DotEdgeLayout(
-            source=src,
-            target=dst,
-            spline_points=spline,
-            label=label,
-            tailport=tailport,
-        ))
+        edges.append(
+            DotEdgeLayout(
+                source=src,
+                target=dst,
+                spline_points=spline,
+                label=label,
+                tailport=tailport,
+            )
+        )
 
     return DotLayout(
         nodes=nodes,

@@ -249,6 +249,12 @@ def main(argv: list[str] | None = None) -> int:
         metavar="NAME",
         help="Base name for output artifacts (default: stem of input file)",
     )
+    parser.add_argument(
+        "-c",
+        "--C",
+        action="store_true",
+        help="Treat the input file as a C source file and compile it automatically",
+    )
 
     args = parser.parse_args(argv)
 
@@ -261,6 +267,19 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     outdir.mkdir(parents=True, exist_ok=True)
+
+    if args.C:
+        input_path = tools.compile_c_source(
+            input_path,
+            Path(base_name).with_suffix(".ll"),
+            [
+                "-g",
+                "-O2",
+                "-fno-strict-aliasing",
+                "-fno-inline",
+                "-fno-discard-value-names",
+            ],
+        )
 
     stream = parse_module_to_events(input_path.as_posix())
 

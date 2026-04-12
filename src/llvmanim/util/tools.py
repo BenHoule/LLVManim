@@ -6,9 +6,11 @@ while also allowing the user to override paths
 import os
 import platform
 import shutil
+import subprocess
 from functools import cache, lru_cache
 from glob import glob
 from pathlib import Path
+from typing import Sequence
 
 
 def sort_by_llvm_version(candidate: str):
@@ -97,3 +99,24 @@ def ffmpeg() -> Path | None:
     The path to the ffmpeg binary to be used. If the FFMPEG env variable is unset, will be found on PATH
     """
     return find_tool("ffmpeg")
+
+
+def compile_c_source(path: Path, output: Path, flags: Sequence[str]):
+    clang = llvm_tool("clang")
+    opt = llvm_tool("opt")
+    if clang is None or opt is None:
+        raise FileNotFoundError("Could not find clang and opt binaries")
+    res = subprocess.run(
+        [
+            clang,
+            *flags,
+            "-S",
+            "-emit-llvm",
+            path,
+            "-o",
+            output,
+        ]
+    )
+    res.check_returncode()
+    return output
+    # raise Exception("a")

@@ -44,9 +44,8 @@ def llvm_bin_dir() -> Path | None:
     The path to the directory containing the LLVM binary tools (eg., /usr/lib/llvm-18/bin if using llvm 18 on ubuntu).
 
     If the LLVM_BIN_DIR environment variable is not set, all LLVM tools (except those that are explicitly overridden)
-    will be found in PATH with their standard names. If the user is on linux
-
-    The default lookup might fail on many systems (like Debian-based distros)
+    will be found in PATH with their standard names. If the user is on Linux, then we have a special fallback search
+    since the default lookup might fail on many systems (like Debian-based distros).
 
     """
     from_env = os.environ.get("LLVM_BIN_DIR")
@@ -119,4 +118,3 @@ def compile_c_source(path: Path, output: Path, flags: Sequence[str]):
     )
     res.check_returncode()
     return output
-    # raise Exception("a")

@@ -199,6 +199,25 @@ Default input is `tests/ingest/testdata/double.ll` when no positional argument i
 - `--export-analysis-metadata <path>`: write analysis metadata to a JSON file
 - `--import-trace <path>`: load a runtime path trace from a JSON file for overlay visualization
 - `--export-trace <path>`: write the trace overlay to a JSON file
+- `--C`: treat the input file as a `C` source file instead of LLVM textual IR and compile it to LLVM IR automatically
+
+### Environment Variables
+LLVManim has to use external tools to perform certain operations and therefore needs a way to locate these tools. 
+For any of the external tools LLVManim uses, you can specify the environment variable with the tool's name in `SCREAMING_SNAKE_CASE`
+to provide a path to the tool's binary.
+
+By default LLVMAnim searches for the following external tools in the directories listed in the `PATH` environment variable if their corresponding
+environment variable is not set:
+- `ffmpeg`
+- `dot`
+
+LLVManim also needs to use some of LLVM's binary tools when compiling a C source file, specifially `clang` and `opt`. 
+Since these tools may have non-standard locations, you can specify a convenient fallback search directory
+for these tools in the `LLVM_BIN_DIR` environment variable. 
+
+LLVManim has a special case search for LLVM tools on Linux since it is common to have multiple versions of LLVM installed and therefore the tools
+may not be on PATH. LLVManim attempts to search `/usr/lib/llvm/bin` and then tries to find the latest LLVM version from the candidates in `/usr/lib/llvm-*/bin` 
+before falling back to to `PATH`. You can disable this special case search by setting the `NO_LLVM_DEFAULT_SEARCH` environment variable to any value.
 
 ### Common Examples
 

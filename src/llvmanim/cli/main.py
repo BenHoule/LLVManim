@@ -24,6 +24,7 @@ from llvmanim.transform.scene import (
     build_scene_graph,
 )
 from llvmanim.util import tools
+from llvmanim.cli.config import apply_config_defaults, find_config_file, load_config
 
 try:
     from manim import config as manim_config
@@ -257,6 +258,14 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     args = parser.parse_args(argv)
+
+    config_path = find_config_file()
+    if config_path is not None:
+        try:
+            config = load_config(config_path)
+            apply_config_defaults(args, config)
+        except (ValueError, ImportError) as exc:
+            print(f"Warning: could not load config file {config_path}: {exc}")
 
     input_path = Path(args.input)
     outdir = Path(args.outdir)

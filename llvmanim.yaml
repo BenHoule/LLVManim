@@ -1,0 +1,31 @@
+# LLVManim Configuration File
+# Place this file as .llvmanim.yaml in your project root (or any parent directory).
+# All keys are optional — omit any you want to leave at the default.
+# CLI flags always take precedence over values set here.
+
+# Animation display mode.
+# Options: basic (stack only), rich (IR + stack), rich-ssa (IR + SSA values + stack)
+ir_mode: basic
+
+# Animation speed multiplier. 1.0 = normal, 2.0 = twice as fast, 0.5 = half speed.
+speed: 1.0
+
+# Output format for animations.
+# Options: mp4, gif
+format: mp4
+
+# GIF output settings (only used when format: gif)
+gif_fps: 12
+gif_width: 960
+
+# Default output directory for all generated files.
+outdir: .
+
+# Default flags (equivalent to passing these CLI flags every time)
+animate: false
+preview: false
+draw: false
+json: false
+
+# Skip confirmation prompts automatically (equivalent to -y / --yes)
+"yes": false

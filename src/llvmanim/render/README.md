@@ -13,9 +13,9 @@ Rendered through `stack_renderer.py`:
 1. Parse `.ll` file into `ProgramEventStream`.
 2. Build a `SceneGraph` via `build_scene_graph(stream, mode="stack")`.
 3. Create a `StackRenderer` with one of three `ir_mode` settings and an optional `scheme`:
-   - `"basic"` (`--ir-mode basic`) — stack-only layout with badge flash
-   - `"rich"` (`--ir-mode rich`) — two-column: IR source with spotlight cursor + stack
-   - `"rich-ssa"` (`--ir-mode rich-ssa`) — three-column: IR source + SSA values + stack
+   - `"basic"` (`--ir-mode basic`) -- stack-only layout with badge flash
+   - `"rich"` (`--ir-mode rich`) -- two-column: IR source with spotlight cursor + stack
+   - `"rich-ssa"` (`--ir-mode rich-ssa`) -- three-column: IR source + SSA values + stack
 4. Call `scene.render(preview=...)`.
 
 ### CFG Traversal Animation (`--cfg-animate`)
@@ -52,7 +52,7 @@ These are used by CLI flags:
 |---|---|
 | `command_driven_scene.py` | Base class for command-driven Manim scenes with handler registry |
 | `colors.py` | `ColorScheme` dataclass plus `DARK` and `LIGHT` presets; `SCHEMES` lookup dict |
-| `stack_renderer.py` | Stack animation renderer — basic, rich (IR+cursor), and rich-ssa (IR+SSA+stack) modes |
+| `stack_renderer.py` | Stack animation renderer -- basic, rich (IR+cursor), and rich-ssa (IR+SSA+stack) modes |
 | `cfg_renderer.py` | CFG traversal animation renderer with DOT layout and trace overlay |
 | `ssa_formatting.py` | Shared SSA display formatting (value labels, op colors, name extraction) |
 | `cfg_animation_scene.py` | Shared helpers for CFG mobject construction (`_build_block_mob`, `_build_edge_mob`, `_CoordMapper`) |

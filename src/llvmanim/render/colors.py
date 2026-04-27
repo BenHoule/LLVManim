@@ -2,9 +2,9 @@
 
 Two built-in schemes are provided:
 
-  DARK  — Black background (Manim default).  All current hardcoded colors
+  DARK  -- Black background (Manim default).  All current hardcoded colors
           belong to this scheme.
-  LIGHT — White background with inverted chrome colors for readability.
+  LIGHT -- White background with inverted chrome colors for readability.
 
 Pass a :data:`ColorScheme` instance to :class:`~llvmanim.render.cfg_renderer.CFGRenderer`
 or :class:`~llvmanim.render.stack_renderer.StackRenderer` via the ``scheme`` keyword

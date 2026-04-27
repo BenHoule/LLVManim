@@ -23,19 +23,19 @@
 
 ## Issue Dependency Sequence
 
-### Milestone 1 — `binop`/`compare` foundation ✅
+### Milestone 1 -- `binop`/`compare` foundation ✅
 - [x] Ingest: classify LLVM `binop` and `compare` opcodes as first-class `EventKind`s
 - [x] Transform: map `binop`/`compare` events to typed animation actions (`animate_binop`, `animate_compare`)
 - [x] Tests: end-to-end coverage for `binop`/`compare` parse → command → render
 
-### Milestone 2 — SSA bridge panel ✅
+### Milestone 2 -- SSA bridge panel ✅
 - [x] `RichTraceStep` NamedTuple in `transform/trace.py` with `include_ssa` parameter
 - [x] `ssa_formatting.py` module (format_display_value, OP_COLORS, extract_ssa_name, etc.)
 - [x] Opt-in 3-column layout in `RichStackSceneSpotlight(enable_ssa=True)`
 - [x] Per-frame SSA cleanup on pop (fade + Y-space reclamation)
 - [x] Sandbox prototype: `sandbox/manim_CE/register_panel_demo.py`
 
-### Milestone 3 — call-stack correctness + architecture
+### Milestone 3 -- call-stack correctness + architecture
 - [ ] Transform: fix duplicate `pop_stack_frame` generation on conditional branches
 	Note: temporary pop guard exists in `render_stack_model.py`
 - [x] Architecture: move execution-trace builder from presentation to transform layer
@@ -43,7 +43,7 @@
 - [x] Architecture: merge rendering pipelines into `CommandDrivenScene` with `StackRenderer` and `CFGRenderer`
 - [x] Architecture: rename `present/` → `render/`
 
-### Milestone 4 — CFG animation productization ✅
+### Milestone 4 -- CFG animation productization ✅
 - [x] Presentation: add CFG animation scenes from `SceneGraph` nodes/edges
 - [x] CLI: expose CFG animation mode and output controls
 - [x] Auto-derive static CFG trace from CFG edges (`derive_cfg_trace`)
@@ -85,7 +85,7 @@
 - [x] Export Graphviz DOT (and PNG when Graphviz is available)
 - [x] Support stack animation modes (`basic` badge + `rich` spotlight)
 - [x] SSA bridge panel: opt-in 3-column layout via `StackRenderer(ir_mode="rich-ssa")`
-- [x] `ssa_formatting.py` — shared SSA display formatting (single swap-point for future numeric values)
+- [x] `ssa_formatting.py` -- shared SSA display formatting (single swap-point for future numeric values)
 - [x] Generate `rich_stack_scene.py` from actual pipeline output instead of reparsing `.ll`
 - [x] CFG animations (via `cfg_renderer.py` + `dot_layout.py`)
 - [x] Add T/F branch labels to semantic DOT export

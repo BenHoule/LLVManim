@@ -62,7 +62,7 @@ def test_load_valid_metadata(tmp_path: Path) -> None:
 
 
 def test_load_partial_metadata_domtree_only(tmp_path: Path) -> None:
-    """Load metadata with only domtree fields — loop fields default."""
+    """Load metadata with only domtree fields -- loop fields default."""
     data = {
         "version": 1,
         "source": "",
@@ -88,7 +88,7 @@ def test_load_partial_metadata_domtree_only(tmp_path: Path) -> None:
 
 
 def test_load_partial_metadata_loop_only(tmp_path: Path) -> None:
-    """Load metadata with only loop fields — domtree fields default."""
+    """Load metadata with only loop fields -- domtree fields default."""
     data = {
         "version": 1,
         "source": "",

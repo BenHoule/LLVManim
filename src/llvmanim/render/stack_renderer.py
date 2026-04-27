@@ -7,11 +7,11 @@ and ``RichStackSceneSpotlight`` in the unified pipeline.
 
 Three display modes are supported via the *ir_mode* parameter:
 
-  basic      — Stack-only layout with yellow-flash badge on arriving cells.
-  rich       — Two-column layout (IR Source | Stack) with a yellow
+  basic      -- Stack-only layout with yellow-flash badge on arriving cells.
+  rich       -- Two-column layout (IR Source | Stack) with a yellow
                SurroundingRectangle cursor that advances to the current
                instruction and FadeTransforms to the callee's IR on call/ret.
-  rich-ssa   — Three-column layout (IR Source | SSA Values | Stack).  Binop,
+  rich-ssa   -- Three-column layout (IR Source | SSA Values | Stack).  Binop,
                compare, and load operations produce SSA value rows in the
                centre panel that persist until their owning frame pops.
 """

@@ -1,10 +1,10 @@
 """SSA value formatting for the bridge panel.
 
 Functions here produce human-readable display strings for SSA computation
-results (binop, compare, load).  The key function is
-:func:`format_display_value` — it is the **single swap-point** for future
+results (binop, compare, load). The key function is
+:func:`format_display_value` -- it is the **single swap-point** for future
 numeric runtime values.  Today it returns symbolic expressions like
-``2 × %2``; when a runtime trace provides concrete values, only this
+``2 x %2``; when a runtime trace provides concrete values, only this
 function needs to change.
 
 TODO: When numeric runtime values become available (e.g. extended

@@ -1,5 +1,5 @@
 """
-SSA Bridge Panel prototype — Manim Community Edition.
+SSA Bridge Panel prototype -- Manim Community Edition.
 
 3-column Spotlight layout: IR Source | SSA Values | Stack.
 
@@ -64,13 +64,13 @@ class _RegEntry(NamedTuple):
 
     ``display_value`` is the **only** field the renderer reads for the label
     text.  Today it holds a symbolic expression; in the future it can hold a
-    concrete numeric string from a runtime trace — no rendering changes needed.
+    concrete numeric string from a runtime trace -- no rendering changes needed.
     """
 
     name: str  # SSA result name, e.g. "%mul"
-    display_value: str  # symbolic now ("2 × %2"), numeric later ("84")
+    display_value: str  # symbolic now ("2 x %2"), numeric later ("84")
     op_type: str  # "binop" | "compare" | "load"
-    owning_frame: str  # function name — cleared on pop
+    owning_frame: str  # function name -- cleared on pop
 
 
 # ── Symbolic expression formatter (the single swap-point for future numerics) ─
@@ -368,7 +368,7 @@ def _ssa_row(name: str, display_value: str, color: ManimColor) -> VGroup:
     """Build an SSA value row for the bridge panel.
 
     The label text reads ``name = display_value``.  The renderer only uses
-    ``display_value`` — this is the future-proofing seam for numeric values.
+    ``display_value`` -- this is the future-proofing seam for numeric values.
     """
     rect = Rectangle(
         width=_SSA_ROW_W,
@@ -484,7 +484,7 @@ class RegisterPanelDemo(Scene):
         stack_lbl.move_to((_STACK_X, 2.7, 0))
         self.add(stack_lbl)
 
-        # IR panel — starts with @main
+        # IR panel -- starts with @main
         self._ir_panel: VGroup = _build_ir_panel("main")
         self.add(self._ir_panel)
         self._ir_cursor = SurroundingRectangle(

@@ -27,6 +27,9 @@ _VALID_KEYS = {
     "preview",
     "draw",
     "json",
+    "color_scheme",
+    "quality",
+    "disable_caching",
 }
 
 _DEFAULTS: dict[str, Any] = {
@@ -41,6 +44,9 @@ _DEFAULTS: dict[str, Any] = {
     "preview": False,
     "draw": False,
     "json": False,
+    "color_scheme": "dark",
+    "quality": None,
+    "disable_caching": False,
 }
 
 
@@ -113,6 +119,21 @@ def load_config(path: Path) -> dict[str, Any]:
     for bool_key in ("yes", "animate", "preview", "draw", "json"):
         if bool_key in raw:
             validated[bool_key] = bool(raw[bool_key])
+
+    if "color_scheme" in raw:
+        val = raw["color_scheme"]
+        if val not in ("dark", "light"):
+            raise ValueError(f"color_scheme must be one of: dark, light (got: {val!r})")
+        validated["color_scheme"] = val
+
+    if "quality" in raw:
+        val = raw["quality"]
+        if val not in ("l", "m", "h", "p", "k"):
+            raise ValueError(f"quality must be one of: l, m, h, p, k (got: {val!r})")
+        validated["quality"] = val
+
+    if "disable_caching" in raw:
+        validated["disable_caching"] = bool(raw["disable_caching"])
 
     return validated
 

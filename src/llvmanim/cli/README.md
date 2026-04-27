@@ -42,12 +42,18 @@ Default input when none is supplied: `tests/ingest/testdata/double.ll`.
 | `--import-trace PATH` | — | Import a runtime path trace from a JSON file for overlay visualization |
 | `--export-trace PATH` | — | Export the trace overlay to a JSON file |
 | `-y` / `--yes` | off | Skip confirmation prompts (e.g. auto-derive trace) |
+| `--color-scheme {dark,light}` | `dark` | Animation color scheme: `dark` (black background) or `light` (white background) |
 
 ## Animation Modes
 
-- `basic` — stack-only layout; arriving cells flash yellow then settle to white (`StackRenderer` basic mode)
-- `rich` — two-column layout with full IR source on the left and a moving yellow cursor; stack on the right (`StackRenderer` rich mode)
+- `basic` — stack-only layout; arriving cells flash the accent color then settle to white (`StackRenderer` basic mode)
+- `rich` — two-column layout with full IR source on the left and a moving accent-color cursor; stack on the right (`StackRenderer` rich mode)
 - `rich-ssa` — three-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results alongside the rich spotlight view (`StackRenderer` rich-ssa mode)
+
+## Color Schemes
+
+- `dark` (default) — black background; yellow flash/cursor; green/blue CFG node/edge accents
+- `light` — white background; orange flash/cursor; adjusted CFG node/edge colors for legibility on white
 
 ## GIF Output Notes
 

@@ -25,7 +25,6 @@ from manim import (
     GOLD_D,
     GREEN_C,
     GREY_B,
-    GREY_D,
     LEFT,
     MAROON_D,
     PURPLE_D,
@@ -33,7 +32,6 @@ from manim import (
     TEAL_D,
     UP,
     WHITE,
-    YELLOW,
     FadeIn,
     FadeOut,
     FadeTransform,
@@ -46,6 +44,7 @@ from manim import (
 )
 
 from llvmanim.ingest.display_lines import clean_ir_line
+from llvmanim.render.colors import DARK, ColorScheme
 from llvmanim.render.command_driven_scene import CommandDrivenScene
 from llvmanim.render.ssa_formatting import (
     OP_COLORS,
@@ -124,16 +123,21 @@ def _slot_cell(slot_text: str, color: ManimColor, width: float = _SLOT_W) -> VGr
 # ── IR panel helpers ────────────────────────────────────────────────────────────
 
 
-def _build_ir_panel(func_name: str, ir_registry: dict[str, list[str]]) -> VGroup:
+def _build_ir_panel(
+    func_name: str,
+    ir_registry: dict[str, list[str]],
+    ir_text_color: ManimColor | str | None = None,
+) -> VGroup:
     """Build a monospaced VGroup of Text lines for *func_name*'s IR source.
 
     Each submobject is a single line's Text so that
     ``panel[line_index].get_center()`` gives the correct cursor target.
     """
+    color = ir_text_color if ir_text_color is not None else DARK.ir_text_color
     lines = ir_registry.get(func_name, [f"(no IR available for @{func_name})"])
     group = VGroup()
     for i, line in enumerate(lines):
-        txt = Text(line, font="Monospace", font_size=_IR_FONT_SIZE)
+        txt = Text(line, font="Monospace", font_size=_IR_FONT_SIZE, color=color)
         txt.move_to((_IR_PANEL_X, _IR_PANEL_TOP_Y - i * _IR_LINE_SPACING, 0))
         txt.align_to((_IR_PANEL_X - 2.6, 0, 0), direction=LEFT)
         group.add(txt)
@@ -212,9 +216,12 @@ class StackRenderer(CommandDrivenScene):
         *,
         ir_mode: str = "basic",
         display_lines: dict[str, list[str]] | None = None,
+        scheme: ColorScheme | None = None,
         **kwargs: object,
     ) -> None:
-        super().__init__(graph, speed=speed, title=title, **kwargs)
+        s = scheme if scheme is not None else DARK
+        super().__init__(graph, speed=speed, title=title, scheme=s, **kwargs)
+        self._scheme = s
 
         self._ir_mode = ir_mode
         self._ir_registry: dict[str, list[str]] = display_lines or {}
@@ -246,7 +253,7 @@ class StackRenderer(CommandDrivenScene):
         if self._ir_mode in ("rich", "rich-ssa"):
             self._setup_ir_chrome()
         else:
-            col_label = Text("Stack  (grows \u2193)", font_size=21, color=GREY_B)
+            col_label = Text("Stack  (grows \u2193)", font_size=21, color=self._scheme.label_color)
             col_label.move_to(RIGHT * self._STACK_X + UP * 2.85)
             self.add(col_label)
 
@@ -256,26 +263,26 @@ class StackRenderer(CommandDrivenScene):
             ir_x = _3COL_IR_PANEL_X
             div1 = Line(
                 (_3COL_DIV1_X, 3.5, 0), (_3COL_DIV1_X, -4.0, 0),
-                color=GREY_D, stroke_width=1,
+                color=self._scheme.divider_color, stroke_width=1,
             )
             div2 = Line(
                 (_3COL_DIV2_X, 3.5, 0), (_3COL_DIV2_X, -4.0, 0),
-                color=GREY_D, stroke_width=1,
+                color=self._scheme.divider_color, stroke_width=1,
             )
             self.add(div1, div2)
-            ssa_lbl = Text("SSA Values", font_size=21, color=GREY_B)
+            ssa_lbl = Text("SSA Values", font_size=21, color=self._scheme.label_color)
             ssa_lbl.move_to((_SSA_PANEL_X, 2.85, 0))
             self.add(ssa_lbl)
         else:
             ir_x = _IR_PANEL_X
-            vdiv = Line(UP * 3.5, DOWN * 4.0, color=GREY_D, stroke_width=1)
+            vdiv = Line(UP * 3.5, DOWN * 4.0, color=self._scheme.divider_color, stroke_width=1)
             self.add(vdiv)
 
-        ir_lbl = Text("IR Source", font_size=21, color=GREY_B)
+        ir_lbl = Text("IR Source", font_size=21, color=self._scheme.label_color)
         ir_lbl.move_to((ir_x, 2.85, 0))
         self.add(ir_lbl)
 
-        stack_lbl = Text("Stack  (grows \u2193)", font_size=21, color=GREY_B)
+        stack_lbl = Text("Stack  (grows \u2193)", font_size=21, color=self._scheme.label_color)
         stack_lbl.move_to(RIGHT * self._STACK_X + UP * 2.85)
         self.add(stack_lbl)
 
@@ -287,12 +294,14 @@ class StackRenderer(CommandDrivenScene):
             "main",
         )
 
-        self._ir_panel: VGroup = _build_ir_panel(first_func, self._ir_registry)
+        self._ir_panel: VGroup = _build_ir_panel(
+            first_func, self._ir_registry, ir_text_color=self._scheme.ir_text_color
+        )
         if self._ir_mode == "rich-ssa":
             self._reposition_ir_panel(self._ir_panel)
         self.add(self._ir_panel)
         self._ir_cursor = SurroundingRectangle(
-            self._ir_panel[0], color=YELLOW, buff=0.06, stroke_width=2
+            self._ir_panel[0], color=self._scheme.cursor_color, buff=0.06, stroke_width=2
         )
         self.add(self._ir_cursor)
 
@@ -323,7 +332,9 @@ class StackRenderer(CommandDrivenScene):
 
     def _swap_panel(self, new_func: str, target_line: int = 0) -> None:
         """FadeTransform the current IR panel to *new_func*'s panel."""
-        new_panel = _build_ir_panel(new_func, self._ir_registry)
+        new_panel = _build_ir_panel(
+            new_func, self._ir_registry, ir_text_color=self._scheme.ir_text_color
+        )
         if self._ir_mode == "rich-ssa":
             self._reposition_ir_panel(new_panel)
         self.play(FadeTransform(self._ir_panel, new_panel), run_time=self._rt(0.4))
@@ -332,7 +343,7 @@ class StackRenderer(CommandDrivenScene):
         self._panel_scroll = 0.0
         safe_idx = min(target_line, len(self._ir_panel) - 1)
         new_cursor = SurroundingRectangle(
-            self._ir_panel[safe_idx], color=YELLOW, buff=0.06, stroke_width=2
+            self._ir_panel[safe_idx], color=self._scheme.cursor_color, buff=0.06, stroke_width=2
         )
         self.play(FadeTransform(self._ir_cursor, new_cursor), run_time=self._rt(0.25))
         self._ir_cursor = new_cursor
@@ -343,7 +354,7 @@ class StackRenderer(CommandDrivenScene):
         safe_idx = min(line_index, len(self._ir_panel) - 1)
         self._scroll_to_line(safe_idx)
         new_cursor = SurroundingRectangle(
-            self._ir_panel[safe_idx], color=YELLOW, buff=0.06, stroke_width=2
+            self._ir_panel[safe_idx], color=self._scheme.cursor_color, buff=0.06, stroke_width=2
         )
         self.play(self._ir_cursor.animate.become(new_cursor), run_time=self._rt(0.3))
 
@@ -408,7 +419,7 @@ class StackRenderer(CommandDrivenScene):
         self._depth += 1
         self._frame_stack.append((mob, []))
         self._frame_names.append(func_name)
-        mob[1].set_color(YELLOW)
+        mob[1].set_color(self._scheme.flash_color)
         self.play(FadeIn(mob, shift=DOWN * 0.25), run_time=self._rt(0.5))
         self.play(mob[1].animate.set_color(WHITE), run_time=self._rt(0.35))
 
@@ -437,7 +448,7 @@ class StackRenderer(CommandDrivenScene):
         mob.move_to(RIGHT * self._STACK_X + UP * (self._cursor_y - _SLOT_H / 2))
         self._cursor_y -= _SLOT_H + _GAP
         self._frame_stack[-1][1].append(mob)
-        mob[1].set_color(YELLOW)
+        mob[1].set_color(self._scheme.flash_color)
         self.play(FadeIn(mob, shift=DOWN * 0.15), run_time=self._rt(0.4))
         self.play(mob[1].animate.set_color(WHITE), run_time=self._rt(0.35))
 
@@ -473,7 +484,7 @@ class StackRenderer(CommandDrivenScene):
         mob.move_to((_SSA_PANEL_X, self._ssa_cursor_y - _SSA_ROW_H / 2, 0))
         self._ssa_cursor_y -= _SSA_ROW_H + _SSA_GAP
         self._ssa_entries.append((mob, func_name))
-        mob[1].set_color(YELLOW)
+        mob[1].set_color(self._scheme.flash_color)
         self.play(FadeIn(mob, shift=DOWN * 0.1), run_time=self._rt(0.3))
         self.play(mob[1].animate.set_color(WHITE), run_time=self._rt(0.2))
 

@@ -18,6 +18,7 @@ LLVManim parses LLVM IR (`.ll`) into a typed event stream, derives a CFG-style s
   - `--ir-mode basic`: stack-only with per-cell badge flash
   - `--ir-mode rich`: IR source panel + moving spotlight cursor + stack view
   - `--ir-mode rich-ssa`: 3-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results
+- `--color-scheme dark|light`: switch the animation color scheme (dark = default black background; light = white background)
 - `ssa_formatting.py`: shared SSA display formatting with a single swap-point for future numeric runtime values
 - `RichTraceStep` and `build_execution_trace(include_ssa=True)` for binop/compare/load trace steps
 - Render CFG traversal animations (`--cfg-animate`) using DOT-derived layout from `opt -passes=dot-cfg`
@@ -199,6 +200,7 @@ Default input is `tests/ingest/testdata/double.ll` when no positional argument i
 - `--export-analysis-metadata <path>`: write analysis metadata to a JSON file
 - `--import-trace <path>`: load a runtime path trace from a JSON file for overlay visualization
 - `--export-trace <path>`: write the trace overlay to a JSON file
+- `--color-scheme {dark,light}`: animation color scheme (default: `dark` — black background; `light` — white background)
 - `--C`: treat the input file as a `C` source file instead of LLVM textual IR and compile it to LLVM IR automatically
 
 ### Environment Variables
@@ -271,6 +273,7 @@ uv run llvmanim tests/ingest/testdata/double.ll --cfg-animate --dot-cfg .main.do
 │  uv run llvmanim input.ll [--json] [--draw] [--animate]        │
 │                     [--preview] [--ir-mode basic|rich|rich-ssa]│
 │                           [--speed N] [--format mp4|gif]       │
+│                           [--color-scheme dark|light]          │
 │                           [--cfg-animate] [--dot-cfg PATH]     │
 │                           [--import-trace PATH] [-y]           │
 │                           [-n NAME] [--import-cfg-edges PATH]  │

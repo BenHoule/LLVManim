@@ -1,6 +1,5 @@
 digraph "CFG for 'init' function" {
 	label="CFG for 'init' function";
-	splines=ortho;
 
-	Node0x5e0c539ad840 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870" fontname="Courier",label="{entry:\l|  %p.addr = alloca ptr, align 8\l  store ptr %p, ptr %p.addr, align 8\l  call void @llvm.dbg.declare(metadata ptr %p.addr, metadata !17, metadata\l... !DIExpression()), !dbg !18\l  %0 = load ptr, ptr %p.addr, align 8, !dbg !19\l  store i32 1, ptr %0, align 4, !dbg !20\l  ret void, !dbg !21\l}"];
+	Node0x6019d5441840 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870" fontname="Courier",label="{entry:\l|  %p.addr = alloca ptr, align 8\l  store ptr %p, ptr %p.addr, align 8\l  call void @llvm.dbg.declare(metadata ptr %p.addr, metadata !17, metadata\l... !DIExpression()), !dbg !18\l  %0 = load ptr, ptr %p.addr, align 8, !dbg !19\l  store i32 1, ptr %0, align 4, !dbg !20\l  ret void, !dbg !21\l}"];
 }

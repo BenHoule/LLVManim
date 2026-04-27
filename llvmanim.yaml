@@ -29,3 +29,7 @@ json: false
 
 # Skip confirmation prompts automatically (equivalent to -y / --yes)
 "yes": false
+
+# Animation color scheme.
+# Options: dark (black background, yellow accents), light (white background, orange accents)
+color_scheme: dark

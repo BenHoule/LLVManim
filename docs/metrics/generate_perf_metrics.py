@@ -65,7 +65,7 @@ def _annotate_points(ax, xs, ys, fmt_fn, crowd_threshold_frac: float = 0.12) -> 
             stagger_levels.append(None)
             level = 0
 
-    for i, (x, y) in enumerate(zip(xs, ys)):
+    for i, (x, y) in enumerate(zip(xs, ys, strict=False)):
         if is_crowded[i]:
             offset_y = _CROWD_BASE_Y + stagger_levels[i] * _CROWD_STEP_Y
             if (

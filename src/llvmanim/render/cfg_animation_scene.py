@@ -10,7 +10,6 @@ import numpy as np
 from manim import (
     BOLD,
     DOWN,
-    GREY_D,
     CubicBezier,
     DashedVMobject,
     RoundedRectangle,
@@ -20,18 +19,8 @@ from manim import (
 )
 
 from llvmanim.ingest.dot_layout import DotEdgeLayout, DotNodeLayout
+from llvmanim.render.colors import DARK, ColorScheme
 from llvmanim.transform.models import SceneNode
-
-# ── Colours ────────────────────────────────────────────────────────────────────
-_UNVISITED_FILL = "#555555"
-_UNVISITED_TEXT = "#999999"
-_ACTIVE_FILL = "#2ecc71"
-_VISITED_FILL = "#d4edda"
-_VISITED_TEXT = "#333333"
-_EDGE_DORMANT = "#666666"
-_EDGE_TRAVERSED = "#0056b3"
-_EDGE_ACTIVE = "#f1c40f"
-
 
 # ── Coordinate mapping ────────────────────────────────────────────────────────
 
@@ -104,8 +93,10 @@ def _build_block_mob(
     node: SceneNode,
     node_layout: DotNodeLayout,
     mapper: _CoordMapper,
+    scheme: ColorScheme | None = None,
 ) -> VGroup:
     """Create a labeled rounded rectangle for one CFG block."""
+    s = scheme if scheme is not None else DARK
     mn_w, mn_h = mapper.size(node_layout.width, node_layout.height)
     mn_w = max(mn_w, 1.5)
     mn_h = max(mn_h, 0.8)
@@ -114,9 +105,9 @@ def _build_block_mob(
         width=mn_w,
         height=mn_h,
         corner_radius=0.12,
-        fill_color=_UNVISITED_FILL,
+        fill_color=s.cfg_unvisited_fill,
         fill_opacity=0.9,
-        stroke_color=GREY_D,
+        stroke_color=s.cfg_visited_stroke,
         stroke_width=2,
     )
 
@@ -125,7 +116,7 @@ def _build_block_mob(
         font="Monospace",
         font_size=20,
         weight=BOLD,
-        color=_UNVISITED_TEXT,
+        color=s.cfg_unvisited_text,
     )
 
     summary = _block_summary(node)
@@ -134,7 +125,7 @@ def _build_block_mob(
             summary,
             font="Monospace",
             font_size=12,
-            color=_UNVISITED_TEXT,
+            color=s.cfg_unvisited_text,
         )
         title.next_to(rect.get_top(), DOWN, buff=0.12)
         detail.next_to(title, DOWN, buff=0.08)
@@ -153,6 +144,7 @@ def _build_block_mob(
 def _build_edge_mob(
     edge_layout: DotEdgeLayout,
     mapper: _CoordMapper,
+    scheme: ColorScheme | None = None,
 ) -> VGroup:
     """Create a bezier curve edge with arrowhead and optional T/F label.
 
@@ -183,10 +175,11 @@ def _build_edge_mob(
             mn_points[-1],
         )
 
-    bezier.set_color(_EDGE_DORMANT)
+    s = scheme if scheme is not None else DARK
+    bezier.set_color(s.cfg_edge_dormant)
     bezier.set_stroke(width=2)
 
-    arrow_tip = Triangle(fill_opacity=1, fill_color=_EDGE_DORMANT, stroke_width=0)
+    arrow_tip = Triangle(fill_opacity=1, fill_color=s.cfg_edge_dormant, stroke_width=0)
     arrow_tip.scale(0.08)
     end_pt = bezier.point_from_proportion(1.0)
     near_end = bezier.point_from_proportion(0.92)
@@ -209,7 +202,7 @@ def _build_edge_mob(
             font="Monospace",
             font_size=16,
             weight=BOLD,
-            color=_EDGE_DORMANT,
+            color=s.cfg_edge_dormant,
         )
         label_pt = bezier.point_from_proportion(0.25)
         lbl.move_to(label_pt)

@@ -36,7 +36,7 @@ def _event(
     )
 
 
-# ── _ssa_row factory ────────────────────────────────────────────────────────────
+# -- _ssa_row factory ------------------------------------------------------------
 
 
 class TestSsaRow:
@@ -54,7 +54,7 @@ class TestSsaRow:
         assert "%ptr" in label_text
 
 
-# ── StackRenderer SSA handler registration ──────────────────────────────────────
+# -- StackRenderer SSA handler registration --------------------------------------
 
 
 class TestStackRendererSsaRegistration:
@@ -79,7 +79,7 @@ class TestStackRendererSsaRegistration:
             assert action not in renderer._handlers
 
 
-# ── StackRenderer 3-column layout ───────────────────────────────────────────────
+# -- StackRenderer 3-column layout -----------------------------------------------
 
 
 class TestStackRendererRichSsaLayout:
@@ -106,7 +106,7 @@ class TestStackRendererRichSsaLayout:
         assert renderer._STACK_X == 0.5
 
 
-# ── SSA pop cleanup ─────────────────────────────────────────────────────────────
+# -- SSA pop cleanup -------------------------------------------------------------
 
 
 class TestSsaCleanupOnPop:

@@ -69,7 +69,7 @@ class CFGRenderer(CommandDrivenScene):
         self._register_handler("exit_block", self._handle_exit_block)
         self._register_handler("traverse_edge", self._handle_traverse_edge)
 
-    # ── Setup ───────────────────────────────────────────────────────────────
+    # -- Setup ---------------------------------------------------------------
 
     def _setup_scene(self) -> None:
         mapper = _CoordMapper(self._layout.bounding_box)
@@ -94,7 +94,7 @@ class CFGRenderer(CommandDrivenScene):
         if edge_anims:
             self.play(*edge_anims, run_time=self._rt(0.6))
 
-    # ── Handlers ────────────────────────────────────────────────────────────
+    # -- Handlers ------------------------------------------------------------
 
     def _resolve_block_name(self, target: str) -> str:
         """Resolve a command target to a bare block name for mobject lookup."""

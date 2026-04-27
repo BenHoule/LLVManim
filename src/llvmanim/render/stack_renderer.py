@@ -53,7 +53,7 @@ from llvmanim.render.ssa_formatting import (
 )
 from llvmanim.transform.models import AnimationCommand, SceneGraph
 
-# ── Layout constants ────────────────────────────────────────────────────────────
+# -- Layout constants ------------------------------------------------------------
 
 _SLOT_W = 4.0
 _HEADER_H = 0.55
@@ -88,9 +88,12 @@ _3COL_DIV1_X = -2.0
 _3COL_DIV2_X = 2.5
 
 
-# ── Mobject factories ───────────────────────────────────────────────────────────
+# -- Mobject factories -----------------------------------------------------------
 
-def _frame_header(func_name: str, color: ManimColor, text_color: ManimColor = WHITE, width: float = _SLOT_W) -> VGroup:
+
+def _frame_header(
+    func_name: str, color: ManimColor, text_color: ManimColor = WHITE, width: float = _SLOT_W
+) -> VGroup:
     """Opaque coloured header bar labelled @func_name."""
     rect = Rectangle(
         width=width,
@@ -105,7 +108,9 @@ def _frame_header(func_name: str, color: ManimColor, text_color: ManimColor = WH
     return VGroup(rect, label)
 
 
-def _slot_cell(slot_text: str, color: ManimColor, text_color: ManimColor = WHITE, width: float = _SLOT_W) -> VGroup:
+def _slot_cell(
+    slot_text: str, color: ManimColor, text_color: ManimColor = WHITE, width: float = _SLOT_W
+) -> VGroup:
     """Single alloca-slot row tinted with the owning frame's colour."""
     rect = Rectangle(
         width=width,
@@ -120,7 +125,7 @@ def _slot_cell(slot_text: str, color: ManimColor, text_color: ManimColor = WHITE
     return VGroup(rect, label)
 
 
-# ── IR panel helpers ────────────────────────────────────────────────────────────
+# -- IR panel helpers ------------------------------------------------------------
 
 
 def _build_ir_panel(
@@ -184,7 +189,8 @@ def _ssa_row(name: str, display_value: str, color: ManimColor) -> VGroup:
     return VGroup(rect, label)
 
 
-# ── StackRenderer ───────────────────────────────────────────────────────────────
+# -- StackRenderer ---------------------------------------------------------------
+
 
 class StackRenderer(CommandDrivenScene):
     """Command-driven stack-frame animation scene.
@@ -262,12 +268,16 @@ class StackRenderer(CommandDrivenScene):
         if self._ir_mode == "rich-ssa":
             ir_x = _3COL_IR_PANEL_X
             div1 = Line(
-                (_3COL_DIV1_X, 3.5, 0), (_3COL_DIV1_X, -4.0, 0),
-                color=self._scheme.divider_color, stroke_width=1,
+                (_3COL_DIV1_X, 3.5, 0),
+                (_3COL_DIV1_X, -4.0, 0),
+                color=self._scheme.divider_color,
+                stroke_width=1,
             )
             div2 = Line(
-                (_3COL_DIV2_X, 3.5, 0), (_3COL_DIV2_X, -4.0, 0),
-                color=self._scheme.divider_color, stroke_width=1,
+                (_3COL_DIV2_X, 3.5, 0),
+                (_3COL_DIV2_X, -4.0, 0),
+                color=self._scheme.divider_color,
+                stroke_width=1,
             )
             self.add(div1, div2)
             ssa_lbl = Text("SSA Values", font_size=21, color=self._scheme.label_color)
@@ -288,9 +298,11 @@ class StackRenderer(CommandDrivenScene):
 
         # Initialise the IR panel to the first pushed function.
         first_func = next(
-            (cmd.params.get("function_name", "main")
-             for cmd in self._graph.commands
-             if cmd.action == "push_stack_frame"),
+            (
+                cmd.params.get("function_name", "main")
+                for cmd in self._graph.commands
+                if cmd.action == "push_stack_frame"
+            ),
             "main",
         )
 
@@ -313,7 +325,7 @@ class StackRenderer(CommandDrivenScene):
         self._ssa_cursor_y: float = _SSA_TOP_Y
         self._ssa_entries: list[tuple[VGroup, str]] = []
 
-    # ── IR panel methods ────────────────────────────────────────────────────
+    # -- IR panel methods ----------------------------------------------------
 
     def _scroll_to_line(self, idx: int) -> None:
         """Shift the panel (and cursor) so that line *idx* is within the viewport."""
@@ -365,7 +377,7 @@ class StackRenderer(CommandDrivenScene):
             line_mob.align_to((_3COL_IR_PANEL_X - 2.2, 0, 0), direction=LEFT)
             line_mob.set(font_size=_3COL_IR_FONT_SIZE)
 
-    # ── IR cursor integration ───────────────────────────────────────────────
+    # -- IR cursor integration -----------------------------------------------
 
     def _ir_on_push(self, func_name: str) -> None:
         """Move IR cursor to call site and swap panel to callee."""
@@ -404,7 +416,7 @@ class StackRenderer(CommandDrivenScene):
         idx = _find_line_idx(ir_lines, ir_text)
         self._advance_cursor(idx)
 
-    # ── Handlers ────────────────────────────────────────────────────────────
+    # -- Handlers ------------------------------------------------------------
 
     def _color(self) -> ManimColor:
         return _PALETTE[self._depth % len(_PALETTE)]
@@ -413,7 +425,9 @@ class StackRenderer(CommandDrivenScene):
         func_name = cmd.params.get("function_name", "")
         self._ir_on_push(func_name)
         color = self._color()
-        mob = _frame_header(func_name, color, text_color=self._scheme.stack_text_color, width=self._SLOT_WIDTH)
+        mob = _frame_header(
+            func_name, color, text_color=self._scheme.stack_text_color, width=self._SLOT_WIDTH
+        )
         mob.move_to(RIGHT * self._STACK_X + UP * (self._cursor_y - _HEADER_H / 2))
         self._cursor_y -= _HEADER_H + _GAP
         self._depth += 1
@@ -444,7 +458,9 @@ class StackRenderer(CommandDrivenScene):
         self._ir_on_alloca(slot_text)
         display_text = clean_ir_line(slot_text)
         color = _PALETTE[(self._depth - 1) % len(_PALETTE)]
-        mob = _slot_cell(display_text, color, text_color=self._scheme.stack_text_color, width=self._SLOT_WIDTH)
+        mob = _slot_cell(
+            display_text, color, text_color=self._scheme.stack_text_color, width=self._SLOT_WIDTH
+        )
         mob.move_to(RIGHT * self._STACK_X + UP * (self._cursor_y - _SLOT_H / 2))
         self._cursor_y -= _SLOT_H + _GAP
         self._frame_stack[-1][1].append(mob)
@@ -469,7 +485,7 @@ class StackRenderer(CommandDrivenScene):
         func_name = self._frame_names[-1] if self._frame_names else ""
         self._add_ssa_value(action, ir_text, operands, func_name)
 
-    # ── SSA panel methods ───────────────────────────────────────────────────
+    # -- SSA panel methods ---------------------------------------------------
 
     def _add_ssa_value(
         self, action: str, ir_text: str, operands: list[str], func_name: str
@@ -486,7 +502,7 @@ class StackRenderer(CommandDrivenScene):
         self._ssa_entries.append((mob, func_name))
         mob[1].set_color(self._scheme.flash_color)
         self.play(FadeIn(mob, shift=DOWN * 0.1), run_time=self._rt(0.3))
-        self.play(mob[1].animate.set_color(WHITE), run_time=self._rt(0.2))
+        self.play(mob[1].animate.set_color(self._scheme.stack_text_color), run_time=self._rt(0.2))
 
     def _ssa_pop_cleanup(self, func_name: str) -> list[VGroup]:
         """Return SSA mobs owned by *func_name* for fade-out."""

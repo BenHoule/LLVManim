@@ -23,25 +23,25 @@ from manim import BLACK, GREY_B, GREY_D, ORANGE, WHITE, YELLOW
 class ColorScheme:
     """Holds all theme-specific colors for a single LLVManim scene."""
 
-    # ── Canvas ──────────────────────────────────────────────────────────────
+    # -- Canvas --------------------------------------------------------------
     background: str  # hex string passed to manim_config.background_color
 
-    # ── Chrome (title bar, divider lines, column labels) ────────────────────
+    # -- Chrome (title bar, divider lines, column labels) --------------------
     title_color: Any  # ManimColor accepted by Manim Text
     rule_color: Any  # horizontal rule beneath the title
     label_color: Any  # column header labels ("IR Source", "Stack …")
     divider_color: Any  # vertical divider lines between columns
 
-    # ── Canvas text (text that sits directly on the background) ─────────────
+    # -- Canvas text (text that sits directly on the background) -------------
     ir_text_color: Any  # IR source panel lines
 
-    # ── Animation accents ───────────────────────────────────────────────────
+    # -- Animation accents ---------------------------------------------------
     flash_color: Any  # badge flash on incoming stack / SSA elements
     cursor_color: Any  # SurroundingRectangle IR cursor
 
-    # ── Stack block text ────────────────────────────────────────────────────
+    # -- Stack block text ----------------------------------------------------
     stack_text_color: Any  # resting text color in frame headers and slot cells
-    # ── CFG block states ────────────────────────────────────────────────────
+    # -- CFG block states ----------------------------------------------------
     cfg_unvisited_fill: str
     cfg_unvisited_text: str
     cfg_active_fill: str
@@ -51,13 +51,13 @@ class ColorScheme:
     cfg_visited_text: str
     cfg_visited_stroke: Any
 
-    # ── CFG edges ───────────────────────────────────────────────────────────
+    # -- CFG edges -----------------------------------------------------------
     cfg_edge_dormant: str
     cfg_edge_traversed: str
     cfg_edge_active: str
 
 
-# ── Built-in schemes ────────────────────────────────────────────────────────
+# -- Built-in schemes --------------------------------------------------------
 
 DARK = ColorScheme(
     background="#000000",

@@ -5,7 +5,7 @@ from __future__ import annotations
 from llvmanim.transform.models import SceneEdge, SceneGraph, SceneNode
 from llvmanim.transform.trace import derive_cfg_trace
 
-# ── derive_cfg_trace ────────────────────────────────────────────────
+# -- derive_cfg_trace ------------------------------------------------
 
 
 def _loop_graph() -> SceneGraph:

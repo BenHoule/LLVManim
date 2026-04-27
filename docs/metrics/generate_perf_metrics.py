@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 OUT = Path(__file__).parent
 BG = "#f8f9fa"
 
-# ── Colour palette ─────────────────────────────────────────────────────────────
+# -- Colour palette -------------------------------------------------------------
 C_INGEST = "#27AE60"
 C_TRANSFORM = "#E67E22"
 C_TRACE = "#E67E22"  # derive_cfg_trace is also in the transform layer

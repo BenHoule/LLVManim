@@ -19,7 +19,7 @@ import re
 
 from manim import BLUE_D, GOLD_D, GREEN_C, ManimColor
 
-# ── Opcode → symbol mappings ───────────────────────────────────────────────────
+# -- Opcode → symbol mappings ---------------------------------------------------
 
 BINOP_SYMBOLS: dict[str, str] = {
     "add": "+",
@@ -70,7 +70,7 @@ OP_COLORS: dict[str, ManimColor] = {
     "load": BLUE_D,
 }
 
-# ── Extraction helpers ─────────────────────────────────────────────────────────
+# -- Extraction helpers ---------------------------------------------------------
 
 _SSA_NAME_RE = re.compile(r"(%[\w.]+)\s*=")
 _OPCODE_RE = re.compile(r"%[\w.]+\s*=\s*(\w+)")
@@ -89,7 +89,7 @@ def extract_opcode(ir_text: str) -> str:
     return m.group(1) if m else ""
 
 
-# ── Symbolic formatters ────────────────────────────────────────────────────────
+# -- Symbolic formatters --------------------------------------------------------
 
 
 def format_binop(ir_text: str, operands: list[str]) -> str:

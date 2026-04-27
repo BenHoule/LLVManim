@@ -17,7 +17,7 @@ from matplotlib.lines import Line2D
 
 OUT = Path(__file__).parent
 
-# ── Palette ────────────────────────────────────────────────────────────────────
+# -- Palette --------------------------------------------------------------------
 LAYER_COLORS = {
     "cli": "#C0397E",
     "ingest": "#27AE60",
@@ -40,7 +40,7 @@ def _cov_color(pct: int) -> str:
     return COVERAGE_COLORS["low"]
 
 
-# ── Raw data ───────────────────────────────────────────────────────────────────
+# -- Raw data -------------------------------------------------------------------
 
 # (module_short_name, layer, stmts, missed, coverage_pct)
 COVERAGE_DATA = [
@@ -206,7 +206,14 @@ def chart_tests() -> None:
         mpatches.Patch(color=LAYER_COLORS[label], label=label)
         for label in ("cli", "ingest", "transform", "render")
     ]
-    ax.legend(handles=patches, loc="lower right", fontsize=12, framealpha=0.5, title="Layer", title_fontsize=12)
+    ax.legend(
+        handles=patches,
+        loc="lower right",
+        fontsize=12,
+        framealpha=0.5,
+        title="Layer",
+        title_fontsize=12,
+    )
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)

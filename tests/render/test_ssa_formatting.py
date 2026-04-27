@@ -11,7 +11,7 @@ from llvmanim.render.ssa_formatting import (
     format_load,
 )
 
-# ── extract_ssa_name ───────────────────────────────────────────────────────────
+# -- extract_ssa_name -----------------------------------------------------------
 
 
 class TestExtractSSAName:
@@ -31,7 +31,7 @@ class TestExtractSSAName:
         assert extract_ssa_name("  %cmp = icmp slt i32 %2, 100") == "%cmp"
 
 
-# ── extract_opcode ─────────────────────────────────────────────────────────────
+# -- extract_opcode -------------------------------------------------------------
 
 
 class TestExtractOpcode:
@@ -48,7 +48,7 @@ class TestExtractOpcode:
         assert extract_opcode("store i32 1, ptr %0") == ""
 
 
-# ── format_binop ───────────────────────────────────────────────────────────────
+# -- format_binop ---------------------------------------------------------------
 
 
 class TestFormatBinop:
@@ -82,7 +82,7 @@ class TestFormatBinop:
         assert "add" in result
 
 
-# ── format_compare ─────────────────────────────────────────────────────────────
+# -- format_compare -------------------------------------------------------------
 
 
 class TestFormatCompare:
@@ -106,7 +106,7 @@ class TestFormatCompare:
         assert "icmp" in result
 
 
-# ── format_load ────────────────────────────────────────────────────────────────
+# -- format_load ----------------------------------------------------------------
 
 
 class TestFormatLoad:
@@ -117,7 +117,7 @@ class TestFormatLoad:
         assert format_load([]) == "load ?"
 
 
-# ── format_display_value (dispatch) ────────────────────────────────────────────
+# -- format_display_value (dispatch) --------------------------------------------
 
 
 class TestFormatDisplayValue:

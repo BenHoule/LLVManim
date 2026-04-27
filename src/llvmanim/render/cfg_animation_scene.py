@@ -22,7 +22,8 @@ from llvmanim.ingest.dot_layout import DotEdgeLayout, DotNodeLayout
 from llvmanim.render.colors import DARK, ColorScheme
 from llvmanim.transform.models import SceneNode
 
-# ── Coordinate mapping ────────────────────────────────────────────────────────
+# -- Coordinate mapping --------------------------------------------------------
+
 
 class _CoordMapper:
     """Map Graphviz point coordinates to Manim world coordinates.
@@ -55,7 +56,8 @@ class _CoordMapper:
         return gv_w * self._scale, gv_h * self._scale
 
 
-# ── Block summary extraction ──────────────────────────────────────────────────
+# -- Block summary extraction --------------------------------------------------
+
 
 def _block_summary(node: SceneNode) -> str:
     """Build a short text summary from a scene node's block data."""
@@ -87,7 +89,8 @@ def _block_summary(node: SceneNode) -> str:
     return "\n".join(parts) if parts else ""
 
 
-# ── Mobject builders ──────────────────────────────────────────────────────────
+# -- Mobject builders ----------------------------------------------------------
+
 
 def _build_block_mob(
     node: SceneNode,
@@ -158,13 +161,19 @@ def _build_edge_mob(
 
     if len(mn_points) >= 4:
         bezier = CubicBezier(
-            mn_points[0], mn_points[1], mn_points[2], mn_points[3],
+            mn_points[0],
+            mn_points[1],
+            mn_points[2],
+            mn_points[3],
         )
         for i in range(4, len(mn_points) - 2, 3):
             if i + 2 < len(mn_points):
                 end_idx = min(i + 3, len(mn_points) - 1)
                 seg = CubicBezier(
-                    mn_points[i], mn_points[i + 1], mn_points[i + 2], mn_points[end_idx],
+                    mn_points[i],
+                    mn_points[i + 1],
+                    mn_points[i + 2],
+                    mn_points[end_idx],
                 )
                 bezier.append_points(seg.points)
     else:

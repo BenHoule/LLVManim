@@ -7,10 +7,10 @@ import os
 import platform
 import shutil
 import subprocess
+from collections.abc import Sequence
 from functools import cache, lru_cache
 from glob import glob
 from pathlib import Path
-from typing import Sequence
 
 
 def sort_by_llvm_version(candidate: str):

@@ -58,7 +58,7 @@ overlay: TraceOverlay = derive_cfg_trace(graph, function="main")
 - Returns a `TraceOverlay` with `entry_order`, `visited_nodes`, `traversed_edges`, and `termination_reason`.
 - Used by the CLI when `--cfg-animate` is given without `--import-trace`.
 
-### `scene.py` — unified entry point
+### `scene.py` -- unified entry point
 
 `build_scene_graph` covers both the CFG and stack-animation paths via the
 `mode` keyword argument:

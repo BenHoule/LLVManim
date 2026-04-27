@@ -17,7 +17,7 @@ from llvmanim.render.stack_renderer import (
 )
 from llvmanim.transform.models import AnimationCommand, SceneGraph
 
-# ── _frame_header ────────────────────────────────────────────────────────────
+# -- _frame_header ------------------------------------------------------------
 
 
 class TestFrameHeader:
@@ -45,7 +45,7 @@ class TestFrameHeader:
         assert abs(rect.width - 6.0) < 0.01
 
 
-# ── _slot_cell ───────────────────────────────────────────────────────────────
+# -- _slot_cell ---------------------------------------------------------------
 
 
 class TestSlotCell:
@@ -75,7 +75,7 @@ class TestSlotCell:
         assert abs(rect.width - 3.0) < 0.01
 
 
-# ── _build_ir_panel ──────────────────────────────────────────────────────────
+# -- _build_ir_panel ----------------------------------------------------------
 
 
 class TestBuildIrPanel:
@@ -100,7 +100,7 @@ class TestBuildIrPanel:
         assert y0 > y1 > y2
 
 
-# ── _reposition_ir_panel ─────────────────────────────────────────────────────
+# -- _reposition_ir_panel -----------------------------------------------------
 
 
 class TestRepositionIrPanel:
@@ -114,7 +114,7 @@ class TestRepositionIrPanel:
         assert abs(x0 - _3COL_IR_PANEL_X) < 2.5  # near 3-col x (after left-align)
 
 
-# ── StackRenderer._color ────────────────────────────────────────────────────
+# -- StackRenderer._color ----------------------------------------------------
 
 
 class TestRendererColor:
@@ -126,7 +126,7 @@ class TestRendererColor:
             assert renderer._color() == _PALETTE[i % len(_PALETTE)]
 
 
-# ── IR cursor early returns (basic mode) ─────────────────────────────────────
+# -- IR cursor early returns (basic mode) -------------------------------------
 
 
 class TestIrCursorBasicModeNoop:
@@ -153,7 +153,7 @@ class TestIrCursorBasicModeNoop:
         renderer._ir_on_ssa("%1 = add i32 %a, %b")
 
 
-# ── _ssa_after_pop early returns ─────────────────────────────────────────────
+# -- _ssa_after_pop early returns ---------------------------------------------
 
 
 class TestSsaAfterPopNoop:
@@ -174,7 +174,7 @@ class TestSsaAfterPopNoop:
         renderer._ssa_after_pop()
 
 
-# ── _handle_branch (no-op) ──────────────────────────────────────────────────
+# -- _handle_branch (no-op) --------------------------------------------------
 
 
 def test_handle_branch_is_noop() -> None:

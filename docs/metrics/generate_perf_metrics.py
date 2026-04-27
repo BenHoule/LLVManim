@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 OUT = Path(__file__).parent
 BG = "#f8f9fa"
 
-# ── Colour palette ─────────────────────────────────────────────────────────────
+# -- Colour palette -------------------------------------------------------------
 C_INGEST = "#27AE60"
 C_TRANSFORM = "#E67E22"
 C_TRACE = "#E67E22"  # derive_cfg_trace is also in the transform layer
@@ -65,7 +65,7 @@ def _annotate_points(ax, xs, ys, fmt_fn, crowd_threshold_frac: float = 0.12) -> 
             stagger_levels.append(None)
             level = 0
 
-    for i, (x, y) in enumerate(zip(xs, ys)):
+    for i, (x, y) in enumerate(zip(xs, ys, strict=False)):
         if is_crowded[i]:
             offset_y = _CROWD_BASE_Y + stagger_levels[i] * _CROWD_STEP_Y
             if (

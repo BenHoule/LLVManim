@@ -41,7 +41,7 @@ export_page() {
 OK=0; FAIL=0
 
 # ==================================================================
-# Section 01 — Architecture Overview  (14 pages)
+# Section 01 -- Architecture Overview  (14 pages)
 # ==================================================================
 SRC="$ARCH/01_architecture_overview/01_architecture_overview.drawio"
 echo "=== 01 Architecture Overview ==="
@@ -62,7 +62,7 @@ export_page "$SRC" 12 "$ARCH/01_architecture_overview/01d_render_layer/01d2_cfg_
 export_page "$SRC" 13 "$ARCH/01_architecture_overview/01d_render_layer/01d3_export.svg"
 
 # ==================================================================
-# Section 02 — Stack Animation Flow  (3 pages)
+# Section 02 -- Stack Animation Flow  (3 pages)
 # ==================================================================
 SRC="$ARCH/02_stack_animation_flow/02_stack_animation_flow.drawio"
 echo "=== 02 Stack Animation Flow ==="
@@ -71,7 +71,7 @@ export_page "$SRC" 1 "$ARCH/02_stack_animation_flow/02a_ir_mode_branch.svg"
 export_page "$SRC" 2 "$ARCH/02_stack_animation_flow/02b_stack_render.svg"
 
 # ==================================================================
-# Section 03 — CFG Animation Flow  (4 pages)
+# Section 03 -- CFG Animation Flow  (4 pages)
 # ==================================================================
 SRC="$ARCH/03_cfg_animation_flow/03_cfg_animation_flow.drawio"
 echo "=== 03 CFG Animation Flow ==="
@@ -81,7 +81,7 @@ export_page "$SRC" 2 "$ARCH/03_cfg_animation_flow/03b_cfg_ingest.svg"
 export_page "$SRC" 3 "$ARCH/03_cfg_animation_flow/03c_cfg_render_pipeline.svg"
 
 # ==================================================================
-# Section 04 — Data Model  (5 pages)
+# Section 04 -- Data Model  (5 pages)
 # ==================================================================
 SRC="$ARCH/04_data_model/04_data_model.drawio"
 echo "=== 04 Data Model ==="
@@ -92,7 +92,7 @@ export_page "$SRC" 3 "$ARCH/04_data_model/04c_transform_types.svg"
 export_page "$SRC" 4 "$ARCH/04_data_model/04d_render_types.svg"
 
 # ==================================================================
-# Section 05 — CLI Dispatch  (7 pages)
+# Section 05 -- CLI Dispatch  (7 pages)
 # ==================================================================
 SRC="$ARCH/05_cli_dispatch/05_cli_dispatch.drawio"
 echo "=== 05 CLI Dispatch ==="
@@ -105,4 +105,4 @@ export_page "$SRC" 5 "$ARCH/05_cli_dispatch/05e_cfg_animate_output.svg"
 export_page "$SRC" 6 "$ARCH/05_cli_dispatch/05f_export_output.svg"
 
 echo ""
-echo "Done — $(find "$ARCH" -name '*.svg' | wc -l) SVGs exported."
+echo "Done -- $(find "$ARCH" -name '*.svg' | wc -l) SVGs exported."

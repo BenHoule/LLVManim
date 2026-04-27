@@ -9,9 +9,9 @@ from llvmanim.ingest import parse_module_to_events  # file path → stream
 from llvmanim.ingest import parse_ir_to_events       # IR text  → stream
 ```
 
-- `parse_module_to_events(path: str) → ProgramEventStream` — reads the file at
+- `parse_module_to_events(path: str) → ProgramEventStream` -- reads the file at
   `path`, delegates to `parse_ir_to_events`.
-- `parse_ir_to_events(llvm_ir: str, source_path: str) → ProgramEventStream` —
+- `parse_ir_to_events(llvm_ir: str, source_path: str) → ProgramEventStream` --
   parses IR text directly via `llvmlite`, useful for in-memory IR (e.g. tests).
 
 ## Data Model
@@ -32,10 +32,10 @@ ProgramEventStream
 
 `ProgramEventStream` also carries:
 
-- `cfg_edges: list[CFGEdge]` — populated by the ingest layer for all
+- `cfg_edges: list[CFGEdge]` -- populated by the ingest layer for all
   terminator types (br, switch, invoke, etc.) via llvmlite.  These typed
   edges are consumed directly by the transform layer's `build_scene_graph`.
-- `display_lines: dict[str, list[str]]` — per-function cleaned IR source
+- `display_lines: dict[str, list[str]]` -- per-function cleaned IR source
   lines built at ingest time by `build_display_lines`.  The render
   layer reads these directly for IR source panels, avoiding a second file
   read.
@@ -56,7 +56,7 @@ transform layer.
 | `cfg_edge_io.py` | Import/export CFG edges as JSON sidecars |
 | `trace_io.py` | Import/export runtime path traces as JSON sidecars |
 | `analysis_metadata_io.py` | Import/export domtree/loop analysis metadata as JSON |
-| `display_lines.py` | `build_display_lines` and `clean_ir_line` — IR text → display-ready lines |
+| `display_lines.py` | `build_display_lines` and `clean_ir_line` -- IR text → display-ready lines |
 | `dot_layout.py` | Parse `.dot` files from `opt -passes=dot-cfg` into `DotLayout` for CFG animation |
 | `LEGACY_ir_helpers.py` | Superseded helpers; kept for reference |
 | `LEGACY_llvmparser.py` | Superseded parser; kept for reference |

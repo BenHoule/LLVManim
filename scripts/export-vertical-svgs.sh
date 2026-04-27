@@ -32,7 +32,7 @@ export_page() {
         | grep -v "ERROR:viz_main" || true
 }
 
-echo "=== Vertical — 01 Architecture Overview ==="
+echo "=== Vertical -- 01 Architecture Overview ==="
 export_page  0 "$VERT/01_architecture_overview.svg"
 export_page  1 "$VERT/01a_cli_layer.svg"
 export_page  2 "$VERT/01b_ingest_layer/01b_ingest_layer.svg"
@@ -50,4 +50,4 @@ export_page 12 "$VERT/01d_render_layer/01d2_cfg_renderer.svg"
 export_page 13 "$VERT/01d_render_layer/01d3_export.svg"
 
 echo ""
-echo "Done — $(find "$VERT" -name '*.svg' | wc -l) SVGs exported."
+echo "Done -- $(find "$VERT" -name '*.svg' | wc -l) SVGs exported."

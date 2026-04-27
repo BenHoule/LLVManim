@@ -1,4 +1,4 @@
-"""Tests for the display_lines module — IR text cleaning and display-line extraction."""
+"""Tests for the display_lines module -- IR text cleaning and display-line extraction."""
 
 from llvmanim.ingest.display_lines import build_display_lines, clean_ir_line
 

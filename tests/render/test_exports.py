@@ -24,7 +24,9 @@ def test_export_scene_graph_json(tmp_path: Path, branch_graph: SceneGraph) -> No
     assert "f::no" in text
 
 
-def test_export_scene_graph_json_has_expected_top_level_shape(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_scene_graph_json_has_expected_top_level_shape(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """JSON export should include top-level nodes/edges arrays with stable keys."""
     output = tmp_path / "scene_graph.json"
 
@@ -39,7 +41,9 @@ def test_export_scene_graph_json_has_expected_top_level_shape(tmp_path: Path, br
     assert len(payload["edges"]) == 2
 
 
-def test_export_scene_graph_json_includes_edge_labels(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_scene_graph_json_includes_edge_labels(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """JSON edge entries should include T/F labels from conditional branches."""
     output = tmp_path / "scene_graph.json"
     export_scene_graph_json(branch_graph, output)
@@ -75,7 +79,9 @@ def test_export_scene_graph_json_preserves_event_operands_and_debug_line(tmp_pat
     assert all(event["debug_line"] is None for event in events)
 
 
-def test_export_scene_graph_json_accepts_string_output_path(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_scene_graph_json_accepts_string_output_path(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """export_scene_graph_json should accept both Path and string paths."""
     output = tmp_path / "scene_graph_via_string.json"
 
@@ -102,14 +108,16 @@ def test_gv_id_sanitizes_special_characters() -> None:
     assert _gv_id("already_safe") == "already_safe"
 
 
-def test_export_cfg_png_returns_false_when_graphviz_unavailable(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_cfg_png_returns_false_when_graphviz_unavailable(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """export_cfg_png returns False gracefully when the graphviz package is not installed."""
     with patch.dict(sys.modules, {"graphviz": None, "graphviz.backend": None}):
         result = export_cfg_png(branch_graph, tmp_path / "cfg")
     assert result is False
 
 
-# ── Overlay-aware Graphviz export ─────────────────────────────────
+# -- Overlay-aware Graphviz export ---------------------------------
 
 
 def _branch_graph_with_overlay(branch_graph: SceneGraph) -> SceneGraph:
@@ -123,7 +131,9 @@ def _branch_graph_with_overlay(branch_graph: SceneGraph) -> SceneGraph:
     return branch_graph
 
 
-def test_export_dot_overlay_highlights_visited_nodes(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_dot_overlay_highlights_visited_nodes(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """Visited nodes receive a green fill when overlay is present."""
     graph = _branch_graph_with_overlay(branch_graph)
     output = tmp_path / "cfg.dot"
@@ -132,12 +142,14 @@ def test_export_dot_overlay_highlights_visited_nodes(tmp_path: Path, branch_grap
 
     text = output.read_text(encoding="utf-8")
     # Visited nodes get green fill
-    assert '#d4edda' in text
+    assert "#d4edda" in text
     # Unvisited node (f::no) gets gray fill
-    assert '#e0e0e0' in text
+    assert "#e0e0e0" in text
 
 
-def test_export_dot_overlay_highlights_traversed_edges(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_dot_overlay_highlights_traversed_edges(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """Traversed edges get bold/colored styling; others get dashed gray."""
     graph = _branch_graph_with_overlay(branch_graph)
     output = tmp_path / "cfg.dot"
@@ -146,11 +158,11 @@ def test_export_dot_overlay_highlights_traversed_edges(tmp_path: Path, branch_gr
 
     text = output.read_text(encoding="utf-8")
     # Traversed edge entry→yes has blue styling
-    assert '#0056b3' in text
-    assert 'penwidth=2.0' in text
+    assert "#0056b3" in text
+    assert "penwidth=2.0" in text
     # Non-traversed edge entry→no has gray dashed styling
-    assert '#cccccc' in text
-    assert 'dashed' in text
+    assert "#cccccc" in text
+    assert "dashed" in text
 
 
 def test_export_dot_no_overlay_is_plain(tmp_path: Path, branch_graph: SceneGraph) -> None:
@@ -160,12 +172,14 @@ def test_export_dot_no_overlay_is_plain(tmp_path: Path, branch_graph: SceneGraph
     export_cfg_dot(branch_graph, output)
 
     text = output.read_text(encoding="utf-8")
-    assert 'fillcolor' not in text
-    assert 'penwidth' not in text
-    assert 'dashed' not in text
+    assert "fillcolor" not in text
+    assert "penwidth" not in text
+    assert "dashed" not in text
 
 
-def test_export_dot_overlay_preserves_all_nodes_and_edges(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_dot_overlay_preserves_all_nodes_and_edges(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """Overlay never removes base graph structure; all 3 nodes and 2 edges remain."""
     graph = _branch_graph_with_overlay(branch_graph)
     output = tmp_path / "cfg.dot"
@@ -180,7 +194,9 @@ def test_export_dot_overlay_preserves_all_nodes_and_edges(tmp_path: Path, branch
     assert '"f::entry" -> "f::no"' in text
 
 
-def test_export_cfg_png_returns_true_when_graphviz_available(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_cfg_png_returns_true_when_graphviz_available(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """export_cfg_png calls graphviz and returns True when the package is present."""
     graph = branch_graph
 
@@ -198,7 +214,9 @@ def test_export_cfg_png_returns_true_when_graphviz_available(tmp_path: Path, bra
     mock_dot.render.assert_called_once()
 
 
-def test_export_cfg_png_returns_false_when_dot_executable_missing(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_cfg_png_returns_false_when_dot_executable_missing(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """export_cfg_png returns False when the dot executable is not found."""
     from graphviz.backend.execute import ExecutableNotFound
 
@@ -207,7 +225,9 @@ def test_export_cfg_png_returns_false_when_dot_executable_missing(tmp_path: Path
     assert result is False
 
 
-def test_export_cfg_png_returns_false_when_dot_process_fails(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_cfg_png_returns_false_when_dot_process_fails(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """export_cfg_png returns False when graphviz render process returns an error."""
     from graphviz.backend.execute import CalledProcessError
 
@@ -216,7 +236,9 @@ def test_export_cfg_png_returns_false_when_dot_process_fails(tmp_path: Path, bra
     assert result is False
 
 
-def test_export_cfg_png_uses_sanitized_ids_for_nodes_and_edges(tmp_path: Path, branch_graph: SceneGraph) -> None:
+def test_export_cfg_png_uses_sanitized_ids_for_nodes_and_edges(
+    tmp_path: Path, branch_graph: SceneGraph
+) -> None:
     """export_cfg_png should pass Graphviz-safe IDs to dot.node() and dot.edge()."""
     graph = branch_graph
 
@@ -242,7 +264,7 @@ def test_export_cfg_png_uses_sanitized_ids_for_nodes_and_edges(tmp_path: Path, b
     assert ("f__entry", "f__no") in edge_pairs
 
 
-# ── T/F edge labels in DOT export ─────────────────────────────────
+# -- T/F edge labels in DOT export ---------------------------------
 
 
 def test_export_dot_includes_tf_edge_labels(tmp_path: Path, branch_graph: SceneGraph) -> None:

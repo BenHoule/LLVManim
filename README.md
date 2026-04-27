@@ -18,6 +18,7 @@ LLVManim parses LLVM IR (`.ll`) into a typed event stream, derives a CFG-style s
   - `--ir-mode basic`: stack-only with per-cell badge flash
   - `--ir-mode rich`: IR source panel + moving spotlight cursor + stack view
   - `--ir-mode rich-ssa`: 3-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results
+- `--color-scheme dark|light`: switch the animation color scheme (dark = default black background; light = white background)
 - `ssa_formatting.py`: shared SSA display formatting with a single swap-point for future numeric runtime values
 - `RichTraceStep` and `build_execution_trace(include_ssa=True)` for binop/compare/load trace steps
 - Render CFG traversal animations (`--cfg-animate`) using DOT-derived layout from `opt -passes=dot-cfg`
@@ -95,7 +96,7 @@ Pytest markers used by the suite:
 - `contract`: tests asserting behavior at external dependency boundaries
 - `e2e`: end-to-end entrypoint/workflow tests
 
-Markers are applied automatically by directory path convention in `tests/conftest.py` — no per-test decoration needed:
+Markers are applied automatically by directory path convention in `tests/conftest.py` -- no per-test decoration needed:
 
 | Path prefix | Marker(s) applied |
 |---|---|
@@ -127,7 +128,7 @@ Common deterministic inputs are defined in `tests/conftest.py` and available to 
 
 ## Generating Charts and Images
 
-All charts are written to `docs/metrics/`. Running `uv sync --dev` (see [Setup And Validation](#setup-and-validation)) installs every required library — `matplotlib` is pulled in as a transitive dependency of `manimgl`.
+All charts are written to `docs/metrics/`. Running `uv sync --dev` (see [Setup And Validation](#setup-and-validation)) installs every required library -- `matplotlib` is pulled in as a transitive dependency of `manimgl`.
 
 ### Static metrics charts (01–04)
 
@@ -146,7 +147,7 @@ uv run python docs/metrics/generate_metrics.py
 
 ### Performance scaling charts (05–10)
 
-Benchmarks the live pipeline against synthetically generated IR. Runs the actual `llvmanim` ingest and transform functions — no Manim rendering required.
+Benchmarks the live pipeline against synthetically generated IR. Runs the actual `llvmanim` ingest and transform functions -- no Manim rendering required.
 
 ```bash
 uv run python docs/metrics/generate_perf_metrics.py
@@ -199,10 +200,13 @@ Default input is `tests/ingest/testdata/double.ll` when no positional argument i
 - `--export-analysis-metadata <path>`: write analysis metadata to a JSON file
 - `--import-trace <path>`: load a runtime path trace from a JSON file for overlay visualization
 - `--export-trace <path>`: write the trace overlay to a JSON file
+- `--color-scheme {dark,light}`: animation color scheme (default: `dark` -- black background; `light` -- white background)
+- `--quality {l,m,h,p,k}`: render quality -- `l`=480p/15fps, `m`=720p/30fps, `h`=1080p/60fps (default), `p`=1440p/60fps, `k`=4K/60fps
+- `--disable-caching`: disable Manim's partial-movie cache (useful when iterating on a scene)
 - `--C`: treat the input file as a `C` source file instead of LLVM textual IR and compile it to LLVM IR automatically
 
 ### Environment Variables
-LLVManim has to use external tools to perform certain operations and therefore needs a way to locate these tools. 
+LLVManim has to use external tools to perform certain operations and therefore needs a way to locate these tools.
 For any of the external tools LLVManim uses, you can specify the environment variable with the tool's name in `SCREAMING_SNAKE_CASE`
 to provide a path to the tool's binary.
 
@@ -211,12 +215,12 @@ environment variable is not set:
 - `ffmpeg`
 - `dot`
 
-LLVManim also needs to use some of LLVM's binary tools when compiling a C source file, specifially `clang` and `opt`. 
+LLVManim also needs to use some of LLVM's binary tools when compiling a C source file, specifially `clang` and `opt`.
 Since these tools may have non-standard locations, you can specify a convenient fallback search directory
-for these tools in the `LLVM_BIN_DIR` environment variable. 
+for these tools in the `LLVM_BIN_DIR` environment variable.
 
 LLVManim has a special case search for LLVM tools on Linux since it is common to have multiple versions of LLVM installed and therefore the tools
-may not be on PATH. LLVManim attempts to search `/usr/lib/llvm/bin` and then tries to find the latest LLVM version from the candidates in `/usr/lib/llvm-*/bin` 
+may not be on PATH. LLVManim attempts to search `/usr/lib/llvm/bin` and then tries to find the latest LLVM version from the candidates in `/usr/lib/llvm-*/bin`
 before falling back to to `PATH`. You can disable this special case search by setting the `NO_LLVM_DEFAULT_SEARCH` environment variable to any value.
 
 ### Common Examples
@@ -271,6 +275,9 @@ uv run llvmanim tests/ingest/testdata/double.ll --cfg-animate --dot-cfg .main.do
 │  uv run llvmanim input.ll [--json] [--draw] [--animate]        │
 │                     [--preview] [--ir-mode basic|rich|rich-ssa]│
 │                           [--speed N] [--format mp4|gif]       │
+│                           [--color-scheme dark|light]          │
+│                           [--quality l|m|h|p|k]               │
+│                           [--disable-caching]                  │
 │                           [--cfg-animate] [--dot-cfg PATH]     │
 │                           [--import-trace PATH] [-y]           │
 │                           [-n NAME] [--import-cfg-edges PATH]  │

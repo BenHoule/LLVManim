@@ -14,7 +14,7 @@ from llvmanim.ingest.analysis_metadata_io import (
 )
 from llvmanim.transform.models import BlockMetadata
 
-# ── load_analysis_metadata ────────────────────────────────────────
+# -- load_analysis_metadata ----------------------------------------
 
 
 def test_load_valid_metadata(tmp_path: Path) -> None:
@@ -62,7 +62,7 @@ def test_load_valid_metadata(tmp_path: Path) -> None:
 
 
 def test_load_partial_metadata_domtree_only(tmp_path: Path) -> None:
-    """Load metadata with only domtree fields — loop fields default."""
+    """Load metadata with only domtree fields -- loop fields default."""
     data = {
         "version": 1,
         "source": "",
@@ -88,7 +88,7 @@ def test_load_partial_metadata_domtree_only(tmp_path: Path) -> None:
 
 
 def test_load_partial_metadata_loop_only(tmp_path: Path) -> None:
-    """Load metadata with only loop fields — domtree fields default."""
+    """Load metadata with only loop fields -- domtree fields default."""
     data = {
         "version": 1,
         "source": "",
@@ -164,16 +164,14 @@ def test_load_rejects_function_without_blocks_list(tmp_path: Path) -> None:
 def test_load_rejects_block_without_id(tmp_path: Path) -> None:
     p = tmp_path / "bad.json"
     p.write_text(
-        json.dumps(
-            {"version": 1, "functions": [{"name": "f", "blocks": [{"name": "entry"}]}]}
-        )
+        json.dumps({"version": 1, "functions": [{"name": "f", "blocks": [{"name": "entry"}]}]})
     )
 
     with pytest.raises(AnalysisMetadataIOError, match="must have an 'id' field"):
         load_analysis_metadata(p)
 
 
-# ── save_analysis_metadata ────────────────────────────────────────
+# -- save_analysis_metadata ----------------------------------------
 
 
 def test_save_and_load_round_trip(tmp_path: Path) -> None:

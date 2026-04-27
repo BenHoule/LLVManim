@@ -1,15 +1,15 @@
 """
-Rich call-stack visualization sandbox — Manim Community Edition.
+Rich call-stack visualization sandbox -- Manim Community Edition.
 
 Two scene classes are provided, selectable with the -s flag:
 
-  StackDemoBadge     — Option B (IMPLEMENTED)
+  StackDemoBadge     -- Option B (IMPLEMENTED)
       Stack-only layout, no separate IR text panel.  When a frame header or
       slot row arrives it slides in with its label highlighted yellow, then
       settles to white.  The slot labels carry the full instruction text, so
-      the stack IS the story — no competing panel required.
+      the stack IS the story -- no competing panel required.
 
-  StackDemoIRCursor  — Option A (STUBBED — see class docstring for TODOs)
+  StackDemoIRCursor  -- Option A (STUBBED -- see class docstring for TODOs)
       Two-column layout: full IR source with a moving SurroundingRectangle
       cursor on the left; animated stack on the right.  Requires per-function
       IR text to flow through the data pipeline (not yet implemented).
@@ -21,6 +21,7 @@ Run (low quality, fast):
 Run (high quality):
     uv run manim -qh sandbox/manim_CE/stack_demo.py StackDemoBadge
 """
+
 from __future__ import annotations
 
 from manim import (
@@ -54,8 +55,8 @@ from manim import (
 # ── IR source registry (hardcoded double.ll, relevant alloca/call/ret lines) ──
 #
 # Each entry maps a function name to:
-#   lines      — display strings for the IR panel (stripped, readable)
-#   event_map  — maps (ir_text_fragment) → line index for cursor placement
+#   lines      -- display strings for the IR panel (stripped, readable)
+#   event_map  -- maps (ir_text_fragment) → line index for cursor placement
 #
 # When porting to production, replace this dict with data extracted live from
 # llvmanim.ingest.llvm_events and stored on LLVManimScene (see class TODOs).
@@ -164,11 +165,11 @@ _IR_REGISTRY: dict[str, dict] = {
 }
 
 # ── Layout constants ───────────────────────────────────────────────────────────
-_SLOT_W = 4.0          # width of every stack cell
-_HEADER_H = 0.55       # height of a frame's header bar
-_SLOT_H = 0.62         # height of one alloca slot
-_GAP = 0.04            # gap between adjacent cells
-_STACK_TOP_Y = 2.6     # y of the top edge of the first cell; subclasses may shift
+_SLOT_W = 4.0  # width of every stack cell
+_HEADER_H = 0.55  # height of a frame's header bar
+_SLOT_H = 0.62  # height of one alloca slot
+_GAP = 0.04  # gap between adjacent cells
+_STACK_TOP_Y = 2.6  # y of the top edge of the first cell; subclasses may shift
 
 # One colour per call depth; wraps if depth exceeds palette length
 _PALETTE = [BLUE_D, GREEN_C, TEAL_D, GOLD_D, MAROON_D, PURPLE_D]
@@ -176,10 +177,11 @@ _PALETTE = [BLUE_D, GREEN_C, TEAL_D, GOLD_D, MAROON_D, PURPLE_D]
 
 # ── Mobject factories ──────────────────────────────────────────────────────────
 
+
 def _frame_header(func_name: str, color: ManimColor) -> VGroup:
     """Bold, opaque header bar labelled with the function name.
 
-    Returns VGroup(rect, label) — label is always index 1.  Callers may
+    Returns VGroup(rect, label) -- label is always index 1.  Callers may
     recolour label before or after FadeIn (e.g. for the yellow-flash effect).
     """
     rect = Rectangle(
@@ -198,7 +200,7 @@ def _frame_header(func_name: str, color: ManimColor) -> VGroup:
 def _slot_cell(slot_text: str, color: ManimColor) -> VGroup:
     """Single alloca-slot row tinted with the owning frame's colour.
 
-    Returns VGroup(rect, label) — label is always index 1.
+    Returns VGroup(rect, label) -- label is always index 1.
     """
     rect = Rectangle(
         width=_SLOT_W,
@@ -215,14 +217,15 @@ def _slot_cell(slot_text: str, color: ManimColor) -> VGroup:
 
 # ── Shared base ────────────────────────────────────────────────────────────────
 
+
 class _StackBase(Scene):
-    """Shared stack mechanics.  Do not instantiate directly — use a subclass.
+    """Shared stack mechanics.  Do not instantiate directly -- use a subclass.
 
     Subclasses customise behaviour by overriding:
-      _setup_chrome()        — add title, panels, column labels, etc.
-      _before_cell_arrive()  — called just before FadeIn (e.g. set label → YELLOW)
-      _on_cell_arrive()      — called just after FadeIn (e.g. animate label → WHITE)
-      _on_step_begin()       — called at the start of push / alloca / pop
+      _setup_chrome()        -- add title, panels, column labels, etc.
+      _before_cell_arrive()  -- called just before FadeIn (e.g. set label → YELLOW)
+      _on_cell_arrive()      -- called just after FadeIn (e.g. animate label → WHITE)
+      _on_step_begin()       -- called at the start of push / alloca / pop
     """
 
     _STACK_X: float = 0.5  # horizontal centre of the stack panel; override per subclass
@@ -258,13 +261,15 @@ class _StackBase(Scene):
     def _on_cell_arrive(self, mob: VGroup) -> None:
         """Called after FadeIn completes.  Play badge animations here."""
 
-    def _on_step_begin(self, action: str, ir_text: str, func_name: str, caller_name: str = "") -> None:
+    def _on_step_begin(
+        self, action: str, ir_text: str, func_name: str, caller_name: str = ""
+    ) -> None:
         """Called at the start of each stack step.  Advance IR cursor here.
 
-        action      — "push", "alloca", or "pop"
-        ir_text     — raw instruction text (alloca) or IR event label (ret)
-        func_name   — callee for push; current frame for alloca; popped frame for pop
-        caller_name — caller frame name (only meaningful for push and pop)
+        action      -- "push", "alloca", or "pop"
+        ir_text     -- raw instruction text (alloca) or IR event label (ret)
+        func_name   -- callee for push; current frame for alloca; popped frame for pop
+        caller_name -- caller frame name (only meaningful for push and pop)
         """
 
     # ── Stack mechanics ───────────────────────────────────────────────────────
@@ -325,11 +330,11 @@ class _StackBase(Scene):
         allocates %p.addr → returns → @main while.body calls @double_1 →
         @double_1 allocates locals → returns → @main while.end returns.
         """
-        self._push("@main",     "push_stack_frame main")
+        self._push("@main", "push_stack_frame main")
         self._alloca("%retval = alloca i32")
         self._alloca("%r = alloca i32")
         self._alloca("%p = alloca ptr")
-        self._push("@init",     "push_stack_frame init")
+        self._push("@init", "push_stack_frame init")
         self._alloca("%p.addr = alloca ptr")
         self._pop("ret  ← @init")
         self._push("@double_1", "push_stack_frame double_1")
@@ -341,10 +346,11 @@ class _StackBase(Scene):
 
 # ── Option B: Badge flash (IMPLEMENTED) ───────────────────────────────────────
 
+
 class StackDemoBadge(_StackBase):
     """Option B (IMPLEMENTED): Stack-only layout with yellow-flash badge.
 
-    No separate IR text panel — the slot labels carry the instruction text.
+    No separate IR text panel -- the slot labels carry the instruction text.
     Each arriving cell's label starts yellow and settles to white, drawing
     the viewer's attention without a competing panel.
     """
@@ -368,7 +374,7 @@ class StackDemoBadge(_StackBase):
 
 # ── IR panel factory (shared, used by Option A) ──────────────────────────────
 
-_IR_PANEL_X = -3.5    # horizontal centre of the IR text column
+_IR_PANEL_X = -3.5  # horizontal centre of the IR text column
 _IR_LINE_SPACING = 0.40
 _IR_FONT_SIZE = 16
 
@@ -425,12 +431,13 @@ def _call_site_line(caller_func: str, callee_func: str) -> int:
 
 # ── Option A: IR cursor (IMPLEMENTED) ─────────────────────────────────────────
 
+
 class StackDemoIRCursor(_StackBase):
     """Option A (IMPLEMENTED): Two-column layout with a moving IR source cursor.
 
-    Left panel  — full IR source for the currently executing function,
+    Left panel  -- full IR source for the currently executing function,
                   rendered as monospaced text from _IR_REGISTRY.
-    Right panel — live animated stack (inherited from _StackBase).
+    Right panel -- live animated stack (inherited from _StackBase).
 
     A yellow SurroundingRectangle cursor advances to the current instruction
     on every stack step.  On call the panel FadeTransforms to the callee's IR
@@ -468,11 +475,11 @@ class StackDemoIRCursor(_StackBase):
         stack_col_label.move_to(RIGHT * self._STACK_X + UP * 2.85)
         self.add(stack_col_label)
 
-        # IR panel starts with @main — first function in the demo sequence.
+        # IR panel starts with @main -- first function in the demo sequence.
         self._ir_panel: VGroup = _build_ir_panel("main")
         self.add(self._ir_panel)
 
-        # Cursor — starts on the define line (index 0).
+        # Cursor -- starts on the define line (index 0).
         self._ir_cursor = SurroundingRectangle(
             self._ir_panel[0],
             color=YELLOW,
@@ -486,13 +493,15 @@ class StackDemoIRCursor(_StackBase):
         # Call-site restoration stack: (caller_func, call_line_idx) per active call.
         self._call_site_stack: list[tuple[str, int]] = []
 
-    def _on_step_begin(self, action: str, ir_text: str, func_name: str, caller_name: str = "") -> None:
+    def _on_step_begin(
+        self, action: str, ir_text: str, func_name: str, caller_name: str = ""
+    ) -> None:
         """Advance the IR cursor and manage panel swaps on call/ret.
 
-        push  — advance cursor to the call instruction in the caller, record
+        push  -- advance cursor to the call instruction in the caller, record
                 the call-site for later restoration, then swap to the callee.
-        alloca — advance cursor to the alloca line (no panel swap).
-        pop   — advance cursor to the ret line in the callee, then swap back
+        alloca -- advance cursor to the alloca line (no panel swap).
+        pop   -- advance cursor to the ret line in the callee, then swap back
                 to the caller and restore the cursor to the call-site.
         """
         callee = func_name.lstrip("@")
@@ -522,7 +531,7 @@ class StackDemoIRCursor(_StackBase):
     def _swap_panel(self, new_func: str, target_line: int = 0) -> None:
         """FadeTransform the current IR panel to the new function's panel.
 
-        target_line — line index the cursor should land on in the new panel.
+        target_line -- line index the cursor should land on in the new panel.
                       Pass the call-site index when returning to a caller.
         """
         new_panel = _build_ir_panel(new_func)

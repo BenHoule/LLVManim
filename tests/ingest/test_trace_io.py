@@ -10,7 +10,7 @@ import pytest
 from llvmanim.ingest.trace_io import TraceIOError, load_trace, save_trace
 from llvmanim.transform.models import TraceOverlay
 
-# ── load_trace ────────────────────────────────────────────────────
+# -- load_trace ----------------------------------------------------
 
 
 def test_load_valid_trace(tmp_path: Path) -> None:
@@ -148,9 +148,7 @@ def test_load_rejects_traversed_edges_not_list(tmp_path: Path) -> None:
 
 def test_load_rejects_malformed_edge_pair(tmp_path: Path) -> None:
     p = tmp_path / "bad.json"
-    p.write_text(
-        json.dumps({"version": 1, "entry_order": [], "traversed_edges": [["a"]]})
-    )
+    p.write_text(json.dumps({"version": 1, "entry_order": [], "traversed_edges": [["a"]]}))
 
     with pytest.raises(TraceIOError, match="must be a \\[source, target\\] pair"):
         load_trace(p)
@@ -158,9 +156,7 @@ def test_load_rejects_malformed_edge_pair(tmp_path: Path) -> None:
 
 def test_load_rejects_non_string_termination_reason(tmp_path: Path) -> None:
     p = tmp_path / "bad.json"
-    p.write_text(
-        json.dumps({"version": 1, "entry_order": [], "termination_reason": 42})
-    )
+    p.write_text(json.dumps({"version": 1, "entry_order": [], "termination_reason": 42}))
 
     with pytest.raises(TraceIOError, match="'termination_reason' must be a string"):
         load_trace(p)
@@ -176,7 +172,7 @@ def test_load_defaults_termination_reason_to_empty(tmp_path: Path) -> None:
     assert overlay.termination_reason == ""
 
 
-# ── save_trace ────────────────────────────────────────────────────
+# -- save_trace ----------------------------------------------------
 
 
 def test_save_produces_valid_json(tmp_path: Path) -> None:

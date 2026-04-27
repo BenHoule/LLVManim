@@ -8,8 +8,6 @@ It replaces ``CFGAnimationScene`` in the unified pipeline.
 from __future__ import annotations
 
 from manim import (
-    GREY_D,
-    WHITE,
     CubicBezier,
     FadeIn,
     Triangle,
@@ -18,15 +16,11 @@ from manim import (
 
 from llvmanim.ingest.dot_layout import DotLayout
 from llvmanim.render.cfg_animation_scene import (
-    _ACTIVE_FILL,
-    _EDGE_ACTIVE,
-    _EDGE_TRAVERSED,
-    _VISITED_FILL,
-    _VISITED_TEXT,
     _build_block_mob,
     _build_edge_mob,
     _CoordMapper,
 )
+from llvmanim.render.colors import DARK, ColorScheme
 from llvmanim.render.command_driven_scene import CommandDrivenScene
 from llvmanim.transform.models import AnimationCommand, SceneGraph, SceneNode
 
@@ -53,10 +47,13 @@ class CFGRenderer(CommandDrivenScene):
         layout: DotLayout,
         speed: float = 1.0,
         title: str = "CFG Traversal",
+        scheme: ColorScheme | None = None,
         **kwargs: object,
     ) -> None:
-        super().__init__(graph, speed=speed, title=title, **kwargs)
+        s = scheme if scheme is not None else DARK
+        super().__init__(graph, speed=speed, title=title, scheme=s, **kwargs)
         self._layout = layout
+        self._scheme = s
 
         self._block_mobs: dict[str, VGroup] = {}
         self._edge_groups: dict[tuple[str, str], VGroup] = {}
@@ -72,7 +69,7 @@ class CFGRenderer(CommandDrivenScene):
         self._register_handler("exit_block", self._handle_exit_block)
         self._register_handler("traverse_edge", self._handle_traverse_edge)
 
-    # ── Setup ───────────────────────────────────────────────────────────────
+    # -- Setup ---------------------------------------------------------------
 
     def _setup_scene(self) -> None:
         mapper = _CoordMapper(self._layout.bounding_box)
@@ -82,11 +79,11 @@ class CFGRenderer(CommandDrivenScene):
             node_layout = self._layout.nodes.get(block_name)
             if node_layout is None:
                 continue
-            mob = _build_block_mob(node, node_layout, mapper)
+            mob = _build_block_mob(node, node_layout, mapper, scheme=self._scheme)
             self._block_mobs[block_name] = mob
 
         for edge_layout in self._layout.edges:
-            group = _build_edge_mob(edge_layout, mapper)
+            group = _build_edge_mob(edge_layout, mapper, scheme=self._scheme)
             self._edge_groups[(edge_layout.source, edge_layout.target)] = group
 
         block_anims = [FadeIn(mob, scale=0.9) for mob in self._block_mobs.values()]
@@ -97,7 +94,7 @@ class CFGRenderer(CommandDrivenScene):
         if edge_anims:
             self.play(*edge_anims, run_time=self._rt(0.6))
 
-    # ── Handlers ────────────────────────────────────────────────────────────
+    # -- Handlers ------------------------------------------------------------
 
     def _resolve_block_name(self, target: str) -> str:
         """Resolve a command target to a bare block name for mobject lookup."""
@@ -114,12 +111,12 @@ class CFGRenderer(CommandDrivenScene):
         text_mobs = list(mob[1:])
 
         anims = [
-            rect.animate.set_fill(color=_ACTIVE_FILL, opacity=0.95).set_stroke(
-                color=WHITE, width=3
+            rect.animate.set_fill(color=self._scheme.cfg_active_fill, opacity=0.95).set_stroke(
+                color=self._scheme.cfg_active_stroke, width=3
             ),
         ]
         for t in text_mobs:
-            anims.append(t.animate.set_color(WHITE))
+            anims.append(t.animate.set_color(self._scheme.cfg_active_text))
         self.play(*anims, run_time=self._rt(0.35))
         self._visited.add(block_name)
 
@@ -132,12 +129,12 @@ class CFGRenderer(CommandDrivenScene):
         text_mobs = list(mob[1:])
 
         anims = [
-            rect.animate.set_fill(color=_VISITED_FILL, opacity=0.9).set_stroke(
-                color=GREY_D, width=2
+            rect.animate.set_fill(color=self._scheme.cfg_visited_fill, opacity=0.9).set_stroke(
+                color=self._scheme.cfg_visited_stroke, width=2
             ),
         ]
         for t in text_mobs:
-            anims.append(t.animate.set_color(_VISITED_TEXT))
+            anims.append(t.animate.set_color(self._scheme.cfg_visited_text))
         self.play(*anims, run_time=self._rt(0.25))
 
     def _handle_traverse_edge(self, cmd: AnimationCommand) -> None:
@@ -153,9 +150,9 @@ class CFGRenderer(CommandDrivenScene):
         if getattr(group, "is_dashed", False) and key not in self._traversed:
             dashed_mob = group[0]
             solid: CubicBezier = group.solid_curve  # type: ignore[attr-defined]
-            solid.set_color(_EDGE_ACTIVE).set_stroke(width=3.5)
+            solid.set_color(self._scheme.cfg_edge_active).set_stroke(width=3.5)
             tip: Triangle = group.arrow_tip  # type: ignore[attr-defined]
-            tip.set_fill(color=_EDGE_ACTIVE)
+            tip.set_fill(color=self._scheme.cfg_edge_active)
 
             self.remove(dashed_mob)
             group.submobjects[0] = solid  # type: ignore[index]
@@ -163,26 +160,26 @@ class CFGRenderer(CommandDrivenScene):
             group.is_dashed = False  # type: ignore[attr-defined]
 
             self.play(
-                solid.animate.set_color(_EDGE_ACTIVE).set_stroke(width=3.5),
+                solid.animate.set_color(self._scheme.cfg_edge_active).set_stroke(width=3.5),
                 run_time=self._rt(0.2),
             )
         else:
             curve = group[0]
             tip_mob: Triangle = group.arrow_tip  # type: ignore[attr-defined]
             self.play(
-                curve.animate.set_color(_EDGE_ACTIVE).set_stroke(width=3.5),
-                tip_mob.animate.set_fill(color=_EDGE_ACTIVE),
+                curve.animate.set_color(self._scheme.cfg_edge_active).set_stroke(width=3.5),
+                tip_mob.animate.set_fill(color=self._scheme.cfg_edge_active),
                 run_time=self._rt(0.2),
             )
 
         curve = group[0]
         settle_tip: Triangle = group.arrow_tip  # type: ignore[attr-defined]
         self.play(
-            curve.animate.set_color(_EDGE_TRAVERSED).set_stroke(width=3),
-            settle_tip.animate.set_fill(color=_EDGE_TRAVERSED),
+            curve.animate.set_color(self._scheme.cfg_edge_traversed).set_stroke(width=3),
+            settle_tip.animate.set_fill(color=self._scheme.cfg_edge_traversed),
             run_time=self._rt(0.15),
         )
 
         if hasattr(group, "edge_label"):
-            group.edge_label.set_color(_EDGE_TRAVERSED)  # type: ignore[attr-defined]
+            group.edge_label.set_color(self._scheme.cfg_edge_traversed)  # type: ignore[attr-defined]
         self._traversed.add(key)

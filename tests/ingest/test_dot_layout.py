@@ -17,7 +17,7 @@ from llvmanim.ingest.dot_layout import (
     compute_dot_layout,
 )
 
-# ── _extract_block_name ──────────────────────────────────────────
+# -- _extract_block_name ------------------------------------------
 
 
 def test_extract_block_name_from_record_label() -> None:
@@ -39,7 +39,7 @@ def test_extract_block_name_fallback() -> None:
     assert len(result) > 0
 
 
-# ── _parse_spline_points ─────────────────────────────────────────
+# -- _parse_spline_points -----------------------------------------
 
 
 def test_parse_spline_simple() -> None:
@@ -68,7 +68,7 @@ def test_parse_spline_empty() -> None:
     assert _parse_spline_points("") == []
 
 
-# ── _parse_json_layout ───────────────────────────────────────────
+# -- _parse_json_layout -------------------------------------------
 
 _SAMPLE_JSON: dict = {
     "bb": "0,0,400,300",
@@ -137,15 +137,25 @@ def test_parse_json_layout_edge_spline_points() -> None:
 def test_parse_json_layout_edge_labels_from_tailport() -> None:
     data = dict(_SAMPLE_JSON)
     data["edges"] = [
-        {"tail": 0, "head": 1, "pos": "e,200,120 200,230 200,200 200,170 200,140", "tailport": "s0"},
-        {"tail": 0, "head": 1, "pos": "e,200,120 200,230 200,200 200,170 200,140", "tailport": "s1"},
+        {
+            "tail": 0,
+            "head": 1,
+            "pos": "e,200,120 200,230 200,200 200,170 200,140",
+            "tailport": "s0",
+        },
+        {
+            "tail": 0,
+            "head": 1,
+            "pos": "e,200,120 200,230 200,200 200,170 200,140",
+            "tailport": "s1",
+        },
     ]
     layout = _parse_json_layout(data)
     assert layout.edges[0].label == "T"
     assert layout.edges[1].label == "F"
 
 
-# ── compute_dot_layout ───────────────────────────────────────────
+# -- compute_dot_layout -------------------------------------------
 
 
 def test_compute_dot_layout_file_not_found() -> None:
@@ -157,8 +167,10 @@ def test_compute_dot_layout_dot_not_installed(tmp_path: Path) -> None:
     dot_file = tmp_path / "test.dot"
     dot_file.write_text("digraph { a -> b }")
 
-    with patch("llvmanim.ingest.dot_layout.subprocess.run", side_effect=FileNotFoundError), \
-         pytest.raises(DotLayoutError, match="dot.*not found"):
+    with (
+        patch("llvmanim.ingest.dot_layout.subprocess.run", side_effect=FileNotFoundError),
+        pytest.raises(DotLayoutError, match="dot.*not found"),
+    ):
         compute_dot_layout(dot_file)
 
 
@@ -166,10 +178,14 @@ def test_compute_dot_layout_dot_fails(tmp_path: Path) -> None:
     dot_file = tmp_path / "test.dot"
     dot_file.write_text("digraph { a -> b }")
 
-    with patch(
-        "llvmanim.ingest.dot_layout.subprocess.run",
-        side_effect=subprocess.CalledProcessError(1, ["dot"], stderr="bad input"),
-    ), pytest.raises(DotLayoutError, match="exited with code 1"):
+    with (
+        patch("llvmanim.ingest.dot_layout.find_tool", return_value="/usr/bin/dot"),
+        patch(
+            "llvmanim.ingest.dot_layout.subprocess.run",
+            side_effect=subprocess.CalledProcessError(1, ["dot"], stderr="bad input"),
+        ),
+        pytest.raises(DotLayoutError, match="exited with code 1"),
+    ):
         compute_dot_layout(dot_file)
 
 
@@ -177,10 +193,14 @@ def test_compute_dot_layout_timeout(tmp_path: Path) -> None:
     dot_file = tmp_path / "test.dot"
     dot_file.write_text("digraph { a -> b }")
 
-    with patch(
-        "llvmanim.ingest.dot_layout.subprocess.run",
-        side_effect=subprocess.TimeoutExpired(["dot"], 30),
-    ), pytest.raises(DotLayoutError, match="timed out"):
+    with (
+        patch("llvmanim.ingest.dot_layout.find_tool", return_value="/usr/bin/dot"),
+        patch(
+            "llvmanim.ingest.dot_layout.subprocess.run",
+            side_effect=subprocess.TimeoutExpired(["dot"], 30),
+        ),
+        pytest.raises(DotLayoutError, match="timed out"),
+    ):
         compute_dot_layout(dot_file)
 
 
@@ -189,8 +209,11 @@ def test_compute_dot_layout_bad_json(tmp_path: Path) -> None:
     dot_file.write_text("digraph { a -> b }")
 
     mock_result = subprocess.CompletedProcess(["dot"], 0, stdout="not json", stderr="")
-    with patch("llvmanim.ingest.dot_layout.subprocess.run", return_value=mock_result), \
-         pytest.raises(DotLayoutError, match="parse"):
+    with (
+        patch("llvmanim.ingest.dot_layout.find_tool", return_value="/usr/bin/dot"),
+        patch("llvmanim.ingest.dot_layout.subprocess.run", return_value=mock_result),
+        pytest.raises(DotLayoutError, match="parse"),
+    ):
         compute_dot_layout(dot_file)
 
 
@@ -202,7 +225,9 @@ def test_compute_dot_layout_integration(tmp_path: Path) -> None:
         pytest.skip("Graphviz 'dot' not installed")
 
     dot_file = tmp_path / "simple.dot"
-    dot_file.write_text('digraph { rankdir=TB; a [label="a"]; b [label="b"]; c [label="c"]; a -> b; b -> c; }')
+    dot_file.write_text(
+        'digraph { rankdir=TB; a [label="a"]; b [label="b"]; c [label="c"]; a -> b; b -> c; }'
+    )
 
     layout = compute_dot_layout(dot_file)
 

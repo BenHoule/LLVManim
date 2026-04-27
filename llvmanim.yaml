@@ -1,6 +1,6 @@
 # LLVManim Configuration File
 # Place this file as .llvmanim.yaml in your project root (or any parent directory).
-# All keys are optional — omit any you want to leave at the default.
+# All keys are optional -- omit any you want to leave at the default.
 # CLI flags always take precedence over values set here.
 
 # Animation display mode.
@@ -29,3 +29,16 @@ json: false
 
 # Skip confirmation prompts automatically (equivalent to -y / --yes)
 "yes": false
+
+# Animation color scheme.
+# Options: dark (black background, yellow accents), light (white background, orange accents)
+color_scheme: dark
+
+# Render quality (controls resolution and frame rate passed to Manim).
+# Options: l (480p/15fps), m (720p/30fps), h (1080p/60fps, default), p (1440p/60fps), k (4K/60fps)
+# Omit this key to use Manim's default (h = 1080p/60fps).
+# quality: m
+
+# Disable Manim's partial-movie cache.
+# Useful when iterating on scenes -- avoids stale cache artifacts.
+# disable_caching: true

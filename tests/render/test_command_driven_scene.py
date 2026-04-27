@@ -7,7 +7,7 @@ from llvmanim.render.command_driven_scene import CommandDrivenScene
 from llvmanim.render.stack_renderer import StackRenderer
 from llvmanim.transform.models import AnimationCommand, SceneGraph, SceneNode
 
-# ── CommandDrivenScene ───────────────────────────────────────────
+# -- CommandDrivenScene -------------------------------------------
 
 
 def test_command_driven_scene_is_manim_scene() -> None:
@@ -49,7 +49,7 @@ def test_command_driven_scene_speed_clamped() -> None:
     assert scene._rt(1.0) > 0
 
 
-# ── StackRenderer ────────────────────────────────────────────────
+# -- StackRenderer ------------------------------------------------
 
 
 def test_stack_renderer_is_command_driven_scene() -> None:
@@ -91,8 +91,13 @@ def test_stack_renderer_rich_ssa_registers_all_handlers() -> None:
     graph = SceneGraph()
     renderer = StackRenderer(graph, ir_mode="rich-ssa")
     expected = {
-        "push_stack_frame", "pop_stack_frame", "create_stack_slot",
-        "highlight_branch", "animate_binop", "animate_compare", "animate_memory_read",
+        "push_stack_frame",
+        "pop_stack_frame",
+        "create_stack_slot",
+        "highlight_branch",
+        "animate_binop",
+        "animate_compare",
+        "animate_memory_read",
     }
     assert expected.issubset(set(renderer._handlers.keys()))
 
@@ -104,7 +109,7 @@ def test_stack_renderer_stores_graph() -> None:
     assert renderer._graph is graph
 
 
-# ── CFGRenderer ──────────────────────────────────────────────────
+# -- CFGRenderer --------------------------------------------------
 
 
 def test_cfg_renderer_is_command_driven_scene() -> None:

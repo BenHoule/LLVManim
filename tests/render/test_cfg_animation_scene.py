@@ -99,7 +99,7 @@ def _simple_layout() -> DotLayout:
     )
 
 
-# ── _CoordMapper ─────────────────────────────────────────────────
+# -- _CoordMapper -------------------------------------------------
 
 
 def test_coord_mapper_center_maps_to_near_center() -> None:
@@ -117,7 +117,7 @@ def test_coord_mapper_size_scales() -> None:
     assert w > h
 
 
-# ── _block_summary ───────────────────────────────────────────────
+# -- _block_summary -----------------------------------------------
 
 
 def test_block_summary_ret() -> None:
@@ -161,7 +161,7 @@ def test_block_summary_call() -> None:
     assert "call @helper" in summary
 
 
-# ── _build_block_mob ─────────────────────────────────────────────
+# -- _build_block_mob ---------------------------------------------
 
 
 def test_build_block_mob_returns_vgroup() -> None:
@@ -172,7 +172,7 @@ def test_build_block_mob_returns_vgroup() -> None:
     assert len(mob) >= 2  # rect + title (+ optional summary)
 
 
-# ── _build_edge_mob ──────────────────────────────────────────────
+# -- _build_edge_mob ----------------------------------------------
 
 
 def test_build_edge_mob_returns_vgroup() -> None:

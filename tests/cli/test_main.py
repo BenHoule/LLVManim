@@ -357,7 +357,7 @@ def test_find_latest_file_returns_none_when_no_matches(tmp_path) -> None:
     assert _find_latest_file(tmp_path, "*.mp4") is None
 
 
-# ── CFG edge I/O CLI tests ───────────────────────────────────────
+# -- CFG edge I/O CLI tests ---------------------------------------
 
 
 _BRANCH_IR = """\
@@ -515,7 +515,7 @@ def test_convert_mp4_to_gif_returns_true_when_commands_succeed(tmp_path) -> None
     assert mock_run.call_count == 2
 
 
-# ── Analysis metadata CLI flags ───────────────────────────────────
+# -- Analysis metadata CLI flags -----------------------------------
 
 
 def test_import_analysis_metadata_bad_path_returns_one(tmp_path, capsys) -> None:
@@ -609,7 +609,7 @@ def test_export_analysis_metadata_writes_file(tmp_path, capsys) -> None:
     assert "Wrote analysis metadata" in capsys.readouterr().out
 
 
-# ── Trace overlay CLI flags ──────────────────────────────────────
+# -- Trace overlay CLI flags --------------------------------------
 
 _LOOP_IR = """\
 define i32 @main() {
@@ -729,7 +729,7 @@ def test_no_trace_flag_produces_no_overlay(tmp_path) -> None:
     assert "penwidth" not in dot_text
 
 
-# ── CFG animate CLI flags ────────────────────────────────────────
+# -- CFG animate CLI flags ----------------------------------------
 
 
 def test_cfg_animate_requires_dot_cfg(tmp_path, capsys) -> None:

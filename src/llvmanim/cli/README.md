@@ -34,20 +34,28 @@ Default input when none is supplied: `tests/ingest/testdata/double.ll`.
 | `--outdir PATH` | `.` | Output directory (created if absent) |
 | `-n` / `--name NAME` | *(stem of input file)* | Base name for output artifacts |
 | `--cfg-animate` | off | Render a CFG traversal animation (requires `--dot-cfg`; auto-derives trace if `--import-trace` is not given) |
-| `--dot-cfg PATH` | — | Path to a `.dot` file from `opt -passes=dot-cfg` for CFG layout |
-| `--import-cfg-edges PATH` | — | Import CFG edges from a JSON file instead of extracting from IR |
-| `--export-cfg-edges PATH` | — | Export extracted CFG edges to a JSON file |
-| `--import-analysis-metadata PATH` | — | Import domtree/loop analysis metadata from a JSON file |
-| `--export-analysis-metadata PATH` | — | Export analysis metadata to a JSON file |
-| `--import-trace PATH` | — | Import a runtime path trace from a JSON file for overlay visualization |
-| `--export-trace PATH` | — | Export the trace overlay to a JSON file |
+| `--dot-cfg PATH` | -- | Path to a `.dot` file from `opt -passes=dot-cfg` for CFG layout |
+| `--import-cfg-edges PATH` | -- | Import CFG edges from a JSON file instead of extracting from IR |
+| `--export-cfg-edges PATH` | -- | Export extracted CFG edges to a JSON file |
+| `--import-analysis-metadata PATH` | -- | Import domtree/loop analysis metadata from a JSON file |
+| `--export-analysis-metadata PATH` | -- | Export analysis metadata to a JSON file |
+| `--import-trace PATH` | -- | Import a runtime path trace from a JSON file for overlay visualization |
+| `--export-trace PATH` | -- | Export the trace overlay to a JSON file |
 | `-y` / `--yes` | off | Skip confirmation prompts (e.g. auto-derive trace) |
+| `--color-scheme {dark,light}` | `dark` | Animation color scheme: `dark` (black background) or `light` (white background) |
+| `--quality {l,m,h,p,k}` | *(Manim default: `h`)* | Render quality: `l`=480p/15fps, `m`=720p/30fps, `h`=1080p/60fps, `p`=1440p/60fps, `k`=4K/60fps |
+| `--disable-caching` | off | Disable Manim's partial-movie cache (useful when iterating on scenes) |
 
 ## Animation Modes
 
-- `basic` — stack-only layout; arriving cells flash yellow then settle to white (`StackRenderer` basic mode)
-- `rich` — two-column layout with full IR source on the left and a moving yellow cursor; stack on the right (`StackRenderer` rich mode)
-- `rich-ssa` — three-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results alongside the rich spotlight view (`StackRenderer` rich-ssa mode)
+- `basic` -- stack-only layout; arriving cells flash the accent color then settle to white (`StackRenderer` basic mode)
+- `rich` -- two-column layout with full IR source on the left and a moving accent-color cursor; stack on the right (`StackRenderer` rich mode)
+- `rich-ssa` -- three-column layout (IR Source | SSA Values | Stack) showing binop/compare/load results alongside the rich spotlight view (`StackRenderer` rich-ssa mode)
+
+## Color Schemes
+
+- `dark` (default) -- black background; yellow flash/cursor; green/blue CFG node/edge accents
+- `light` -- white background; orange flash/cursor; adjusted CFG node/edge colors for legibility on white
 
 ## GIF Output Notes
 
@@ -57,8 +65,8 @@ Default input when none is supplied: `tests/ingest/testdata/double.ll`.
 
 ## Exit Codes
 
-- `0` — success
-- `1` — input file not found
+- `0` -- success
+- `1` -- input file not found
 
 ## Files
 

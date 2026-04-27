@@ -10,7 +10,7 @@ import pytest
 from llvmanim.ingest.cfg_edge_io import CFGEdgeIOError, load_cfg_edges, save_cfg_edges
 from llvmanim.transform.models import CFGEdge
 
-# ── load_cfg_edges ────────────────────────────────────────────────
+# -- load_cfg_edges ------------------------------------------------
 
 
 def test_load_valid_edges(tmp_path: Path) -> None:
@@ -123,7 +123,7 @@ def test_load_rejects_block_without_id(tmp_path: Path) -> None:
         load_cfg_edges(p)
 
 
-# ── save_cfg_edges ────────────────────────────────────────────────
+# -- save_cfg_edges ------------------------------------------------
 
 
 def test_save_produces_valid_json(tmp_path: Path) -> None:
@@ -153,9 +153,7 @@ def test_save_round_trip(tmp_path: Path) -> None:
     save_cfg_edges(original, p)
 
     loaded = load_cfg_edges(p)
-    assert set((e.source, e.target) for e in loaded) == set(
-        (e.source, e.target) for e in original
-    )
+    assert set((e.source, e.target) for e in loaded) == set((e.source, e.target) for e in original)
 
 
 def test_save_multi_function(tmp_path: Path) -> None:

@@ -3,8 +3,8 @@
 from llvmanim.ingest.llvm_events import parse_ir_to_events
 from llvmanim.transform.models import BlockMetadata, CFGBlock, ProgramEventStream, SceneGraph
 from llvmanim.transform.scene import (
-  _animation_hint_for_block,
-  build_scene_graph,
+    _animation_hint_for_block,
+    build_scene_graph,
 )
 
 
@@ -204,25 +204,25 @@ def test_build_scene_graph_deduplicates_duplicate_branch_targets() -> None:
 
 
 def test_animation_hint_for_linear_memory_block() -> None:
-  """Linear blocks with memory ops should use the memory-activity hint."""
-  block = CFGBlock(id="f::entry", name="entry", function_name="f")
-  block.role = "linear"
-  block.memory_ops = [
-    parse_ir_to_events(
-      """
+    """Linear blocks with memory ops should use the memory-activity hint."""
+    block = CFGBlock(id="f::entry", name="entry", function_name="f")
+    block.role = "linear"
+    block.memory_ops = [
+        parse_ir_to_events(
+            """
       define void @f() {
       entry:
         %x = alloca i32
         ret void
       }
       """
-    ).events[0]
-  ]
+        ).events[0]
+    ]
 
-  assert _animation_hint_for_block(block) == "show_memory_activity"
+    assert _animation_hint_for_block(block) == "show_memory_activity"
 
 
-# ── Analysis metadata integration ──────────────────────────────────
+# -- Analysis metadata integration ----------------------------------
 
 
 def test_loop_header_metadata_overrides_animation_hint() -> None:
@@ -349,8 +349,7 @@ def test_no_metadata_preserves_original_behavior() -> None:
     assert _snapshot(graph_without) == _snapshot(graph_with_none) == _snapshot(graph_with_empty)
 
 
-
-# ── T/F edge labels from ingest layer ──────────────────────────────
+# -- T/F edge labels from ingest layer ------------------------------
 
 
 def test_scene_graph_preserves_edge_labels() -> None:
@@ -370,11 +369,12 @@ def test_scene_graph_preserves_edge_labels() -> None:
     assert labels == {"T", "F"}
 
 
-# ── stack mode (mode="stack") ──────────────────────────────────
+# -- stack mode (mode="stack") ----------------------------------
 
 
 def _stack_event(fn, kind, text, idx, *, opcode=None, operands=None):
     from llvmanim.transform.models import IREvent
+
     return IREvent(
         function_name=fn,
         block_name="entry",
@@ -447,8 +447,8 @@ def test_stack_scene_graph_callee_descent() -> None:
         "push_stack_frame",  # main
         "push_stack_frame",  # foo
         "create_stack_slot",  # %y in foo
-        "pop_stack_frame",   # foo
-        "pop_stack_frame",   # main
+        "pop_stack_frame",  # foo
+        "pop_stack_frame",  # main
     ]
 
 
@@ -474,7 +474,12 @@ def test_stack_scene_graph_skips_llvm_intrinsics() -> None:
     stream = ProgramEventStream(
         source_path="<test>",
         events=[
-            _stack_event("main", "call", "call void @llvm.memcpy.p0.p0.i64(ptr %a, ptr %b, i64 8, i1 false)", 0),
+            _stack_event(
+                "main",
+                "call",
+                "call void @llvm.memcpy.p0.p0.i64(ptr %a, ptr %b, i64 8, i1 false)",
+                0,
+            ),
             _stack_event("main", "ret", "ret i32 0", 1),
         ],
     )
@@ -509,7 +514,9 @@ def test_stack_scene_graph_include_ssa_emits_binop_compare_load() -> None:
             _stack_event("main", "alloca", "%x = alloca i32", 0),
             _stack_event("main", "load", "%1 = load i32, ptr %x", 1, operands=["%x"]),
             _stack_event("main", "binop", "%mul = mul nsw i32 2, %1", 2, operands=["2", "%1"]),
-            _stack_event("main", "compare", "%cmp = icmp sgt i32 %mul, 5", 3, operands=["%mul", "5"]),
+            _stack_event(
+                "main", "compare", "%cmp = icmp sgt i32 %mul, 5", 3, operands=["%mul", "5"]
+            ),
             _stack_event("main", "ret", "ret i32 %mul", 4),
         ],
     )

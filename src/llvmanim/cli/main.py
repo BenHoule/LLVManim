@@ -6,6 +6,7 @@ import argparse
 import subprocess
 from pathlib import Path
 
+from llvmanim.cli.config import apply_config_defaults, find_config_file, load_config
 from llvmanim.ingest import parse_module_to_events
 from llvmanim.ingest.analysis_metadata_io import (
     AnalysisMetadataIOError,
@@ -17,6 +18,7 @@ from llvmanim.ingest.dot_layout import DotLayoutError, compute_dot_layout
 from llvmanim.ingest.trace_io import TraceIOError, load_trace, save_trace
 from llvmanim.render import export_cfg_dot, export_cfg_png, export_scene_graph_json
 from llvmanim.render.cfg_renderer import CFGRenderer
+from llvmanim.render.colors import SCHEMES
 from llvmanim.render.stack_renderer import StackRenderer
 from llvmanim.transform.models import BlockMetadata, SceneGraph
 from llvmanim.transform.scene import (
@@ -24,7 +26,6 @@ from llvmanim.transform.scene import (
     build_scene_graph,
 )
 from llvmanim.util import tools
-from llvmanim.cli.config import apply_config_defaults, find_config_file, load_config
 
 try:
     from manim import config as manim_config
@@ -257,6 +258,29 @@ def main(argv: list[str] | None = None) -> int:
         help="Treat the input file as a C source file and compile it automatically",
     )
 
+    parser.add_argument(
+        "--color-scheme",
+        choices=["dark", "light"],
+        default="dark",
+        metavar="SCHEME",
+        help="Color scheme for the animation: dark (default) or light",
+    )
+
+    parser.add_argument(
+        "--quality",
+        choices=["l", "m", "h", "p", "k"],
+        default=None,
+        metavar="LEVEL",
+        help="Render quality: l=480p/15fps, m=720p/30fps, h=1080p/60fps (default), p=1440p/60fps, k=4K/60fps",
+    )
+
+    parser.add_argument(
+        "--disable-caching",
+        action="store_true",
+        default=False,
+        help="Disable Manim's partial-movie cache (useful when iterating on scenes)",
+    )
+
     args = parser.parse_args(argv)
 
     config_path = find_config_file()
@@ -270,6 +294,7 @@ def main(argv: list[str] | None = None) -> int:
     input_path = Path(args.input)
     outdir = Path(args.outdir)
     base_name = args.name if args.name else input_path.stem
+    scheme = SCHEMES[args.color_scheme]
 
     if not input_path.exists():
         print(f"Error: input file not found: {input_path}")
@@ -422,6 +447,11 @@ def main(argv: list[str] | None = None) -> int:
             manim_config.media_dir = str(outdir)
             manim_config.format = render_format
             manim_config.output_file = f"cfg_{base_name}"
+            manim_config.background_color = scheme.background
+            if args.quality is not None:
+                manim_config.quality = args.quality
+            if args.disable_caching:
+                manim_config.disable_caching = True
 
         source_name = Path(stream.source_path).name
         cfg_title = f"CFG Traversal  ·  {source_name}"
@@ -434,6 +464,7 @@ def main(argv: list[str] | None = None) -> int:
             dot_layout,
             speed=args.speed,
             title=cfg_title,
+            scheme=scheme,
         )
         cfg_scene.render(preview=args.preview)
         print("Rendered CFG traversal animation.")
@@ -459,6 +490,11 @@ def main(argv: list[str] | None = None) -> int:
             manim_config.media_dir = str(outdir)
             manim_config.format = render_format
             manim_config.output_file = base_name
+            manim_config.background_color = scheme.background
+            if args.quality is not None:
+                manim_config.quality = args.quality
+            if args.disable_caching:
+                manim_config.disable_caching = True
         include_ssa = args.ir_mode == "rich-ssa"
         stack_graph = build_scene_graph(stream, mode="stack", include_ssa=include_ssa)
         animation_scene = StackRenderer(
@@ -466,6 +502,7 @@ def main(argv: list[str] | None = None) -> int:
             speed=args.speed,
             ir_mode=args.ir_mode,
             display_lines=stream.display_lines,
+            scheme=scheme,
         )
         animation_scene.render(preview=args.preview)
 

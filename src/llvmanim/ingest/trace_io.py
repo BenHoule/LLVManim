@@ -29,7 +29,7 @@ def load_trace(path: str | Path) -> TraceOverlay:
         }
 
     ``entry_order`` is required (the ordered sequence of block visits).
-    ``visited_nodes`` and ``traversed_edges`` are optional — when absent they
+    ``visited_nodes`` and ``traversed_edges`` are optional -- when absent they
     are derived from ``entry_order``.
     """
     text = Path(path).read_text(encoding="utf-8")

@@ -1,5 +1,5 @@
 """
-CFG traversal animation sandbox — Manim Community Edition.
+CFG traversal animation sandbox -- Manim Community Edition.
 
 Uses LLVM's ``opt -passes=dot-cfg`` output + Graphviz layout engine to position
 nodes and route edges accurately, then animates the runtime execution path
@@ -28,16 +28,16 @@ Run (high quality):
 
 TODO: Add a --verbose / --show-ir flag that renders full IR instructions inside
 each block instead of the summary.  For large functions, text fitting will need
-auto-sizing or scrollable viewports — defer until layout engine is more mature.
+auto-sizing or scrollable viewports -- defer until layout engine is more mature.
 
 TODO: Improvements to revisit:
   - Edge label placement: "true"/"false" labels occasionally overlap the edge
-    curve or nearby blocks — investigate Graphviz xlabel or a label-collision
+    curve or nearby blocks -- investigate Graphviz xlabel or a label-collision
     avoidance pass.
   - Block text sizing: summary text can overflow narrow blocks on complex
-    functions — add an auto-scale pass that measures text width vs block rect.
+    functions -- add an auto-scale pass that measures text width vs block rect.
   - Arrowhead sizing: fixed 0.08 scale may be too large/small at different
-    zoom levels — tie arrowhead scale to the coordinate mapper scale factor.
+    zoom levels -- tie arrowhead scale to the coordinate mapper scale factor.
   - Color scheme: current green/blue palette is functional but not polished;
     consider a design-token system once the main tool implementation is stable.
   - Multi-function support: extend layout to handle inter-procedural CFGs
@@ -235,7 +235,7 @@ def _parse_spline_points(pos_str: str) -> list[tuple[float, float]]:
         if part.startswith("e,"):
             endpoint = tuple(float(v) for v in part[2:].split(","))  # type: ignore[assignment]
         elif part.startswith("s,"):
-            pass  # start point — not used, first data point is the start
+            pass  # start point -- not used, first data point is the start
         else:
             coords = part.split(",")
             if len(coords) == 2:

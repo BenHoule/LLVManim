@@ -93,7 +93,7 @@ def test_kind_from_opcode_none_returns_other() -> None:
     assert _kind_from_opcode(None) == "other"
 
 
-# ── Conditional br T/F labels ────────────────────────────────────
+# -- Conditional br T/F labels ------------------------------------
 
 
 def test_conditional_br_edges_have_tf_labels() -> None:
@@ -132,7 +132,7 @@ def test_unconditional_br_edge_has_no_label() -> None:
     assert stream.cfg_edges[0].label == ""
 
 
-# ── Non-br terminator edge extraction ────────────────────────────
+# -- Non-br terminator edge extraction ----------------------------
 
 
 def test_switch_edges_extracted() -> None:
@@ -230,7 +230,7 @@ def test_parse_ir_invalid_input_raises() -> None:
         parse_ir_to_events("this is not valid llvm ir")
 
 
-# ── display_lines pipeline integration ───────────────────────────
+# -- display_lines pipeline integration ---------------------------
 
 
 def test_parse_ir_to_events_populates_display_lines() -> None:
@@ -253,7 +253,7 @@ def test_parse_module_populates_display_lines() -> None:
     assert len(stream.display_lines) > 0
 
 
-# ── Typed CFG edge extraction ───────────────────────────────────────────────────
+# -- Typed CFG edge extraction ---------------------------------------------------
 
 
 def test_cfg_edges_conditional_branch() -> None:

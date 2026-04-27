@@ -46,6 +46,7 @@ Thumbs.db
 .ipynb_checkpoints/
 
 # Manim / ManimGL outputs
+example_outputs/
 media/
 videos/
 images/

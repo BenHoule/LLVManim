@@ -90,7 +90,7 @@ _3COL_DIV2_X = 2.5
 
 # ── Mobject factories ───────────────────────────────────────────────────────────
 
-def _frame_header(func_name: str, color: ManimColor, width: float = _SLOT_W) -> VGroup:
+def _frame_header(func_name: str, color: ManimColor, text_color: ManimColor = WHITE, width: float = _SLOT_W) -> VGroup:
     """Opaque coloured header bar labelled @func_name."""
     rect = Rectangle(
         width=width,
@@ -100,12 +100,12 @@ def _frame_header(func_name: str, color: ManimColor, width: float = _SLOT_W) -> 
         stroke_color=color,
         stroke_width=2,
     )
-    label = Text(f"@{func_name}", font="Monospace", font_size=22, color=WHITE, weight=BOLD)
+    label = Text(f"@{func_name}", font="Monospace", font_size=22, color=text_color, weight=BOLD)
     label.move_to(rect)
     return VGroup(rect, label)
 
 
-def _slot_cell(slot_text: str, color: ManimColor, width: float = _SLOT_W) -> VGroup:
+def _slot_cell(slot_text: str, color: ManimColor, text_color: ManimColor = WHITE, width: float = _SLOT_W) -> VGroup:
     """Single alloca-slot row tinted with the owning frame's colour."""
     rect = Rectangle(
         width=width,
@@ -115,7 +115,7 @@ def _slot_cell(slot_text: str, color: ManimColor, width: float = _SLOT_W) -> VGr
         stroke_color=color,
         stroke_width=1.5,
     )
-    label = Text(slot_text, font="Monospace", font_size=19)
+    label = Text(slot_text, font="Monospace", font_size=19, color=text_color)
     label.move_to(rect)
     return VGroup(rect, label)
 
@@ -413,7 +413,7 @@ class StackRenderer(CommandDrivenScene):
         func_name = cmd.params.get("function_name", "")
         self._ir_on_push(func_name)
         color = self._color()
-        mob = _frame_header(func_name, color, width=self._SLOT_WIDTH)
+        mob = _frame_header(func_name, color, text_color=self._scheme.stack_text_color, width=self._SLOT_WIDTH)
         mob.move_to(RIGHT * self._STACK_X + UP * (self._cursor_y - _HEADER_H / 2))
         self._cursor_y -= _HEADER_H + _GAP
         self._depth += 1
@@ -421,7 +421,7 @@ class StackRenderer(CommandDrivenScene):
         self._frame_names.append(func_name)
         mob[1].set_color(self._scheme.flash_color)
         self.play(FadeIn(mob, shift=DOWN * 0.25), run_time=self._rt(0.5))
-        self.play(mob[1].animate.set_color(WHITE), run_time=self._rt(0.35))
+        self.play(mob[1].animate.set_color(self._scheme.stack_text_color), run_time=self._rt(0.35))
 
     def _handle_pop(self, cmd: AnimationCommand) -> None:
         if not self._frame_stack:
@@ -444,13 +444,13 @@ class StackRenderer(CommandDrivenScene):
         self._ir_on_alloca(slot_text)
         display_text = clean_ir_line(slot_text)
         color = _PALETTE[(self._depth - 1) % len(_PALETTE)]
-        mob = _slot_cell(display_text, color, width=self._SLOT_WIDTH)
+        mob = _slot_cell(display_text, color, text_color=self._scheme.stack_text_color, width=self._SLOT_WIDTH)
         mob.move_to(RIGHT * self._STACK_X + UP * (self._cursor_y - _SLOT_H / 2))
         self._cursor_y -= _SLOT_H + _GAP
         self._frame_stack[-1][1].append(mob)
         mob[1].set_color(self._scheme.flash_color)
         self.play(FadeIn(mob, shift=DOWN * 0.15), run_time=self._rt(0.4))
-        self.play(mob[1].animate.set_color(WHITE), run_time=self._rt(0.35))
+        self.play(mob[1].animate.set_color(self._scheme.stack_text_color), run_time=self._rt(0.35))
 
     def _handle_branch(self, cmd: AnimationCommand) -> None:
         """Highlight-branch is currently a visual no-op in the stack renderer."""

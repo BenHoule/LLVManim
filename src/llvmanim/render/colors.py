@@ -28,7 +28,7 @@ class ColorScheme:
 
     # ── Chrome (title bar, divider lines, column labels) ────────────────────
     title_color: Any  # ManimColor accepted by Manim Text
-    rule_color: Any   # horizontal rule beneath the title
+    rule_color: Any  # horizontal rule beneath the title
     label_color: Any  # column header labels ("IR Source", "Stack …")
     divider_color: Any  # vertical divider lines between columns
 
@@ -36,9 +36,11 @@ class ColorScheme:
     ir_text_color: Any  # IR source panel lines
 
     # ── Animation accents ───────────────────────────────────────────────────
-    flash_color: Any   # badge flash on incoming stack / SSA elements
+    flash_color: Any  # badge flash on incoming stack / SSA elements
     cursor_color: Any  # SurroundingRectangle IR cursor
 
+    # ── Stack block text ────────────────────────────────────────────────────
+    stack_text_color: Any  # resting text color in frame headers and slot cells
     # ── CFG block states ────────────────────────────────────────────────────
     cfg_unvisited_fill: str
     cfg_unvisited_text: str
@@ -66,6 +68,7 @@ DARK = ColorScheme(
     ir_text_color=WHITE,
     flash_color=YELLOW,
     cursor_color=YELLOW,
+    stack_text_color=WHITE,
     cfg_unvisited_fill="#555555",
     cfg_unvisited_text="#999999",
     cfg_active_fill="#2ecc71",
@@ -88,6 +91,7 @@ LIGHT = ColorScheme(
     ir_text_color=BLACK,
     flash_color=ORANGE,
     cursor_color=ORANGE,
+    stack_text_color=BLACK,
     cfg_unvisited_fill="#d0d0d0",
     cfg_unvisited_text="#333333",
     cfg_active_fill="#27ae60",

@@ -179,6 +179,7 @@ def test_compute_dot_layout_dot_fails(tmp_path: Path) -> None:
     dot_file.write_text("digraph { a -> b }")
 
     with (
+        patch("llvmanim.ingest.dot_layout.find_tool", return_value="/usr/bin/dot"),
         patch(
             "llvmanim.ingest.dot_layout.subprocess.run",
             side_effect=subprocess.CalledProcessError(1, ["dot"], stderr="bad input"),
@@ -193,6 +194,7 @@ def test_compute_dot_layout_timeout(tmp_path: Path) -> None:
     dot_file.write_text("digraph { a -> b }")
 
     with (
+        patch("llvmanim.ingest.dot_layout.find_tool", return_value="/usr/bin/dot"),
         patch(
             "llvmanim.ingest.dot_layout.subprocess.run",
             side_effect=subprocess.TimeoutExpired(["dot"], 30),
@@ -208,6 +210,7 @@ def test_compute_dot_layout_bad_json(tmp_path: Path) -> None:
 
     mock_result = subprocess.CompletedProcess(["dot"], 0, stdout="not json", stderr="")
     with (
+        patch("llvmanim.ingest.dot_layout.find_tool", return_value="/usr/bin/dot"),
         patch("llvmanim.ingest.dot_layout.subprocess.run", return_value=mock_result),
         pytest.raises(DotLayoutError, match="parse"),
     ):

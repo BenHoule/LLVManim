@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from llvmanim.ingest.dot_layout import DotLayout, DotNodeLayout
 from llvmanim.render.cfg_renderer import CFGRenderer
+from llvmanim.render.colors import DARK, LIGHT
 from llvmanim.render.command_driven_scene import CommandDrivenScene
 from llvmanim.transform.models import SceneGraph, SceneNode
 
@@ -45,6 +46,18 @@ class TestCFGRendererInit:
     def test_speed_is_stored(self) -> None:
         renderer = CFGRenderer(_minimal_graph(), _minimal_layout(), speed=2.5)
         assert renderer._speed == 2.5
+
+    def test_defaults_to_dark_scheme(self) -> None:
+        renderer = CFGRenderer(_minimal_graph(), _minimal_layout())
+        assert renderer._scheme is DARK
+
+    def test_accepts_light_scheme(self) -> None:
+        renderer = CFGRenderer(_minimal_graph(), _minimal_layout(), scheme=LIGHT)
+        assert renderer._scheme is LIGHT
+
+    def test_explicit_dark_scheme(self) -> None:
+        renderer = CFGRenderer(_minimal_graph(), _minimal_layout(), scheme=DARK)
+        assert renderer._scheme is DARK
 
 
 class TestResolveBlockName:

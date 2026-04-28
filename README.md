@@ -74,7 +74,7 @@ Run tests with coverage visibility:
 uv run pytest -q --cov=llvmanim --cov-report=term-missing
 ```
 
-## Test-Driven Development Workflow
+<!-- ## Test-Driven Development Workflow
 
 Use a small-loop TDD cycle for new behavior and bug fixes:
 
@@ -85,7 +85,7 @@ Use a small-loop TDD cycle for new behavior and bug fixes:
 
 ```bash
 ./scripts/quality-check.sh
-```
+``` -->
 
 ### Test Taxonomy
 

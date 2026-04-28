@@ -283,6 +283,14 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
 
+    _QUALITY_MAP = {
+        "l": "low_quality",
+        "m": "medium_quality",
+        "h": "high_quality",
+        "p": "production_quality",
+        "k": "fourk_quality",
+    }
+
     config_path = find_config_file()
     if config_path is not None:
         try:
@@ -449,7 +457,7 @@ def main(argv: list[str] | None = None) -> int:
             manim_config.output_file = f"cfg_{base_name}"
             manim_config.background_color = scheme.background
             if args.quality is not None:
-                manim_config.quality = args.quality
+                manim_config.quality = _QUALITY_MAP[args.quality]
             if args.disable_caching:
                 manim_config.disable_caching = True
 
@@ -492,7 +500,7 @@ def main(argv: list[str] | None = None) -> int:
             manim_config.output_file = base_name
             manim_config.background_color = scheme.background
             if args.quality is not None:
-                manim_config.quality = args.quality
+                manim_config.quality = _QUALITY_MAP[args.quality]
             if args.disable_caching:
                 manim_config.disable_caching = True
         include_ssa = args.ir_mode == "rich-ssa"

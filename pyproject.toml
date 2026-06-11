@@ -27,6 +27,14 @@ test = [
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
 ]
+docs = [
+    "sphinx>=8.0",
+    "furo>=2024.1.29",
+    "myst-parser>=4.0",
+    "sphinx-autodoc-typehints>=2.3",
+    "sphinx-copybutton>=0.5",
+    "sphinxcontrib-mermaid>=1.0",
+]
 
 [project.scripts]
 llvmanim = "llvmanim.cli.main:main"

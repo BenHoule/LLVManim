@@ -1,0 +1,681 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Animation Modes" href="animation_modes.html"><link rel="prev" title="Quickstart" href="../getting_started/quickstart.html">
+        <link rel="prefetch" href="../_static/logo.svg" as="image">
+        <link rel="prefetch" href="../_static/logo.svg" as="image">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>CLI Reference - LLVManim</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=ef20b758" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">LLVManim</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../_static/logo.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../_static/logo.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">LLVManim</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/concepts.html">Key Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="animation_modes.html">Animation Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output_formats.html">Output Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_ir.html">Working with LLVM IR</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/overview.html">Architecture Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/pipeline.html">Pipeline: IR to Animation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/data_model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/rendering.html">Rendering Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/import_layers.html">Import Layer Boundaries</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/ingest.html">llvmanim.ingest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/transform.html">llvmanim.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/render.html">llvmanim.render</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/cli.html">llvmanim.cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/util.html">llvmanim.util</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dev/setup.html">Developer Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/adding_features.html">Adding New Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/metrics.html">Metrics and Charts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/BenHoule/LLVManim/blob/main/docs/sphinx/user_guide/cli_reference.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/BenHoule/LLVManim/edit/main/docs/sphinx/user_guide/cli_reference.rst" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="cli-reference">
+<h1>CLI Reference<a class="headerlink" href="#cli-reference" title="Link to this heading">¶</a></h1>
+<p>All LLVManim functionality is accessed through a single command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>llvmanim<span class="w"> </span><span class="o">[</span>INPUT<span class="o">]</span><span class="w"> </span><span class="o">[</span>FLAGS...<span class="o">]</span>
+<span class="c1"># or, if installed system-wide:</span>
+llvmanim<span class="w"> </span><span class="o">[</span>INPUT<span class="o">]</span><span class="w"> </span><span class="o">[</span>FLAGS...<span class="o">]</span>
+</pre></div>
+</div>
+<section id="positional-argument">
+<h2>Positional argument<a class="headerlink" href="#positional-argument" title="Link to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-INPUT">
+<span class="sig-name descname"><span class="pre">INPUT</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-arg-INPUT" title="Link to this definition">¶</a></dt>
+<dd><p>Path to an LLVM IR file (<code class="docutils literal notranslate"><span class="pre">.ll</span></code>).</p>
+<p><em>Default:</em> <code class="docutils literal notranslate"><span class="pre">tests/ingest/testdata/double.ll</span></code> (useful for quick
+experiments without specifying a file).</p>
+</dd></dl>
+
+</section>
+<section id="core-output-flags">
+<h2>Core output flags<a class="headerlink" href="#core-output-flags" title="Link to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-json">
+<span class="sig-name descname"><span class="pre">--json</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-json" title="Link to this definition">¶</a></dt>
+<dd><p>Export the scene graph to <code class="docutils literal notranslate"><span class="pre">&lt;outdir&gt;/&lt;name&gt;_scene_graph.json</span></code>.</p>
+<p>The JSON file contains every node, edge, and animation command derived
+from the IR.  Useful for debugging or piping into other tools.  Does
+not require Manim.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-draw">
+<span class="sig-name descname"><span class="pre">--draw</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-draw" title="Link to this definition">¶</a></dt>
+<dd><p>Export the CFG as a Graphviz DOT file and render it to PNG.</p>
+<p>Writes <code class="docutils literal notranslate"><span class="pre">&lt;outdir&gt;/cfg_&lt;name&gt;.dot</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;outdir&gt;/cfg_&lt;name&gt;.png</span></code>.
+Requires the Graphviz Python package (<code class="docutils literal notranslate"><span class="pre">graphviz</span></code>) and the <code class="docutils literal notranslate"><span class="pre">dot</span></code>
+binary.  Does not require Manim.</p>
+</dd></dl>
+
+</section>
+<section id="animation-flags">
+<h2>Animation flags<a class="headerlink" href="#animation-flags" title="Link to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-animate">
+<span class="sig-name descname"><span class="pre">--animate</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-animate" title="Link to this definition">¶</a></dt>
+<dd><p>Render a stack animation video using Manim CE.</p>
+<p>The video is written into <code class="docutils literal notranslate"><span class="pre">&lt;outdir&gt;/1080p60/</span></code> as an MP4 (or GIF if
+<code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">gif</span></code>).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-preview">
+<span class="sig-name descname"><span class="pre">--preview</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-preview" title="Link to this definition">¶</a></dt>
+<dd><p>Render the animation <strong>and</strong> open the result in your default video
+viewer.  Implies <code class="docutils literal notranslate"><span class="pre">--animate</span></code>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-cfg-animate">
+<span class="sig-name descname"><span class="pre">--cfg-animate</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-cfg-animate" title="Link to this definition">¶</a></dt>
+<dd><p>Render a CFG traversal animation.  Requires <code class="docutils literal notranslate"><span class="pre">--dot-cfg</span></code>.</p>
+<p>If no <code class="docutils literal notranslate"><span class="pre">--import-trace</span></code> is provided, LLVManim auto-derives a static
+trace and asks for confirmation (use <code class="docutils literal notranslate"><span class="pre">-y</span></code> to skip).</p>
+</dd></dl>
+
+</section>
+<section id="ir-display-mode">
+<h2>IR display mode<a class="headerlink" href="#ir-display-mode" title="Link to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-ir-mode">
+<span class="sig-name descname"><span class="pre">--ir-mode</span></span><span class="sig-prename descclassname"> <span class="pre">{basic,rich,rich-ssa}</span></span><a class="headerlink" href="#cmdoption-ir-mode" title="Link to this definition">¶</a></dt>
+<dd><p>Controls what the stack animation renders.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Basic<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Stack-only.  A yellow badge flashes on the active stack cell.
+This is the default and the fastest to render.</p>
+</dd>
+<dt class="field-even">Rich<span class="colon">:</span></dt>
+<dd class="field-even"><p>Two-column layout — IR source on the left with a moving
+yellow cursor, call stack on the right.</p>
+</dd>
+<dt class="field-odd">Rich-ssa<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Three-column layout — IR source | SSA values panel |
+call stack.  The SSA panel shows live value assignments
+as each instruction is animated.</p>
+</dd>
+</dl>
+<p><em>Default:</em> <code class="docutils literal notranslate"><span class="pre">basic</span></code></p>
+<p>See <a class="reference internal" href="animation_modes.html"><span class="doc">Animation Modes</span></a> for screenshots and detailed explanations.</p>
+</dd></dl>
+
+</section>
+<section id="animation-control">
+<h2>Animation control<a class="headerlink" href="#animation-control" title="Link to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-speed">
+<span class="sig-name descname"><span class="pre">--speed</span></span><span class="sig-prename descclassname"> <span class="pre">MULTIPLIER</span></span><a class="headerlink" href="#cmdoption-speed" title="Link to this definition">¶</a></dt>
+<dd><p>Scale the animation speed.  <code class="docutils literal notranslate"><span class="pre">2.0</span></code> renders twice as fast; <code class="docutils literal notranslate"><span class="pre">0.5</span></code>
+renders at half speed.</p>
+<p><em>Default:</em> <code class="docutils literal notranslate"><span class="pre">1.0</span></code></p>
+</dd></dl>
+
+</section>
+<section id="output-format-and-paths">
+<h2>Output format and paths<a class="headerlink" href="#output-format-and-paths" title="Link to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-outdir">
+<span class="sig-name descname"><span class="pre">--outdir</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-outdir" title="Link to this definition">¶</a></dt>
+<dd><p>Directory for all output artifacts.  Created if it does not exist.</p>
+<p><em>Default:</em> <code class="docutils literal notranslate"><span class="pre">.</span></code> (current working directory)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-format">
+<span class="sig-name descname"><span class="pre">--format</span></span><span class="sig-prename descclassname"> <span class="pre">{mp4,gif}</span></span><a class="headerlink" href="#cmdoption-format" title="Link to this definition">¶</a></dt>
+<dd><p>Animation output format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mp4<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Standard MP4 via Manim’s built-in encoder. <strong>(default)</strong></p>
+</dd>
+<dt class="field-even">Gif<span class="colon">:</span></dt>
+<dd class="field-even"><p>Convert the MP4 to a GIF via a palette-based ffmpeg workflow
+that keeps memory usage low.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-gif-fps">
+<span class="sig-name descname"><span class="pre">--gif-fps</span></span><span class="sig-prename descclassname"> <span class="pre">FPS</span></span><a class="headerlink" href="#cmdoption-gif-fps" title="Link to this definition">¶</a></dt>
+<dd><p>Frame rate used when <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">gif</span></code>.</p>
+<p><em>Default:</em> <code class="docutils literal notranslate"><span class="pre">12</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-gif-width">
+<span class="sig-name descname"><span class="pre">--gif-width</span></span><span class="sig-prename descclassname"> <span class="pre">PX</span></span><a class="headerlink" href="#cmdoption-gif-width" title="Link to this definition">¶</a></dt>
+<dd><p>Width in pixels of the output GIF.</p>
+<p><em>Default:</em> <code class="docutils literal notranslate"><span class="pre">960</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-n">
+<span id="cmdoption-name"></span><span class="sig-name descname"><span class="pre">-n</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--name</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-n" title="Link to this definition">¶</a></dt>
+<dd><p>Base name for all output files.  Affects the stem of JSON, DOT, PNG,
+and video files.</p>
+<p><em>Default:</em> stem of the input file (e.g. <code class="docutils literal notranslate"><span class="pre">double</span></code> for <code class="docutils literal notranslate"><span class="pre">double.ll</span></code>).</p>
+</dd></dl>
+
+</section>
+<section id="cfg-animation-options">
+<h2>CFG animation options<a class="headerlink" href="#cfg-animation-options" title="Link to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-dot-cfg">
+<span class="sig-name descname"><span class="pre">--dot-cfg</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-dot-cfg" title="Link to this definition">¶</a></dt>
+<dd><p>Path to a <code class="docutils literal notranslate"><span class="pre">.dot</span></code> layout file produced by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opt</span> <span class="o">-</span><span class="n">passes</span><span class="o">=</span><span class="n">dot</span><span class="o">-</span><span class="n">cfg</span> <span class="o">-</span><span class="n">disable</span><span class="o">-</span><span class="n">output</span> <span class="n">my_file</span><span class="o">.</span><span class="n">ll</span>
+</pre></div>
+</div>
+<p>This file provides the node positions and edge routing used by the
+CFG animation.  Required when <code class="docutils literal notranslate"><span class="pre">--cfg-animate</span></code> is used.</p>
+</dd></dl>
+
+</section>
+<section id="trace-import-export">
+<h2>Trace import / export<a class="headerlink" href="#trace-import-export" title="Link to this heading">¶</a></h2>
+<p>A <em>trace</em> is a JSON file that records the sequence of blocks visited and
+edges traversed during an execution.  You can import traces produced by a
+real runtime or export the auto-derived static trace for later re-use.</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-import-trace">
+<span class="sig-name descname"><span class="pre">--import-trace</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-import-trace" title="Link to this definition">¶</a></dt>
+<dd><p>Load a trace from a JSON file and use it as the execution path for
+<code class="docutils literal notranslate"><span class="pre">--cfg-animate</span></code>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-export-trace">
+<span class="sig-name descname"><span class="pre">--export-trace</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-export-trace" title="Link to this definition">¶</a></dt>
+<dd><p>Export the current trace overlay to a JSON file.</p>
+</dd></dl>
+
+</section>
+<section id="cfg-edge-import-export">
+<h2>CFG edge import / export<a class="headerlink" href="#cfg-edge-import-export" title="Link to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-import-cfg-edges">
+<span class="sig-name descname"><span class="pre">--import-cfg-edges</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-import-cfg-edges" title="Link to this definition">¶</a></dt>
+<dd><p>Replace the CFG edges extracted from the IR with edges loaded from a
+JSON file.  Useful when opt-derived edges are incorrect or when testing
+with custom topologies.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-export-cfg-edges">
+<span class="sig-name descname"><span class="pre">--export-cfg-edges</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-export-cfg-edges" title="Link to this definition">¶</a></dt>
+<dd><p>Export the CFG edges extracted from the IR to a JSON file.</p>
+</dd></dl>
+
+</section>
+<section id="analysis-metadata-import-export">
+<h2>Analysis metadata import / export<a class="headerlink" href="#analysis-metadata-import-export" title="Link to this heading">¶</a></h2>
+<p>Analysis metadata captures dominator-tree and loop information computed
+by LLVM opt passes (<code class="docutils literal notranslate"><span class="pre">print&lt;postdomtree&gt;</span></code>).  It enriches scene nodes with
+<code class="docutils literal notranslate"><span class="pre">idom</span></code>, <code class="docutils literal notranslate"><span class="pre">dom_depth</span></code>, <code class="docutils literal notranslate"><span class="pre">is_loop_header</span></code>, etc.</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-import-analysis-metadata">
+<span class="sig-name descname"><span class="pre">--import-analysis-metadata</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-import-analysis-metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Load analysis metadata from a JSON file.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-export-analysis-metadata">
+<span class="sig-name descname"><span class="pre">--export-analysis-metadata</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-export-analysis-metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Export the analysis metadata derived from the scene graph to a JSON file.</p>
+</dd></dl>
+
+</section>
+<section id="miscellaneous-flags">
+<h2>Miscellaneous flags<a class="headerlink" href="#miscellaneous-flags" title="Link to this heading">¶</a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-y">
+<span id="cmdoption-yes"></span><span class="sig-name descname"><span class="pre">-y</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--yes</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-y" title="Link to this definition">¶</a></dt>
+<dd><p>Skip interactive confirmation prompts (e.g. when auto-deriving a CFG
+trace).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-c">
+<span id="cmdoption-C"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--C</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-c" title="Link to this definition">¶</a></dt>
+<dd><p>Treat INPUT as a C source file.  LLVManim calls <code class="docutils literal notranslate"><span class="pre">clang</span></code> automatically
+to compile it to IR before processing:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>llvmanim<span class="w"> </span>my_program.c<span class="w"> </span>--C<span class="w"> </span>--animate
+</pre></div>
+</div>
+<p>Compilation uses: <code class="docutils literal notranslate"><span class="pre">-g</span> <span class="pre">-O2</span> <span class="pre">-fno-strict-aliasing</span> <span class="pre">-fno-inline</span>
+<span class="pre">-fno-discard-value-names</span> <span class="pre">-S</span> <span class="pre">-emit-llvm</span></code>.</p>
+</dd></dl>
+
+</section>
+<section id="environment-variables">
+<h2>Environment variables<a class="headerlink" href="#environment-variables" title="Link to this heading">¶</a></h2>
+<p>All environment variables are optional.  When unset, LLVManim falls back
+to automatic discovery using <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> and (on Linux) version-sorted
+<code class="docutils literal notranslate"><span class="pre">/usr/lib/llvm-*/bin/</span></code> directories.</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LLVM_BIN_DIR</span></code></p></td>
+<td><p>Explicit path to the directory containing LLVM binaries
+(<code class="docutils literal notranslate"><span class="pre">clang</span></code>, <code class="docutils literal notranslate"><span class="pre">opt</span></code>, …)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">NO_LLVM_DEFAULT_SEARCH</span></code></p></td>
+<td><p>Set to <code class="docutils literal notranslate"><span class="pre">1</span></code> to disable Linux-specific <code class="docutils literal notranslate"><span class="pre">/usr/lib/llvm-*/bin</span></code>
+auto-discovery</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CLANG</span></code></p></td>
+<td><p>Full path to the <code class="docutils literal notranslate"><span class="pre">clang</span></code> binary</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">OPT</span></code></p></td>
+<td><p>Full path to the <code class="docutils literal notranslate"><span class="pre">opt</span></code> binary</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DOT</span></code></p></td>
+<td><p>Full path to the Graphviz <code class="docutils literal notranslate"><span class="pre">dot</span></code> binary</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">FFMPEG</span></code></p></td>
+<td><p>Full path to the <code class="docutils literal notranslate"><span class="pre">ffmpeg</span></code> binary</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="common-invocation-patterns">
+<h2>Common invocation patterns<a class="headerlink" href="#common-invocation-patterns" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Quick scan: what does this IR produce?</span>
+uv<span class="w"> </span>run<span class="w"> </span>llvmanim<span class="w"> </span>my.ll<span class="w"> </span>--json
+
+<span class="c1"># Full static export — no Manim needed</span>
+uv<span class="w"> </span>run<span class="w"> </span>llvmanim<span class="w"> </span>my.ll<span class="w"> </span>--json<span class="w"> </span>--draw<span class="w"> </span>--export-cfg-edges<span class="w"> </span>edges.json
+
+<span class="c1"># Basic stack animation, watch it immediately</span>
+uv<span class="w"> </span>run<span class="w"> </span>llvmanim<span class="w"> </span>my.ll<span class="w"> </span>--animate<span class="w"> </span>--preview
+
+<span class="c1"># Rich-SSA animation, GIF, 2× speed</span>
+uv<span class="w"> </span>run<span class="w"> </span>llvmanim<span class="w"> </span>my.ll<span class="w"> </span>--animate<span class="w"> </span>--ir-mode<span class="w"> </span>rich-ssa<span class="w"> </span>--format<span class="w"> </span>gif<span class="w"> </span>--speed<span class="w"> </span><span class="m">2</span>.0
+
+<span class="c1"># CFG traversal with auto-derived trace, skip confirmation</span>
+uv<span class="w"> </span>run<span class="w"> </span>llvmanim<span class="w"> </span>my.ll<span class="w"> </span>--cfg-animate<span class="w"> </span>--dot-cfg<span class="w"> </span>.my.dot<span class="w"> </span>-y
+
+<span class="c1"># Compile C directly and animate</span>
+uv<span class="w"> </span>run<span class="w"> </span>llvmanim<span class="w"> </span>my_program.c<span class="w"> </span>--C<span class="w"> </span>--animate<span class="w"> </span>--ir-mode<span class="w"> </span>rich
+
+<span class="c1"># Use a custom trace from a profiler</span>
+uv<span class="w"> </span>run<span class="w"> </span>llvmanim<span class="w"> </span>my.ll<span class="w"> </span>--cfg-animate<span class="w"> </span>--dot-cfg<span class="w"> </span>.my.dot<span class="w"> </span>--import-trace<span class="w"> </span>trace.json
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="animation_modes.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Animation Modes</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../getting_started/quickstart.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Quickstart</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Ben Houle
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">CLI Reference</a><ul>
+<li><a class="reference internal" href="#positional-argument">Positional argument</a></li>
+<li><a class="reference internal" href="#core-output-flags">Core output flags</a></li>
+<li><a class="reference internal" href="#animation-flags">Animation flags</a></li>
+<li><a class="reference internal" href="#ir-display-mode">IR display mode</a></li>
+<li><a class="reference internal" href="#animation-control">Animation control</a></li>
+<li><a class="reference internal" href="#output-format-and-paths">Output format and paths</a></li>
+<li><a class="reference internal" href="#cfg-animation-options">CFG animation options</a></li>
+<li><a class="reference internal" href="#trace-import-export">Trace import / export</a></li>
+<li><a class="reference internal" href="#cfg-edge-import-export">CFG edge import / export</a></li>
+<li><a class="reference internal" href="#analysis-metadata-import-export">Analysis metadata import / export</a></li>
+<li><a class="reference internal" href="#miscellaneous-flags">Miscellaneous flags</a></li>
+<li><a class="reference internal" href="#environment-variables">Environment variables</a></li>
+<li><a class="reference internal" href="#common-invocation-patterns">Common invocation patterns</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f539c95a"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>

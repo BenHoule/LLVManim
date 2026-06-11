@@ -1,0 +1,754 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="llvmanim.ingest" href="ingest.html"><link rel="prev" title="Import Layer Boundaries" href="../architecture/import_layers.html">
+        <link rel="prefetch" href="../_static/logo.svg" as="image">
+        <link rel="prefetch" href="../_static/logo.svg" as="image">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>API Reference - LLVManim</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=ef20b758" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">LLVManim</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../_static/logo.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../_static/logo.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">LLVManim</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/concepts.html">Key Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/cli_reference.html">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/animation_modes.html">Animation Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/output_formats.html">Output Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/working_with_ir.html">Working with LLVM IR</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/overview.html">Architecture Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/pipeline.html">Pipeline: IR to Animation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/data_model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/rendering.html">Rendering Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/import_layers.html">Import Layer Boundaries</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="ingest.html">llvmanim.ingest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transform.html">llvmanim.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="render.html">llvmanim.render</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html">llvmanim.cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util.html">llvmanim.util</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dev/setup.html">Developer Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/adding_features.html">Adding New Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/metrics.html">Metrics and Charts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/BenHoule/LLVManim/blob/main/docs/sphinx/api/index.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/BenHoule/LLVManim/edit/main/docs/sphinx/api/index.rst" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
+<p>The LLVManim API is organised into five packages.  The dependency hierarchy is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cli  →  render  →  transform  →  ingest
+               ↘              ↗
+</pre></div>
+</div>
+<section id="package-dependency-graph">
+<h2>Package dependency graph<a class="headerlink" href="#package-dependency-graph" title="Link to this heading">¶</a></h2>
+<div class="graphviz"><object data="../_images/graphviz-a605566868902daaf851cd859fb4a4f7d4580c61.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph G {
+	graph [
+	        splines = ortho,
+		bb=&quot;0,0,1102.5,980.29&quot;,
+		concentrate=true,
+		rankdir=TB,
+		start=1
+	];
+	node [fillcolor=&quot;#ffffff&quot;,
+		fontcolor=&quot;#000000&quot;,
+		fontname=Helvetica,
+		fontsize=10,
+		label=&quot;\N&quot;,
+		style=filled
+	];
+	llvmanim___main__	[fillcolor=&quot;#995252&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.58926,
+		label=&quot;llvmanim\.\n__main__&quot;,
+		pos=&quot;420.42,21.213&quot;,
+		width=1.2964];
+	llvmanim_cli	[fillcolor=&quot;#c24747&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.5,
+		label=&quot;llvmanim.cli&quot;,
+		pos=&quot;384.42,107.42&quot;,
+		width=1.2591];
+	llvmanim_cli -&gt; llvmanim___main__	[fillcolor=&quot;#c24747&quot;,
+		pos=&quot;e,411.88,42.189 391.7,89.378 396.35,78.502 402.5,64.118 407.92,51.453&quot;];
+	llvmanim_cli___main__	[fillcolor=&quot;#995252&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\ncli\.\n__main__&quot;,
+		pos=&quot;532.42,107.42&quot;,
+		width=1.2964];
+	llvmanim_cli_main	[fillcolor=&quot;#732626&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\ncli\.\nmain&quot;,
+		pos=&quot;532.42,201.4&quot;,
+		width=1.2964];
+	llvmanim_cli_main -&gt; llvmanim___main__	[fillcolor=&quot;#732626&quot;,
+		minlen=2,
+		pos=&quot;e,428.43,42.472 508.73,176.41 498.08,164.89 485.83,150.54 476.42,136.41 458.43,109.39 442.64,75.748 432.45,51.997&quot;];
+	llvmanim_cli_main -&gt; llvmanim_cli___main__	[fillcolor=&quot;#732626&quot;,
+		pos=&quot;e,532.42,136.66 532.42,172.3 532.42,164.26 532.42,155.36 532.42,146.82&quot;,
+		weight=2];
+	llvmanim_ingest	[fillcolor=blue,
+		fontcolor=white,
+		height=0.5,
+		label=&quot;llvmanim\.\ningest&quot;,
+		pos=&quot;379.42,669.35&quot;,
+		shape=box,
+		width=0.91667];
+	llvmanim_ingest -&gt; llvmanim_cli_main	[fillcolor=blue,
+		minlen=2,
+		pos=&quot;346.22,653.6 322.55,642.16 290.74,624.83 266.42,604.36 212.79,559.22 141.58,547.93 166.42,482.38&quot;];
+	llvmanim_render_cfg_animation_scene	[fillcolor=&quot;#964040&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\nrender\.\ncfg_animation_scene&quot;,
+		pos=&quot;317.42,481.38&quot;,
+		width=2.357];
+	llvmanim_ingest -&gt; llvmanim_render_cfg_animation_scene	[fillcolor=blue,
+		minlen=2,
+		pos=&quot;386.74,651.03 393.74,632.78 403.15,603.02 402.42,576.37;e,358.86,507.13 402.42,574.37 401.75,549.83 385.15,529.05 366.79,513.48&quot;];
+	llvmanim_render_cfg_renderer	[fillcolor=blue,
+		fontcolor=white,
+		height=0.56944,
+		label=&quot;llvmanim\.\nrender\.\ncfg_renderer&quot;,
+		pos=&quot;430.42,395.89&quot;,
+		shape=box,
+		width=1.0833];
+	llvmanim_ingest -&gt; llvmanim_render_cfg_renderer	[fillcolor=blue,
+		minlen=2,
+		pos=&quot;402.42,574.37 401.26,531.65 413.24,521.51 430.42,482.38;e,434.75,416.7 430.42,480.38 437.73,463.73 437.88,443.33 436.12,426.87&quot;];
+	llvmanim_render_stack_renderer	[fillcolor=blue,
+		fontcolor=white,
+		height=0.56944,
+		label=&quot;llvmanim\.\nrender\.\nstack_renderer&quot;,
+		pos=&quot;532.42,395.89&quot;,
+		shape=box,
+		width=1.2361];
+	llvmanim_ingest -&gt; llvmanim_render_stack_renderer	[fillcolor=blue,
+		minlen=2,
+		pos=&quot;e,493.66,416.42 430.42,480.38 441.29,455.61 463.88,435.92 485.03,421.89&quot;];
+	llvmanim_ingest_analysis_metadata_io	[fillcolor=&quot;#a44646&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\ningest\.\nanalysis_metadata_io&quot;,
+		pos=&quot;128.42,763.33&quot;,
+		width=2.4356];
+	llvmanim_ingest_analysis_metadata_io -&gt; llvmanim_cli_main	[fillcolor=&quot;#a44646&quot;,
+		minlen=2,
+		pos=&quot;124.48,734.01 122.86,715.53 122.54,691.09 128.42,670.35&quot;];
+	llvmanim_ingest_cfg_edge_io	[fillcolor=&quot;#a44646&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\ningest\.\ncfg_edge_io&quot;,
+		pos=&quot;973.42,763.33&quot;,
+		width=1.4731];
+	llvmanim_ingest_cfg_edge_io -&gt; llvmanim_cli_main	[fillcolor=&quot;#a44646&quot;,
+		minlen=2,
+		pos=&quot;992.87,736.13 1005.3,718.33 1021,693.84 1031.4,670.35&quot;];
+	llvmanim_ingest_display_lines	[fillcolor=&quot;#c24747&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\ningest\.\ndisplay_lines&quot;,
+		pos=&quot;505.42,857.31&quot;,
+		width=1.5713];
+	llvmanim_ingest_llvm_events	[fillcolor=blue,
+		fontcolor=white,
+		height=0.56944,
+		label=&quot;llvmanim\.\ningest\.\nllvm_events&quot;,
+		pos=&quot;449.42,763.33&quot;,
+		shape=box,
+		width=1.0694];
+	llvmanim_ingest_display_lines -&gt; llvmanim_ingest_llvm_events	[fillcolor=&quot;#c24747&quot;,
+		pos=&quot;e,461.36,783.94 488.92,829.21 481.95,817.76 473.82,804.41 466.75,792.8&quot;,
+		weight=2];
+	llvmanim_ingest_display_lines -&gt; llvmanim_render_stack_renderer	[fillcolor=&quot;#c24747&quot;,
+		minlen=2,
+		pos=&quot;503.42,828.08 498.41,752.49 487.01,546.88 506.42,482.38&quot;];
+	llvmanim_ingest_dot_layout	[fillcolor=&quot;#ce3b3b&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\ningest\.\ndot_layout&quot;,
+		pos=&quot;204.42,669.35&quot;,
+		width=1.3356];
+	llvmanim_ingest_dot_layout -&gt; llvmanim_cli_main	[fillcolor=&quot;#ce3b3b&quot;,
+		minlen=2,
+		pos=&quot;188.42,641.69 179.02,623.9 168.57,599.59 166.42,576.37;166.42,574.37 162.65,533.66 150.67,520.11 166.42,482.38&quot;];
+	llvmanim_ingest_dot_layout -&gt; llvmanim_render_cfg_animation_scene	[fillcolor=&quot;#ce3b3b&quot;,
+		minlen=2,
+		pos=&quot;232.99,645.73 251.39,628.96 273.17,604.23 280.42,576.37;e,303.99,510.34 280.42,574.37 285.24,555.85 292.85,536.06 299.92,519.61&quot;];
+	llvmanim_ingest_dot_layout -&gt; llvmanim_render_cfg_renderer	[fillcolor=&quot;#ce3b3b&quot;,
+		minlen=2,
+		pos=&quot;166.42,574.37 162.34,530.32 175.78,516.09 204.42,482.38;e,391.12,399.29 204.42,480.38 214.16,468.93 211.17,461.11 223.42,452.39 \
+270.4,418.98 336.33,405.68 381.07,400.39&quot;];
+	llvmanim_ingest_llvm_events -&gt; llvmanim_ingest	[fillcolor=blue,
+		pos=&quot;e,392.36,687.35 434.57,742.82 424.11,729.07 409.99,710.52 398.66,695.63&quot;,
+		weight=2];
+	llvmanim_ingest_trace_io	[fillcolor=&quot;#a44646&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\ningest\.\ntrace_io&quot;,
+		pos=&quot;855.42,763.33&quot;,
+		width=1.2964];
+	llvmanim_ingest_trace_io -&gt; llvmanim_cli_main	[fillcolor=&quot;#a44646&quot;,
+		minlen=2,
+		pos=&quot;891.15,744.44 942.23,718.74 1030.2,674.06 1031.4,670.35;1031.4,668.35 1074.1,540.17 1050.4,466.27 950.42,375.39 914.93,343.12 529.5,\
+315.27 532.42,267.39&quot;];
+	llvmanim_render	[fillcolor=blue,
+		fontcolor=white,
+		height=0.5,
+		label=&quot;llvmanim\.\nrender&quot;,
+		pos=&quot;532.42,321.39&quot;,
+		shape=box,
+		width=0.91667];
+	llvmanim_render -&gt; llvmanim_cli_main	[fillcolor=blue,
+		minlen=2,
+		pos=&quot;531.89,303.19 531.7,292.81 531.69,279.33 532.42,267.39&quot;];
+	llvmanim_render_cfg_animation_scene -&gt; llvmanim_render_cfg_renderer	[fillcolor=&quot;#964040&quot;,
+		pos=&quot;e,404,416.41 351.94,454.88 365.8,444.63 381.76,432.84 395.66,422.58&quot;,
+		weight=2];
+	llvmanim_render_cfg_renderer -&gt; llvmanim_cli_main	[fillcolor=blue,
+		minlen=2,
+		pos=&quot;431.38,375.32 433.16,359.24 438.08,336.83 451.42,322.39&quot;];
+	llvmanim_render_cfg_renderer -&gt; llvmanim_render	[fillcolor=blue,
+		pos=&quot;e,508.27,339.56 458.02,375.27 470.9,366.12 486.31,355.17 499.76,345.61&quot;,
+		weight=2];
+	llvmanim_render_command_driven_scene	[fillcolor=&quot;#bc2f2f&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\nrender\.\ncommand_driven_scene&quot;,
+		pos=&quot;629.42,481.38&quot;,
+		width=2.6517];
+	llvmanim_render_command_driven_scene -&gt; llvmanim_render	[fillcolor=&quot;#bc2f2f&quot;,
+		pos=&quot;699.1,461.55 789.7,437.04 936.48,397.27 936.42,396.89;e,565.55,335.27 936.42,394.89 923.4,315.67 657.2,359.31 579.42,339.39 578,\
+339.03 576.57,338.64 575.12,338.23&quot;,
+		weight=2];
+	llvmanim_render_command_driven_scene -&gt; llvmanim_render_cfg_renderer	[fillcolor=&quot;#bc2f2f&quot;,
+		pos=&quot;e,469.48,413.28 574.78,457.46 544.8,444.88 507.95,429.42 478.98,417.27&quot;,
+		weight=2];
+	llvmanim_render_command_driven_scene -&gt; llvmanim_render_stack_renderer	[fillcolor=&quot;#bc2f2f&quot;,
+		pos=&quot;e,555.1,416.41 598.46,453.74 587.02,443.89 574.07,432.74 562.69,422.95&quot;,
+		weight=2];
+	llvmanim_render_graphviz_export	[fillcolor=&quot;#a44646&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\nrender\.\ngraphviz_export&quot;,
+		pos=&quot;936.42,575.37&quot;,
+		width=1.866];
+	llvmanim_render_graphviz_export -&gt; llvmanim_render	[fillcolor=&quot;#a44646&quot;,
+		pos=&quot;931.89,546.26 929.98,527.66 929.55,502.99 936.42,482.38&quot;,
+		weight=2];
+	llvmanim_render_json_export	[fillcolor=&quot;#a44646&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\nrender\.\njson_export&quot;,
+		pos=&quot;795.42,575.37&quot;,
+		width=1.4535];
+	llvmanim_render_json_export -&gt; llvmanim_render	[fillcolor=&quot;#a44646&quot;,
+		pos=&quot;835.83,556.76 859.46,545.41 889.13,529.26 912.42,510.37 925.15,500.05 931.24,497.93 936.42,482.38;936.42,480.38 948.16,445.18 942.44,\
+433.51 936.42,396.89&quot;,
+		weight=2];
+	llvmanim_render_ssa_formatting	[fillcolor=&quot;#b65353&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\nrender\.\nssa_formatting&quot;,
+		pos=&quot;806.42,481.38&quot;,
+		width=1.7678];
+	llvmanim_render_ssa_formatting -&gt; llvmanim_render_stack_renderer	[fillcolor=&quot;#b65353&quot;,
+		pos=&quot;e,577.1,407.91 759.54,461.64 750.9,458.41 741.93,455.19 733.42,452.39 684.34,436.25 627.5,420.85 586.82,410.39&quot;,
+		weight=2];
+	llvmanim_render_stack_renderer -&gt; llvmanim_cli_main	[fillcolor=blue,
+		minlen=2,
+		pos=&quot;487.72,376.27 460.14,362.23 433.23,342.07 451.42,322.39&quot;];
+	llvmanim_render_stack_renderer -&gt; llvmanim_render	[fillcolor=blue,
+		pos=&quot;e,532.42,339.71 532.42,375.08 532.42,367.3 532.42,358.23 532.42,349.84&quot;,
+		weight=2];
+	llvmanim_transform	[fillcolor=&quot;#f91010&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.58926,
+		label=&quot;llvmanim\.\ntransform&quot;,
+		pos=&quot;590.42,951.3&quot;,
+		width=1.2964];
+	llvmanim_transform -&gt; llvmanim_cli_main	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;544.24,947.22 411.11,937.8 34.63,906.96 12.42,858.31;12.42,856.31 -10.369,806.41 1.7631,780.5 31.42,734.34 59.337,690.89 114.32,\
+720.03 128.42,670.35;128.42,668.35 150.65,586.97 133.91,560.23 166.42,482.38;166.42,480.38 172.31,465.09 177.49,462.47 190.42,452.39 \
+292.63,372.73 363.47,417.57 451.42,322.39;451.42,320.39 477.63,286.28 542.93,309.11 532.42,267.39;e,529.47,230.48 532.42,266.39 \
+530.35,258.2 529.52,249.22 529.36,240.65&quot;];
+	llvmanim_transform -&gt; llvmanim_ingest_analysis_metadata_io	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,67.812,784.38 12.42,856.31 -0.98924,826.95 26.683,804.26 58.353,788.76&quot;];
+	llvmanim_transform -&gt; llvmanim_ingest_cfg_edge_io	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,935.38,783.75 623.75,936.41 653.52,923.84 698.21,904.55 736.42,886.31 787,862.16 798.58,853.98 848.42,828.32 874.16,815.07 902.91,\
+800.35 926.35,788.37&quot;];
+	llvmanim_transform -&gt; llvmanim_ingest_llvm_events	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,410.67,768.33 280.42,856.31 265.08,801.34 345.5,778.77 400.69,769.84&quot;];
+	llvmanim_transform -&gt; llvmanim_ingest_trace_io	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,824.99,785.69 614.88,933.14 660.97,900.79 761.05,830.56 816.49,791.65&quot;];
+	llvmanim_transform -&gt; llvmanim_render_cfg_animation_scene	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;280.42,668.35 272.61,628.22 270.13,615.93 280.42,576.37&quot;];
+	llvmanim_transform -&gt; llvmanim_render_cfg_renderer	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;545.34,945.73 462.91,936.14 294.94,910.36 280.42,858.31;280.42,856.31 258.21,776.7 296.2,751.48 280.42,670.35;280.42,668.35 264.3,\
+580.53 146.61,550.43 204.42,482.38&quot;];
+	llvmanim_transform -&gt; llvmanim_render_command_driven_scene	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;588.59,930.08 585.88,895.79 582,824.12 590.42,764.33;590.42,762.33 597.19,722.01 603.12,709.82 592.42,670.35;e,615.85,510.38 592.42,\
+668.35 578.66,617.6 596.48,557.78 611.82,519.97&quot;];
+	llvmanim_transform -&gt; llvmanim_render_graphviz_export	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;600.57,930.44 626.09,881.81 697.08,754.62 782.42,670.35;e,887.73,595.55 782.42,668.35 808.3,638.26 846.57,615.34 878.48,599.9&quot;];
+	llvmanim_transform -&gt; llvmanim_render_json_export	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,753.98,593.29 590.42,762.33 599.38,681.12 686.88,625.75 744.63,597.72&quot;];
+	llvmanim_transform -&gt; llvmanim_render_stack_renderer	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;545.45,945.32 506.79,938.6 452.49,922.89 421.42,886.31 377.35,834.43 386.05,800.41 402.42,734.34 406.77,716.78 413.87,714.78 421.42,\
+698.34 464.45,604.6 472.05,579.64 506.42,482.38;e,525.78,416.67 506.42,480.38 511.27,462.34 517.46,442.36 522.59,426.46&quot;];
+	llvmanim_transform_models	[fillcolor=&quot;#f91010&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\ntransform\.\nmodels&quot;,
+		pos=&quot;780.42,951.3&quot;,
+		width=1.3356];
+	llvmanim_transform_models -&gt; llvmanim_cli_main	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;862.42,856.31 871.42,843.63 870.41,836.84 883.42,828.32 951.3,783.86 1031,842.02 1054.4,764.33;1054.4,762.33 1066.6,721.99 1014.4,\
+708.9 1031.4,670.35&quot;];
+	llvmanim_transform_models -&gt; llvmanim_ingest_analysis_metadata_io	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,149.99,791.66 736.28,939.78 710.26,933.91 676.62,926.88 646.42,922.31 478.68,896.92 422.06,953.79 266.42,886.31 222.17,867.12 \
+182.16,828.21 156.76,799.47&quot;];
+	llvmanim_transform_models -&gt; llvmanim_ingest_cfg_edge_io	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,938.59,785.44 862.42,856.31 871.42,843.63 872.28,839.18 883.42,828.32 897.44,814.66 914.59,801.72 930.14,791.09&quot;];
+	llvmanim_transform_models -&gt; llvmanim_ingest_llvm_events	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,440.05,784.24 735.52,940.52 709.54,934.97 676.18,928 646.42,922.31 600.56,913.53 469.47,922.04 439.42,886.31 417.98,860.82 426.55,\
+820.81 436.41,793.62&quot;];
+	llvmanim_transform_models -&gt; llvmanim_ingest_trace_io	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,866.18,791.78 862.42,856.31 873.48,840.74 872.71,819.72 868.74,801.7&quot;];
+	llvmanim_transform_models -&gt; llvmanim_render_cfg_animation_scene	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;735.55,940.37 709.57,934.76 676.22,927.8 646.42,922.31 546.83,903.95 501.96,947.7 421.42,886.31 391.33,863.37 270.89,612.98 280.42,\
+576.37&quot;];
+	llvmanim_transform_models -&gt; llvmanim_render_cfg_renderer	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,438.68,416.53 749.61,928.59 734.42,917.03 716.41,901.99 702.42,886.31 648.93,826.33 649.74,800.71 604.42,734.34 593.29,718.04 \
+588.58,715.26 578.42,698.34 520.76,602.36 466.32,480.74 442.72,425.96&quot;];
+	llvmanim_transform_models -&gt; llvmanim_render_command_driven_scene	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;764.63,923.84 739.77,882.6 689.46,800.8 642.42,734.34 621.57,704.88 601.49,705.28 592.42,670.35&quot;];
+	llvmanim_transform_models -&gt; llvmanim_render_graphviz_export	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;780.42,762.33 772.54,743.47 767.87,684.71 782.42,670.35&quot;];
+	llvmanim_transform_models -&gt; llvmanim_render_json_export	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;804.62,926.18 821.85,908.32 844.96,882.91 862.42,858.31;862.42,856.31 885.53,823.77 824.73,823.18 799.42,792.32 789.88,780.7 786.93,\
+777.88 780.42,764.33;e,781.23,603.31 780.42,762.33 756.82,713.24 757.62,693.75 768.42,640.36 770.3,631.07 773.57,621.46 777.2,612.59&quot;];
+	llvmanim_transform_models -&gt; llvmanim_render_stack_renderer	[fillcolor=&quot;#f91010&quot;,
+		minlen=2,
+		pos=&quot;e,577.19,397.16 772.4,922.68 749.54,841.39 688.55,605.03 734.42,546.37 775.33,494.07 838.51,562.68 879.42,510.37 895.3,490.08 896.14,\
+472 879.42,452.39 842.53,409.13 675.44,399.45 587.28,397.38&quot;];
+	llvmanim_transform_scene	[fillcolor=&quot;#a44646&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\ntransform\.\nscene&quot;,
+		pos=&quot;940.42,857.31&quot;,
+		width=1.3356];
+	llvmanim_transform_models -&gt; llvmanim_transform_scene	[fillcolor=&quot;#f91010&quot;,
+		pos=&quot;e,906.43,877.86 814.74,930.56 838.97,916.63 871.61,897.87 897.56,882.96&quot;,
+		weight=2];
+	llvmanim_transform_trace	[fillcolor=&quot;#a44646&quot;,
+		fontcolor=&quot;#ffffff&quot;,
+		height=0.80532,
+		label=&quot;llvmanim\.\ntransform\.\ntrace&quot;,
+		pos=&quot;1054.4,857.31&quot;,
+		width=1.3356];
+	llvmanim_transform_models -&gt; llvmanim_transform_trace	[fillcolor=&quot;#f91010&quot;,
+		pos=&quot;e,1018.6,877.03 824.79,939.57 869.18,928.3 939.05,909.05 997.42,886.31 1001.3,884.77 1005.4,883.08 1009.4,881.29&quot;,
+		weight=2];
+	llvmanim_transform_scene -&gt; llvmanim_cli_main	[fillcolor=&quot;#a44646&quot;,
+		minlen=2,
+		pos=&quot;975.3,837.25 994.38,825.79 1017.7,810.01 1035.4,792.32 1046.1,781.71 1050.1,778.73 1054.4,764.33&quot;];
+	llvmanim_transform_trace -&gt; llvmanim_cli_main	[fillcolor=&quot;#a44646&quot;,
+		minlen=2,
+		pos=&quot;1050.3,828.33 1048.5,809.78 1048.1,785.12 1054.4,764.33&quot;];
+}</p></object></div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ingest.html">llvmanim.ingest</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ingest.html#module-llvmanim.ingest">llvmanim.ingest (package)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingest.html#llvmanim-ingest-llvm-events">llvmanim.ingest.llvm_events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingest.html#llvmanim-ingest-display-lines">llvmanim.ingest.display_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingest.html#llvmanim-ingest-cfg-edge-io">llvmanim.ingest.cfg_edge_io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingest.html#llvmanim-ingest-trace-io">llvmanim.ingest.trace_io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingest.html#llvmanim-ingest-analysis-metadata-io">llvmanim.ingest.analysis_metadata_io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingest.html#llvmanim-ingest-dot-layout">llvmanim.ingest.dot_layout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transform.html">llvmanim.transform</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transform.html#module-llvmanim.transform">llvmanim.transform (package)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transform.html#llvmanim-transform-models">llvmanim.transform.models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transform.html#llvmanim-transform-scene">llvmanim.transform.scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transform.html#llvmanim-transform-trace">llvmanim.transform.trace</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="render.html">llvmanim.render</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="render.html#llvmanim-render-package">llvmanim.render (package)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="render.html#llvmanim-render-command-driven-scene">llvmanim.render.command_driven_scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="render.html#llvmanim-render-stack-renderer">llvmanim.render.stack_renderer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="render.html#llvmanim-render-cfg-renderer">llvmanim.render.cfg_renderer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="render.html#llvmanim-render-cfg-animation-scene">llvmanim.render.cfg_animation_scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="render.html#llvmanim-render-ssa-formatting">llvmanim.render.ssa_formatting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="render.html#llvmanim-render-json-export">llvmanim.render.json_export</a></li>
+<li class="toctree-l2"><a class="reference internal" href="render.html#llvmanim-render-graphviz-export">llvmanim.render.graphviz_export</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">llvmanim.cli</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#module-llvmanim.cli">llvmanim.cli (package)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#llvmanim-cli-main">llvmanim.cli.main</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#entrypoints">Entrypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">llvmanim.util</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="util.html#llvmanim-util-tools">llvmanim.util.tools</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ingest.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">llvmanim.ingest</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../architecture/import_layers.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Import Layer Boundaries</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Ben Houle
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">API Reference</a><ul>
+<li><a class="reference internal" href="#package-dependency-graph">Package dependency graph</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f539c95a"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>

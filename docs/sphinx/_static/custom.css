@@ -1,0 +1,42 @@
+/* LLVManim Sphinx documentation — custom styles */
+
+/* Slightly wider content pane for long type signatures */
+.wy-nav-content {
+    max-width: 1100px;
+}
+
+/* Monospace blocks: softer background that reads well in both themes */
+[data-theme="light"] .highlight {
+    background-color: #f6f8fa;
+}
+[data-theme="dark"] .highlight {
+    background-color: #1e2328;
+}
+
+/* Distinguish field-list labels (Args, Returns, etc.) */
+.field-list strong {
+    font-weight: 700;
+}
+
+/* Graphviz figures: centred with a light border */
+.graphviz {
+    text-align: center;
+    margin: 1.5em 0;
+}
+.graphviz img,
+.graphviz svg {
+    max-width: 100%;
+    border: 1px solid var(--color-background-border);
+    border-radius: 4px;
+    padding: 0.5em;
+}
+
+/* Architecture diagram figures */
+figure.align-center {
+    text-align: center;
+}
+figure.align-center figcaption {
+    font-size: 0.875em;
+    color: var(--color-foreground-secondary);
+    margin-top: 0.4em;
+}

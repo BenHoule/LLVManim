@@ -1,0 +1,1263 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
+        <link rel="prefetch" href="../../../_static/logo.svg" as="image">
+        <link rel="prefetch" href="../../../_static/logo.svg" as="image">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>llvmanim.render.stack_renderer - LLVManim</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=ef20b758" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">LLVManim</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../../_static/logo.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../../_static/logo.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">LLVManim</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/concepts.html">Key Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/cli_reference.html">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/animation_modes.html">Animation Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/output_formats.html">Output Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/working_with_ir.html">Working with LLVM IR</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/overview.html">Architecture Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/pipeline.html">Pipeline: IR to Animation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/data_model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/rendering.html">Rendering Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/import_layers.html">Import Layer Boundaries</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/ingest.html">llvmanim.ingest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/transform.html">llvmanim.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/render.html">llvmanim.render</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/cli.html">llvmanim.cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/util.html">llvmanim.util</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/ingest.html">llvmanim.ingest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/transform.html">llvmanim.transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/render.html">llvmanim.render</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/cli.html">llvmanim.cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/util.html">llvmanim.util</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/setup.html">Developer Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/adding_features.html">Adding New Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/metrics.html">Metrics and Charts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for llvmanim.render.stack_renderer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Stack-frame animation renderer driven by a SceneGraph&#39;s command list.</span>
+
+<span class="sd">``StackRenderer`` is a :class:`CommandDrivenScene` subclass that registers</span>
+<span class="sd">handlers for stack-related actions: push/pop frames, create slots, and</span>
+<span class="sd">optionally animate SSA operations.  It replaces ``RichStackSceneBadge``</span>
+<span class="sd">and ``RichStackSceneSpotlight`` in the unified pipeline.</span>
+
+<span class="sd">Three display modes are supported via the *ir_mode* parameter:</span>
+
+<span class="sd">  basic      — Stack-only layout with yellow-flash badge on arriving cells.</span>
+<span class="sd">  rich       — Two-column layout (IR Source | Stack) with a yellow</span>
+<span class="sd">               SurroundingRectangle cursor that advances to the current</span>
+<span class="sd">               instruction and FadeTransforms to the callee&#39;s IR on call/ret.</span>
+<span class="sd">  rich-ssa   — Three-column layout (IR Source | SSA Values | Stack).  Binop,</span>
+<span class="sd">               compare, and load operations produce SSA value rows in the</span>
+<span class="sd">               centre panel that persist until their owning frame pops.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">manim</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BLUE_D</span><span class="p">,</span>
+    <span class="n">BOLD</span><span class="p">,</span>
+    <span class="n">DOWN</span><span class="p">,</span>
+    <span class="n">GOLD_D</span><span class="p">,</span>
+    <span class="n">GREEN_C</span><span class="p">,</span>
+    <span class="n">GREY_B</span><span class="p">,</span>
+    <span class="n">GREY_D</span><span class="p">,</span>
+    <span class="n">LEFT</span><span class="p">,</span>
+    <span class="n">MAROON_D</span><span class="p">,</span>
+    <span class="n">PURPLE_D</span><span class="p">,</span>
+    <span class="n">RIGHT</span><span class="p">,</span>
+    <span class="n">TEAL_D</span><span class="p">,</span>
+    <span class="n">UP</span><span class="p">,</span>
+    <span class="n">WHITE</span><span class="p">,</span>
+    <span class="n">YELLOW</span><span class="p">,</span>
+    <span class="n">FadeIn</span><span class="p">,</span>
+    <span class="n">FadeOut</span><span class="p">,</span>
+    <span class="n">FadeTransform</span><span class="p">,</span>
+    <span class="n">Line</span><span class="p">,</span>
+    <span class="n">ManimColor</span><span class="p">,</span>
+    <span class="n">Rectangle</span><span class="p">,</span>
+    <span class="n">SurroundingRectangle</span><span class="p">,</span>
+    <span class="n">Text</span><span class="p">,</span>
+    <span class="n">VGroup</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">llvmanim.ingest.display_lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">clean_ir_line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">llvmanim.render.command_driven_scene</span><span class="w"> </span><span class="kn">import</span> <span class="n">CommandDrivenScene</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">llvmanim.render.ssa_formatting</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">OP_COLORS</span><span class="p">,</span>
+    <span class="n">extract_ssa_name</span><span class="p">,</span>
+    <span class="n">format_display_value</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">llvmanim.transform.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnimationCommand</span><span class="p">,</span> <span class="n">SceneGraph</span>
+
+<span class="c1"># ── Layout constants ────────────────────────────────────────────────────────────</span>
+
+<span class="n">_SLOT_W</span> <span class="o">=</span> <span class="mf">4.0</span>
+<span class="n">_HEADER_H</span> <span class="o">=</span> <span class="mf">0.55</span>
+<span class="n">_SLOT_H</span> <span class="o">=</span> <span class="mf">0.62</span>
+<span class="n">_GAP</span> <span class="o">=</span> <span class="mf">0.04</span>
+<span class="n">_STACK_TOP_Y</span> <span class="o">=</span> <span class="mf">2.6</span>
+
+<span class="n">_PALETTE</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManimColor</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">BLUE_D</span><span class="p">,</span> <span class="n">GREEN_C</span><span class="p">,</span> <span class="n">TEAL_D</span><span class="p">,</span> <span class="n">GOLD_D</span><span class="p">,</span> <span class="n">MAROON_D</span><span class="p">,</span> <span class="n">PURPLE_D</span><span class="p">]</span>
+
+<span class="c1"># IR panel layout (2-column mode)</span>
+<span class="n">_IR_PANEL_X</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.5</span>
+<span class="n">_IR_LINE_SPACING</span> <span class="o">=</span> <span class="mf">0.40</span>
+<span class="n">_IR_FONT_SIZE</span> <span class="o">=</span> <span class="mi">13</span>
+<span class="n">_IR_PANEL_TOP_Y</span> <span class="o">=</span> <span class="mf">2.2</span>
+<span class="n">_IR_VIEWPORT_BOT</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.5</span>
+
+<span class="c1"># SSA panel constants</span>
+<span class="n">_SSA_PANEL_X</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">_SSA_ROW_W</span> <span class="o">=</span> <span class="mf">3.2</span>
+<span class="n">_SSA_ROW_H</span> <span class="o">=</span> <span class="mf">0.42</span>
+<span class="n">_SSA_GAP</span> <span class="o">=</span> <span class="mf">0.04</span>
+<span class="n">_SSA_TOP_Y</span> <span class="o">=</span> <span class="mf">2.2</span>
+<span class="n">_SSA_FONT_SIZE</span> <span class="o">=</span> <span class="mi">14</span>
+
+<span class="c1"># 3-column layout overrides (rich-ssa mode)</span>
+<span class="n">_3COL_STACK_X</span> <span class="o">=</span> <span class="mf">4.8</span>
+<span class="n">_3COL_SLOT_W</span> <span class="o">=</span> <span class="mf">3.2</span>
+<span class="n">_3COL_IR_PANEL_X</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.8</span>
+<span class="n">_3COL_IR_FONT_SIZE</span> <span class="o">=</span> <span class="mi">12</span>
+<span class="n">_3COL_IR_LINE_SPACING</span> <span class="o">=</span> <span class="mf">0.32</span>
+<span class="n">_3COL_DIV1_X</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span>
+<span class="n">_3COL_DIV2_X</span> <span class="o">=</span> <span class="mf">2.5</span>
+
+
+<span class="c1"># ── Mobject factories ───────────────────────────────────────────────────────────</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_frame_header</span><span class="p">(</span><span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">ManimColor</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_SLOT_W</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Opaque coloured header bar labelled @func_name.&quot;&quot;&quot;</span>
+    <span class="n">rect</span> <span class="o">=</span> <span class="n">Rectangle</span><span class="p">(</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">_HEADER_H</span><span class="p">,</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">fill_opacity</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span>
+        <span class="n">stroke_color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">stroke_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;@</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="s2">&quot;Monospace&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">WHITE</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">BOLD</span><span class="p">)</span>
+    <span class="n">label</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">VGroup</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_slot_cell</span><span class="p">(</span><span class="n">slot_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">ManimColor</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_SLOT_W</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Single alloca-slot row tinted with the owning frame&#39;s colour.&quot;&quot;&quot;</span>
+    <span class="n">rect</span> <span class="o">=</span> <span class="n">Rectangle</span><span class="p">(</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">_SLOT_H</span><span class="p">,</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">fill_opacity</span><span class="o">=</span><span class="mf">0.18</span><span class="p">,</span>
+        <span class="n">stroke_color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">stroke_width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="n">slot_text</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="s2">&quot;Monospace&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+    <span class="n">label</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">VGroup</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+
+
+<span class="c1"># ── IR panel helpers ────────────────────────────────────────────────────────────</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_ir_panel</span><span class="p">(</span><span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ir_registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">VGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a monospaced VGroup of Text lines for *func_name*&#39;s IR source.</span>
+
+<span class="sd">    Each submobject is a single line&#39;s Text so that</span>
+<span class="sd">    ``panel[line_index].get_center()`` gives the correct cursor target.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">ir_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;(no IR available for @</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">])</span>
+    <span class="n">group</span> <span class="o">=</span> <span class="n">VGroup</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="s2">&quot;Monospace&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="n">_IR_FONT_SIZE</span><span class="p">)</span>
+        <span class="n">txt</span><span class="o">.</span><span class="n">move_to</span><span class="p">((</span><span class="n">_IR_PANEL_X</span><span class="p">,</span> <span class="n">_IR_PANEL_TOP_Y</span> <span class="o">-</span> <span class="n">i</span> <span class="o">*</span> <span class="n">_IR_LINE_SPACING</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">txt</span><span class="o">.</span><span class="n">align_to</span><span class="p">((</span><span class="n">_IR_PANEL_X</span> <span class="o">-</span> <span class="mf">2.6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="n">LEFT</span><span class="p">)</span>
+        <span class="n">group</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">group</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_line_idx</span><span class="p">(</span><span class="n">ir_lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the first display line that contains *text*.</span>
+
+<span class="sd">    Both sides are cleaned with ``clean_ir_line`` so that debug metadata</span>
+<span class="sd">    differences between the event text and the file text don&#39;t cause misses.</span>
+<span class="sd">    Returns 0 if not found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">clean_text</span> <span class="o">=</span> <span class="n">clean_ir_line</span><span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ir_lines</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">clean_text</span> <span class="ow">and</span> <span class="n">clean_text</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_call_site_idx</span><span class="p">(</span><span class="n">ir_lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">callee</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the line index of the call to @callee in *ir_lines*, or 0.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ir_lines</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;call&quot;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="sa">f</span><span class="s2">&quot;@</span><span class="si">{</span><span class="n">callee</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ssa_row</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">display_value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">ManimColor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build an SSA value row for the bridge panel.</span>
+
+<span class="sd">    The label text reads ``name = display_value``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rect</span> <span class="o">=</span> <span class="n">Rectangle</span><span class="p">(</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">_SSA_ROW_W</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">_SSA_ROW_H</span><span class="p">,</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">fill_opacity</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
+        <span class="n">stroke_color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">stroke_width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">display_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="s2">&quot;Monospace&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="n">_SSA_FONT_SIZE</span><span class="p">)</span>
+    <span class="n">label</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">VGroup</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+
+
+<span class="c1"># ── StackRenderer ───────────────────────────────────────────────────────────────</span>
+
+<div class="viewcode-block" id="StackRenderer">
+<a class="viewcode-back" href="../../../api/render.html#llvmanim.render.StackRenderer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StackRenderer</span><span class="p">(</span><span class="n">CommandDrivenScene</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Command-driven stack-frame animation scene.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    graph:</span>
+<span class="sd">        A SceneGraph produced by ``build_scene_graph(stream, mode=&quot;stack&quot;)``.</span>
+<span class="sd">    speed:</span>
+<span class="sd">        Animation speed multiplier.</span>
+<span class="sd">    title:</span>
+<span class="sd">        Title text shown at the top.</span>
+<span class="sd">    ir_mode:</span>
+<span class="sd">        ``&quot;basic&quot;`` (stack only), ``&quot;rich&quot;`` (IR + stack), or</span>
+<span class="sd">        ``&quot;rich-ssa&quot;`` (IR + SSA + stack).</span>
+<span class="sd">    display_lines:</span>
+<span class="sd">        Mapping of function name to list of IR source display lines.</span>
+<span class="sd">        Required for ``rich`` and ``rich-ssa`` modes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_STACK_X</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">_SLOT_WIDTH</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_SLOT_W</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">graph</span><span class="p">:</span> <span class="n">SceneGraph</span><span class="p">,</span>
+        <span class="n">speed</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Call Stack  /  LLVManim&quot;</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">ir_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;basic&quot;</span><span class="p">,</span>
+        <span class="n">display_lines</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">speed</span><span class="o">=</span><span class="n">speed</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="o">=</span> <span class="n">ir_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ir_registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">display_lines</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="c1"># Adjust layout for rich modes</span>
+        <span class="k">if</span> <span class="n">ir_mode</span> <span class="o">==</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_STACK_X</span> <span class="o">=</span> <span class="n">_3COL_STACK_X</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_SLOT_WIDTH</span> <span class="o">=</span> <span class="n">_3COL_SLOT_W</span>
+        <span class="k">elif</span> <span class="n">ir_mode</span> <span class="o">==</span> <span class="s2">&quot;rich&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_STACK_X</span> <span class="o">=</span> <span class="mf">3.0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cursor_y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_STACK_TOP_Y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_stack</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">VGroup</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">VGroup</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_handler</span><span class="p">(</span><span class="s2">&quot;push_stack_frame&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_push</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_handler</span><span class="p">(</span><span class="s2">&quot;pop_stack_frame&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_pop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_handler</span><span class="p">(</span><span class="s2">&quot;create_stack_slot&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_alloca</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_handler</span><span class="p">(</span><span class="s2">&quot;highlight_branch&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_branch</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ir_mode</span> <span class="o">==</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_register_handler</span><span class="p">(</span><span class="s2">&quot;animate_binop&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_ssa</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_register_handler</span><span class="p">(</span><span class="s2">&quot;animate_compare&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_ssa</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_register_handler</span><span class="p">(</span><span class="s2">&quot;animate_memory_read&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_ssa</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_chrome</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_setup_chrome</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;rich&quot;</span><span class="p">,</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setup_ir_chrome</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">col_label</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;Stack  (grows </span><span class="se">\u2193</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">GREY_B</span><span class="p">)</span>
+            <span class="n">col_label</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">RIGHT</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_STACK_X</span> <span class="o">+</span> <span class="n">UP</span> <span class="o">*</span> <span class="mf">2.85</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">col_label</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_ir_chrome</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the IR panel, dividers, and column labels for rich modes.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="o">==</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">:</span>
+            <span class="n">ir_x</span> <span class="o">=</span> <span class="n">_3COL_IR_PANEL_X</span>
+            <span class="n">div1</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">_3COL_DIV1_X</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">_3COL_DIV1_X</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">GREY_D</span><span class="p">,</span> <span class="n">stroke_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">div2</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">_3COL_DIV2_X</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">_3COL_DIV2_X</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">GREY_D</span><span class="p">,</span> <span class="n">stroke_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">div1</span><span class="p">,</span> <span class="n">div2</span><span class="p">)</span>
+            <span class="n">ssa_lbl</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;SSA Values&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">GREY_B</span><span class="p">)</span>
+            <span class="n">ssa_lbl</span><span class="o">.</span><span class="n">move_to</span><span class="p">((</span><span class="n">_SSA_PANEL_X</span><span class="p">,</span> <span class="mf">2.85</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ssa_lbl</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ir_x</span> <span class="o">=</span> <span class="n">_IR_PANEL_X</span>
+            <span class="n">vdiv</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span><span class="n">UP</span> <span class="o">*</span> <span class="mf">3.5</span><span class="p">,</span> <span class="n">DOWN</span> <span class="o">*</span> <span class="mf">4.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">GREY_D</span><span class="p">,</span> <span class="n">stroke_width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vdiv</span><span class="p">)</span>
+
+        <span class="n">ir_lbl</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;IR Source&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">GREY_B</span><span class="p">)</span>
+        <span class="n">ir_lbl</span><span class="o">.</span><span class="n">move_to</span><span class="p">((</span><span class="n">ir_x</span><span class="p">,</span> <span class="mf">2.85</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ir_lbl</span><span class="p">)</span>
+
+        <span class="n">stack_lbl</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;Stack  (grows </span><span class="se">\u2193</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">GREY_B</span><span class="p">)</span>
+        <span class="n">stack_lbl</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">RIGHT</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_STACK_X</span> <span class="o">+</span> <span class="n">UP</span> <span class="o">*</span> <span class="mf">2.85</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">stack_lbl</span><span class="p">)</span>
+
+        <span class="c1"># Initialise the IR panel to the first pushed function.</span>
+        <span class="n">first_func</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;function_name&quot;</span><span class="p">,</span> <span class="s2">&quot;main&quot;</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">commands</span>
+             <span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;push_stack_frame&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;main&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span><span class="p">:</span> <span class="n">VGroup</span> <span class="o">=</span> <span class="n">_build_ir_panel</span><span class="p">(</span><span class="n">first_func</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_registry</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="o">==</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reposition_ir_panel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ir_cursor</span> <span class="o">=</span> <span class="n">SurroundingRectangle</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">YELLOW</span><span class="p">,</span> <span class="n">buff</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span> <span class="n">stroke_width</span><span class="o">=</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ir_cursor</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_func</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">first_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_call_site_stack</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_panel_scroll</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="c1"># SSA panel state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_cursor_y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_SSA_TOP_Y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">VGroup</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># ── IR panel methods ────────────────────────────────────────────────────</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_scroll_to_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Shift the panel (and cursor) so that line *idx* is within the viewport.&quot;&quot;&quot;</span>
+        <span class="n">spacing</span> <span class="o">=</span> <span class="n">_3COL_IR_LINE_SPACING</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="o">==</span> <span class="s2">&quot;rich-ssa&quot;</span> <span class="k">else</span> <span class="n">_IR_LINE_SPACING</span>
+        <span class="n">line_y</span> <span class="o">=</span> <span class="n">_IR_PANEL_TOP_Y</span> <span class="o">-</span> <span class="n">idx</span> <span class="o">*</span> <span class="n">spacing</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_panel_scroll</span>
+        <span class="k">if</span> <span class="n">_IR_VIEWPORT_BOT</span> <span class="o">&lt;=</span> <span class="n">line_y</span> <span class="o">&lt;=</span> <span class="n">_IR_PANEL_TOP_Y</span> <span class="o">+</span> <span class="n">spacing</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">target_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">_IR_PANEL_TOP_Y</span> <span class="o">+</span> <span class="n">_IR_VIEWPORT_BOT</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">target_y</span> <span class="o">-</span> <span class="n">line_y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span><span class="o">.</span><span class="n">animate</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">UP</span> <span class="o">*</span> <span class="n">delta</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ir_cursor</span><span class="o">.</span><span class="n">animate</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">UP</span> <span class="o">*</span> <span class="n">delta</span><span class="p">),</span>
+            <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_panel_scroll</span> <span class="o">+=</span> <span class="n">delta</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_swap_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_func</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target_line</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;FadeTransform the current IR panel to *new_func*&#39;s panel.&quot;&quot;&quot;</span>
+        <span class="n">new_panel</span> <span class="o">=</span> <span class="n">_build_ir_panel</span><span class="p">(</span><span class="n">new_func</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_registry</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="o">==</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reposition_ir_panel</span><span class="p">(</span><span class="n">new_panel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="n">FadeTransform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span><span class="p">,</span> <span class="n">new_panel</span><span class="p">),</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.4</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span> <span class="o">=</span> <span class="n">new_panel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_func</span> <span class="o">=</span> <span class="n">new_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_panel_scroll</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">safe_idx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">target_line</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">new_cursor</span> <span class="o">=</span> <span class="n">SurroundingRectangle</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span><span class="p">[</span><span class="n">safe_idx</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">YELLOW</span><span class="p">,</span> <span class="n">buff</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span> <span class="n">stroke_width</span><span class="o">=</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="n">FadeTransform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ir_cursor</span><span class="p">,</span> <span class="n">new_cursor</span><span class="p">),</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.25</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ir_cursor</span> <span class="o">=</span> <span class="n">new_cursor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scroll_to_line</span><span class="p">(</span><span class="n">safe_idx</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_advance_cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Scroll the panel if needed, then animate the cursor to *line_index*.&quot;&quot;&quot;</span>
+        <span class="n">safe_idx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">line_index</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scroll_to_line</span><span class="p">(</span><span class="n">safe_idx</span><span class="p">)</span>
+        <span class="n">new_cursor</span> <span class="o">=</span> <span class="n">SurroundingRectangle</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ir_panel</span><span class="p">[</span><span class="n">safe_idx</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">YELLOW</span><span class="p">,</span> <span class="n">buff</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span> <span class="n">stroke_width</span><span class="o">=</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ir_cursor</span><span class="o">.</span><span class="n">animate</span><span class="o">.</span><span class="n">become</span><span class="p">(</span><span class="n">new_cursor</span><span class="p">),</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.3</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reposition_ir_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">panel</span><span class="p">:</span> <span class="n">VGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Shift an IR panel to 3-column layout position.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line_mob</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">panel</span><span class="p">):</span>
+            <span class="n">line_mob</span><span class="o">.</span><span class="n">move_to</span><span class="p">((</span><span class="n">_3COL_IR_PANEL_X</span><span class="p">,</span> <span class="n">_IR_PANEL_TOP_Y</span> <span class="o">-</span> <span class="n">i</span> <span class="o">*</span> <span class="n">_3COL_IR_LINE_SPACING</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">line_mob</span><span class="o">.</span><span class="n">align_to</span><span class="p">((</span><span class="n">_3COL_IR_PANEL_X</span> <span class="o">-</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="n">LEFT</span><span class="p">)</span>
+            <span class="n">line_mob</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">font_size</span><span class="o">=</span><span class="n">_3COL_IR_FONT_SIZE</span><span class="p">)</span>
+
+    <span class="c1"># ── IR cursor integration ───────────────────────────────────────────────</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ir_on_push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move IR cursor to call site and swap panel to callee.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;rich&quot;</span><span class="p">,</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">caller_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_func</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">call_line</span> <span class="o">=</span> <span class="n">_call_site_idx</span><span class="p">(</span><span class="n">caller_lines</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_advance_cursor</span><span class="p">(</span><span class="n">call_line</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_call_site_stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_func</span><span class="p">,</span> <span class="n">call_line</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_swap_panel</span><span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">target_line</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ir_on_alloca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ir_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move IR cursor to the alloca instruction.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;rich&quot;</span><span class="p">,</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">ir_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_func</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">_find_line_idx</span><span class="p">(</span><span class="n">ir_lines</span><span class="p">,</span> <span class="n">ir_text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_advance_cursor</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ir_on_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ir_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move IR cursor to ret, then restore caller panel.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;rich&quot;</span><span class="p">,</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">ir_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_func</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">_find_line_idx</span><span class="p">(</span><span class="n">ir_lines</span><span class="p">,</span> <span class="n">ir_text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_advance_cursor</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_site_stack</span><span class="p">:</span>
+            <span class="n">restore_func</span><span class="p">,</span> <span class="n">restore_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_site_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_swap_panel</span><span class="p">(</span><span class="n">restore_func</span><span class="p">,</span> <span class="n">target_line</span><span class="o">=</span><span class="n">restore_line</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ir_on_ssa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ir_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move IR cursor to the SSA instruction.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;rich&quot;</span><span class="p">,</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">ir_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_func</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">_find_line_idx</span><span class="p">(</span><span class="n">ir_lines</span><span class="p">,</span> <span class="n">ir_text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_advance_cursor</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+    <span class="c1"># ── Handlers ────────────────────────────────────────────────────────────</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_color</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ManimColor</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_PALETTE</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_depth</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">_PALETTE</span><span class="p">)]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_handle_push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">:</span> <span class="n">AnimationCommand</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">func_name</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;function_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ir_on_push</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color</span><span class="p">()</span>
+        <span class="n">mob</span> <span class="o">=</span> <span class="n">_frame_header</span><span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_SLOT_WIDTH</span><span class="p">)</span>
+        <span class="n">mob</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">RIGHT</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_STACK_X</span> <span class="o">+</span> <span class="n">UP</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cursor_y</span> <span class="o">-</span> <span class="n">_HEADER_H</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cursor_y</span> <span class="o">-=</span> <span class="n">_HEADER_H</span> <span class="o">+</span> <span class="n">_GAP</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">mob</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
+        <span class="n">mob</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">YELLOW</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="n">FadeIn</span><span class="p">(</span><span class="n">mob</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">DOWN</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">),</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.5</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="n">mob</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">animate</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">WHITE</span><span class="p">),</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.35</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_handle_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">:</span> <span class="n">AnimationCommand</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_stack</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">ir_text</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">text</span> <span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">event</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ir_on_pop</span><span class="p">(</span><span class="n">ir_text</span><span class="p">)</span>
+        <span class="n">popped_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_names</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_names</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">header</span><span class="p">,</span> <span class="n">slots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cursor_y</span> <span class="o">+=</span> <span class="n">_HEADER_H</span> <span class="o">+</span> <span class="n">_GAP</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">slots</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">_SLOT_H</span> <span class="o">+</span> <span class="n">_GAP</span><span class="p">)</span>
+        <span class="n">mobs_out</span> <span class="o">=</span> <span class="n">slots</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">header</span><span class="p">]</span>
+        <span class="n">mobs_out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssa_pop_cleanup</span><span class="p">(</span><span class="n">popped_func</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">FadeOut</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">UP</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mobs_out</span><span class="p">],</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.55</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_after_pop</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_handle_alloca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">:</span> <span class="n">AnimationCommand</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_stack</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">slot_text</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">text</span> <span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">event</span> <span class="k">else</span> <span class="n">cmd</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;slot_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ir_on_alloca</span><span class="p">(</span><span class="n">slot_text</span><span class="p">)</span>
+        <span class="n">display_text</span> <span class="o">=</span> <span class="n">clean_ir_line</span><span class="p">(</span><span class="n">slot_text</span><span class="p">)</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">_PALETTE</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">_PALETTE</span><span class="p">)]</span>
+        <span class="n">mob</span> <span class="o">=</span> <span class="n">_slot_cell</span><span class="p">(</span><span class="n">display_text</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_SLOT_WIDTH</span><span class="p">)</span>
+        <span class="n">mob</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">RIGHT</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_STACK_X</span> <span class="o">+</span> <span class="n">UP</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cursor_y</span> <span class="o">-</span> <span class="n">_SLOT_H</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cursor_y</span> <span class="o">-=</span> <span class="n">_SLOT_H</span> <span class="o">+</span> <span class="n">_GAP</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mob</span><span class="p">)</span>
+        <span class="n">mob</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">YELLOW</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="n">FadeIn</span><span class="p">(</span><span class="n">mob</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">DOWN</span> <span class="o">*</span> <span class="mf">0.15</span><span class="p">),</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.4</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="n">mob</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">animate</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">WHITE</span><span class="p">),</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.35</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_handle_branch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">:</span> <span class="n">AnimationCommand</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Highlight-branch is currently a visual no-op in the stack renderer.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_handle_ssa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">:</span> <span class="n">AnimationCommand</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle animate_binop / animate_compare / animate_memory_read.&quot;&quot;&quot;</span>
+        <span class="n">ir_text</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">text</span> <span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">event</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ir_on_ssa</span><span class="p">(</span><span class="n">ir_text</span><span class="p">)</span>
+        <span class="n">action_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;animate_binop&quot;</span><span class="p">:</span> <span class="s2">&quot;binop&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;animate_compare&quot;</span><span class="p">:</span> <span class="s2">&quot;compare&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;animate_memory_read&quot;</span><span class="p">:</span> <span class="s2">&quot;load&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">action_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">action</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">operands</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;operands&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">func_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_names</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_names</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_ssa_value</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">ir_text</span><span class="p">,</span> <span class="n">operands</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)</span>
+
+    <span class="c1"># ── SSA panel methods ───────────────────────────────────────────────────</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_ssa_value</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ir_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">operands</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse the instruction, format the display value, and animate a new SSA row.&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">extract_ssa_name</span><span class="p">(</span><span class="n">ir_text</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">display_value</span> <span class="o">=</span> <span class="n">format_display_value</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">ir_text</span><span class="p">,</span> <span class="n">operands</span><span class="p">)</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">OP_COLORS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">GREY_B</span><span class="p">)</span>
+        <span class="n">mob</span> <span class="o">=</span> <span class="n">_ssa_row</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">display_value</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+        <span class="n">mob</span><span class="o">.</span><span class="n">move_to</span><span class="p">((</span><span class="n">_SSA_PANEL_X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_cursor_y</span> <span class="o">-</span> <span class="n">_SSA_ROW_H</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_cursor_y</span> <span class="o">-=</span> <span class="n">_SSA_ROW_H</span> <span class="o">+</span> <span class="n">_SSA_GAP</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_entries</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">mob</span><span class="p">,</span> <span class="n">func_name</span><span class="p">))</span>
+        <span class="n">mob</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">YELLOW</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="n">FadeIn</span><span class="p">(</span><span class="n">mob</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">DOWN</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">),</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.3</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="n">mob</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">animate</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">WHITE</span><span class="p">),</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.2</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ssa_pop_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">VGroup</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return SSA mobs owned by *func_name* for fade-out.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="o">!=</span> <span class="s2">&quot;rich-ssa&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="n">ssa_out</span> <span class="o">=</span> <span class="p">[</span><span class="n">mob</span> <span class="k">for</span> <span class="n">mob</span><span class="p">,</span> <span class="n">owner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_entries</span> <span class="k">if</span> <span class="n">owner</span> <span class="o">==</span> <span class="n">func_name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_entries</span> <span class="o">=</span> <span class="p">[(</span><span class="n">m</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_entries</span> <span class="k">if</span> <span class="n">o</span> <span class="o">!=</span> <span class="n">func_name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ssa_out</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_cursor_y</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ssa_out</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">_SSA_ROW_H</span> <span class="o">+</span> <span class="n">_SSA_GAP</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ssa_out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ssa_after_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Relayout remaining SSA entries after a pop fade-out.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ir_mode</span> <span class="o">!=</span> <span class="s2">&quot;rich-ssa&quot;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_entries</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">new_y</span> <span class="o">=</span> <span class="n">_SSA_TOP_Y</span>
+        <span class="n">anims</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">mob</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_entries</span><span class="p">:</span>
+            <span class="n">target_y</span> <span class="o">=</span> <span class="n">new_y</span> <span class="o">-</span> <span class="n">_SSA_ROW_H</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">target_y</span> <span class="o">-</span> <span class="n">mob</span><span class="o">.</span><span class="n">get_center</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+                <span class="n">anims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mob</span><span class="o">.</span><span class="n">animate</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">UP</span> <span class="o">*</span> <span class="n">delta</span><span class="p">))</span>
+            <span class="n">new_y</span> <span class="o">-=</span> <span class="n">_SSA_ROW_H</span> <span class="o">+</span> <span class="n">_SSA_GAP</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssa_cursor_y</span> <span class="o">=</span> <span class="n">new_y</span>
+        <span class="k">if</span> <span class="n">anims</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="o">*</span><span class="n">anims</span><span class="p">,</span> <span class="n">run_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rt</span><span class="p">(</span><span class="mf">0.25</span><span class="p">))</span></div>
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Ben Houle
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=f539c95a"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    </body>
+</html>

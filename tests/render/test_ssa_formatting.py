@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from llvmanim.render.ssa_formatting import (
+    _clean_operand,
     extract_opcode,
     extract_ssa_name,
     format_binop,
@@ -136,3 +137,61 @@ class TestFormatDisplayValue:
     def test_unknown_action_returns_ir_text(self) -> None:
         result = format_display_value("store", "store i32 1, ptr %0", [])
         assert result == "store i32 1, ptr %0"
+
+
+# ── _clean_operand ─────────────────────────────────────────────────────────────
+
+
+class TestCleanOperand:
+    def test_defining_instruction_extracts_name(self) -> None:
+        raw = "  %2 = load i32, ptr %tmp, align 4"
+        assert _clean_operand(raw) == "%2"
+
+    def test_defining_instruction_with_dbg(self) -> None:
+        raw = "  %mul = mul nsw i32 2, %2, !dbg !32"
+        assert _clean_operand(raw) == "%mul"
+
+    def test_typed_integer_constant(self) -> None:
+        assert _clean_operand("i32 2") == "2"
+
+    def test_typed_pointer_operand(self) -> None:
+        assert _clean_operand("ptr %p.addr") == "%p.addr"
+
+    def test_bare_name_unchanged(self) -> None:
+        assert _clean_operand("%x") == "%x"
+
+    def test_bare_integer_unchanged(self) -> None:
+        assert _clean_operand("100") == "100"
+
+
+# ── llvmlite raw operand forms through formatters ─────────────────────────────
+
+
+class TestFormattersWithRawLlvmliteOperands:
+    """Formatters must produce clean output when given the raw str(ValueRef)
+    strings that llvmlite emits (full defining instruction for locals, typed
+    literal for constants)."""
+
+    def test_binop_with_llvmlite_operands(self) -> None:
+        # As emitted by llvmlite for `%mul = mul nsw i32 2, %2`
+        ops = ["i32 2", "  %2 = load i32, ptr %tmp, align 4"]
+        result = format_binop("%mul = mul nsw i32 2, %2", ops)
+        assert result == "2 × %2"
+
+    def test_compare_with_llvmlite_operands(self) -> None:
+        # As emitted by llvmlite for `%cmp = icmp slt i32 %2, 100`
+        ops = ["  %2 = load i32, ptr %1, align 4", "i32 100"]
+        result = format_compare("%cmp = icmp slt i32 %2, 100", ops)
+        assert result == "%2 < 100"
+
+    def test_load_with_llvmlite_operand(self) -> None:
+        # As emitted by llvmlite for `%1 = load i32, ptr %0`
+        ops = ["  %0 = load ptr, ptr %p.addr, align 8"]
+        result = format_load(ops)
+        assert result == "load %0"
+
+    def test_no_align_or_dbg_in_output(self) -> None:
+        ops = ["i32 2", "  %2 = load i32, ptr %tmp, align 4, !dbg !32"]
+        result = format_binop("%mul = mul nsw i32 2, %2", ops)
+        assert "align" not in result
+        assert "!dbg" not in result

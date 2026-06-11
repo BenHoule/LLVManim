@@ -260,8 +260,24 @@ def _build_stack_scene_graph(
     # Track IDs to avoid duplicates when a function is called multiple times.
     frame_counter: dict[str, int] = defaultdict(int)
 
-    def _walk(func_name: str, depth: int, caller_frame_id: str | None) -> None:
+    def _walk(
+        func_name: str,
+        depth: int,
+        caller_frame_id: str | None,
+        active_stack: frozenset[str] = frozenset(),
+    ) -> None:
         if depth > max_depth or func_name not in defined:
+            return
+        if func_name in active_stack:
+            # Back-edge detected (direct or mutual recursion). Emit a marker
+            # command so the renderer can display a recursion indicator, but
+            # do not expand further to avoid exponential blowup.
+            if caller_frame_id is not None:
+                commands.append(AnimationCommand(
+                    action="recursive_call",
+                    target=caller_frame_id,
+                    params={"callee": func_name},
+                ))
             return
 
         # Unique frame ID for this invocation.
@@ -313,7 +329,7 @@ def _build_stack_scene_graph(
                 callee = _CALLEE_RE.search(event.text)
                 callee_name = callee.group(1) if callee else ""
                 if callee_name and callee_name in defined and not callee_name.startswith("llvm"):
-                    _walk(callee_name, depth + 1, frame_id)
+                    _walk(callee_name, depth + 1, frame_id, active_stack | {func_name})
 
             elif include_ssa and event.kind in ("binop", "compare", "load"):
                 action_map: dict[str, ActionKind] = {
@@ -344,6 +360,6 @@ def _build_stack_scene_graph(
                 ))
                 return
 
-    _walk(entry, 0, None)
+    _walk(entry, 0, None, frozenset())
 
     return SceneGraph(nodes=nodes, edges=edges, commands=commands)

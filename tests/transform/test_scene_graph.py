@@ -593,3 +593,63 @@ def test_stack_scene_graph_slot_properties() -> None:
     assert slot.properties["function_name"] == "main"
     assert "frame_id" in slot.properties
     assert slot.label == "%ptr"
+
+
+def test_stack_scene_graph_direct_recursion_terminates() -> None:
+    """A directly recursive function must not cause exponential blowup.
+
+    Without a call-stack guard, a function with k self-call sites causes
+    k^max_depth total _walk invocations (e.g. 2^20 ≈ 1M for fib). The fix
+    uses an active_stack frozenset to detect back-edges and short-circuit.
+    """
+    # Minimal self-recursive function: one self-call, then ret.
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("fib", "call", "call i32 @fib(ptr %p)", 0),
+            _stack_event("fib", "ret", "ret i32 1", 1),
+        ],
+    )
+    graph = build_scene_graph(stream, mode="stack", entry="fib", max_depth=20)
+
+    # Should complete instantly and produce exactly 1 stack_frame node —
+    # the initial call; the back-edge is detected before a second frame is created.
+    frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
+    assert len(frame_nodes) == 1
+    assert frame_nodes[0].label == "fib"
+
+
+def test_stack_scene_graph_direct_recursion_emits_recursive_call_marker() -> None:
+    """A detected back-edge must emit a 'recursive_call' animation command."""
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("fib", "call", "call i32 @fib(ptr %p)", 0),
+            _stack_event("fib", "ret", "ret i32 1", 1),
+        ],
+    )
+    graph = build_scene_graph(stream, mode="stack", entry="fib", max_depth=20)
+
+    recursive_cmds = [c for c in graph.commands if c.action == "recursive_call"]
+    assert len(recursive_cmds) == 1
+    assert recursive_cmds[0].params.get("callee") == "fib"
+
+
+def test_stack_scene_graph_two_self_calls_terminates() -> None:
+    """A function with two self-call sites (like fib) must not expand exponentially."""
+    # fib has call @fib twice in its if.then block.
+    stream = ProgramEventStream(
+        source_path="<test>",
+        events=[
+            _stack_event("fib", "call", "call i32 @fib(ptr %a)", 0),
+            _stack_event("fib", "call", "call i32 @fib(ptr %b)", 1),
+            _stack_event("fib", "ret", "ret i32 1", 2),
+        ],
+    )
+    graph = build_scene_graph(stream, mode="stack", entry="fib", max_depth=20)
+
+    frame_nodes = [n for n in graph.nodes if n.kind == "stack_frame"]
+    # Without the fix: 2^21 ≈ 2M frames. With the fix: exactly 1.
+    assert len(frame_nodes) == 1
+    recursive_cmds = [c for c in graph.commands if c.action == "recursive_call"]
+    assert len(recursive_cmds) == 2
